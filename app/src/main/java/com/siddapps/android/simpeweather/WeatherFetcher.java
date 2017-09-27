@@ -1,5 +1,6 @@
 package com.siddapps.android.simpeweather;
 
+import android.content.Context;
 import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -38,10 +39,8 @@ public class WeatherFetcher {
         return result;
     }
 
-    public void getCurrentWeather(String source) throws Exception {
+    public Weather getCurrentWeather(String source) throws Exception {
         String json = getJson(source);
-
-        Log.i(TAG, json);
 
         JSONObject jsonObject = new JSONObject(json);
         String weatherInfo = jsonObject.getString("weather");
@@ -56,7 +55,10 @@ public class WeatherFetcher {
         mWeather.setHumidity(mainInfoObject.getString("humidity"));
         mWeather.setTemp_min(mainInfoObject.getString("temp_min"));
         mWeather.setTemp_max(mainInfoObject.getString("temp_max"));
+
         printCurrentWeather();
+
+        return mWeather;
     }
 
     private void printCurrentWeather() {
