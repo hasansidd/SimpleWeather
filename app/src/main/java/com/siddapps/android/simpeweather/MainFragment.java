@@ -17,21 +17,14 @@ public class MainFragment extends Fragment {
     private WeatherFetcher mWeatherFetcher;
     private Weather mWeather;
     private TextView mCityName;
+    private TextView mTemp;
+    private TextView mDescription;
     private LocationUtil mLocationUtil;
-    private boolean isLocationGranted;
 
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mLocationUtil = new LocationUtil(getActivity());
-        isLocationGranted = mLocationUtil.locationGranted();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        isLocationGranted = mLocationUtil.locationGranted();
+    private void updateUI() {
+        mCityName.setText(mWeather.getName());
+        mTemp.setText(mWeather.getTemp());
+        mDescription.setText(mWeather.getDescription());
     }
 
     @Nullable
@@ -39,13 +32,14 @@ public class MainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
         mCityName = (TextView) v.findViewById(R.id.city_name_text);
+        mTemp = (TextView) v.findViewById(R.id.current_temp);
+        mDescription = (TextView) v.findViewById(R.id.description_text);
 
         mWeatherFetcher = new WeatherFetcher();
+        mLocationUtil = new LocationUtil(getActivity());
 
-        if (isLocationGranted) {
-            FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
-            fetchWeatherTask.execute();
-        }
+        FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
+        fetchWeatherTask.execute();
 
         return v;
     }
@@ -67,7 +61,7 @@ public class MainFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            mCityName.setText(mWeather.getName());
+            updateUI();
         }
     }
 

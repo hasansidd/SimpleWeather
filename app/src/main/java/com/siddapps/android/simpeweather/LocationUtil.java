@@ -20,7 +20,6 @@ public class LocationUtil {
     private LocationManager locationManager;
     private Location lastKnownLocation;
     private Context mContext;
-    private boolean isGranted = false;
 
     public LocationUtil(Context context) {
         mContext = context;
@@ -28,12 +27,10 @@ public class LocationUtil {
 
         if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        } else {
-            lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         }
     }
 
-    public boolean locationGranted(){
+    private boolean isLocationGranted() {
         Log.i(TAG, "requested");
         if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return false;
@@ -42,16 +39,18 @@ public class LocationUtil {
     }
 
     public String getCurrentLocationZip() throws Exception {
-        Geocoder geocoder = new Geocoder(mContext.getApplicationContext(), Locale.getDefault());
-        List<Address> addresses=geocoder.getFromLocation(lastKnownLocation.getLatitude(),lastKnownLocation.getLongitude(),1);
+        if (isLocationGranted()) {
+            lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            Geocoder geocoder = new Geocoder(mContext.getApplicationContext(), Locale.getDefault());
+            List<Address> addresses = geocoder.getFromLocation(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude(), 1);
 
-        Log.i(TAG, "here");
-        if (addresses.get(0).getPostalCode() != null){
-            String zipCode=addresses.get(0).getPostalCode();
-            return zipCode;
+            Log.i(TAG, "here");
+            if (addresses.get(0).getPostalCode() != null) {
+                String zipCode = addresses.get(0).getPostalCode();
+                return zipCode;
+            }
         }
         return null;
     }
-
 
 }
