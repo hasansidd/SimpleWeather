@@ -1,7 +1,11 @@
 package com.siddapps.android.simpeweather;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
+
+import com.squareup.picasso.Picasso;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.InputStream;
@@ -12,10 +16,10 @@ import java.net.URL;
 public class WeatherFetcher {
     private static final String TAG = "WeatherFetcher";
     private static final String API_KEY = "7c3f5df254d3c24ed9ed5f0ab0937b49";
-    private Weather mWeather;
+    private LocationUtil mLocationUtil;
 
-    public WeatherFetcher() {
-        mWeather = new Weather();
+    public WeatherFetcher(Context context) {
+        mLocationUtil = new LocationUtil(context);
     }
 
     private String getJson(String source) throws Exception {
@@ -39,7 +43,8 @@ public class WeatherFetcher {
         return result;
     }
 
-    public Weather getCurrentWeather(String source) throws Exception {
+    public Weather getWeather(String source) throws Exception {
+        Weather mWeather = new Weather();
         String json = getJson(source);
 
         JSONObject jsonObject = new JSONObject(json);
@@ -49,23 +54,30 @@ public class WeatherFetcher {
         JSONObject mainInfoObject = jsonObject.getJSONObject("main");
 
         mWeather.setName(jsonObject.getString("name"));
-        mWeather.setMain(jsonPart.getString("main"));
-        mWeather.setDescription(jsonPart.getString("description"));
+        mWeather.setIcon(jsonPart.getString("icon"));
+        mWeather.setMainDescription(jsonPart.getString("main"));
+        mWeather.setDetailedDescription(jsonPart.getString("description"));
         mWeather.setTemp(mainInfoObject.getString("temp"));
         mWeather.setHumidity(mainInfoObject.getString("humidity"));
         mWeather.setTemp_min(mainInfoObject.getString("temp_min"));
         mWeather.setTemp_max(mainInfoObject.getString("temp_max"));
 
-        printCurrentWeather();
+        printCurrentWeather(mWeather);
 
         return mWeather;
     }
 
-    private void printCurrentWeather() {
+    public Weather getCurrentWeather() throws Exception {
+        String source = mLocationUtil.getCurrentLocationZip();
+        return getWeather(source);
+    }
+
+    private void printCurrentWeather(Weather weather) {
+        Weather mWeather = weather;
         String fullInfo = String.format("Name: %s\n Main: %s\n Description: %s\n Temperature: %s\n Humidity: %s\n Min Temp: %s\n Max Temp: %s\n"
                 , mWeather.getName()
-                , mWeather.getMain()
-                , mWeather.getDescription()
+                , mWeather.getMainDescription()
+                , mWeather.getDetailedDescription()
                 , mWeather.getTemp()
                 , mWeather.getHumidity()
                 , mWeather.getTemp_min()

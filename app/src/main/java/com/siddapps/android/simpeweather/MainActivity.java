@@ -11,7 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 public class MainActivity extends AppCompatActivity {
-    static public LocationUtil mLocationUtil;
+    static public WeatherFetcher mWeatherFetcher;
     private static final String TAG = "MainActivity";
 
     @Override
@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            mLocationUtil = new LocationUtil(this);
+            mWeatherFetcher = new WeatherFetcher(this);
         } else {
             Intent i = WeatherActivity.newIntent(this);
             startActivity(i);

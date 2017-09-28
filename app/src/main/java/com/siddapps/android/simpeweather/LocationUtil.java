@@ -44,7 +44,6 @@ public class LocationUtil {
             Geocoder geocoder = new Geocoder(mContext.getApplicationContext(), Locale.getDefault());
             List<Address> addresses = geocoder.getFromLocation(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude(), 1);
 
-            Log.i(TAG, "here");
             if (addresses.get(0).getPostalCode() != null) {
                 String zipCode = addresses.get(0).getPostalCode();
                 return zipCode;

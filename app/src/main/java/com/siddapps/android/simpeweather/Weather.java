@@ -6,14 +6,23 @@ public class Weather {
     private static final String TAG = "Weather";
     private String lon;
     private String lat;
-    private String main;
-    private String description;
+    private String mainDescription;
+    private String detailedDescription;
     private String humidity;
     private String temp;
     private String temp_min;
     private String temp_max;
     private String name;
     private String id;
+    private String icon;
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = String.format("http://openweathermap.org/img/w/" + icon + ".png");
+    }
 
     public String getLon() {
         return lon;
@@ -31,20 +40,20 @@ public class Weather {
         this.lat = lat;
     }
 
-    public String getMain() {
-        return main;
+    public String getMainDescription() {
+        return mainDescription;
     }
 
-    public void setMain(String main) {
-        this.main = main;
+    public void setMainDescription(String mainDescription) {
+        this.mainDescription = mainDescription;
     }
 
-    public String getDescription() {
-        return description;
+    public String getDetailedDescription() {
+        return detailedDescription;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setDetailedDescription(String detailedDescription) {
+        this.detailedDescription = detailedDescription;
     }
 
     public String getHumidity() {
