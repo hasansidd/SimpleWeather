@@ -20,7 +20,9 @@ public class WeatherFetcher {
     private LocationUtil mLocationUtil;
 
     public WeatherFetcher(Context context) {
-        mLocationUtil = new LocationUtil(context);
+        if (mLocationUtil == null) {
+            mLocationUtil = new LocationUtil(context);
+        }
     }
 
     private String getJson(String source) throws Exception {
@@ -49,6 +51,10 @@ public class WeatherFetcher {
             Log.i(TAG, "getWeather source is null");
             return null;
         }
+
+        //Log.i(TAG, "Fetching weather for city: " + source);
+        //test
+
         Weather mWeather = new Weather();
         String json = getJson(source);
 
@@ -73,7 +79,7 @@ public class WeatherFetcher {
         mWeather.setSunrise(sysInfoObject.getLong("sunrise"));
         mWeather.setSunset(sysInfoObject.getLong("sunset"));
 
-        printCurrentWeather(mWeather);
+        //printCurrentWeather(mWeather);
 
         return mWeather;
     }

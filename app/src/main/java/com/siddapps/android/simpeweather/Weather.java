@@ -24,7 +24,7 @@ public class Weather {
 
     public String formatTime(long millis) {
         Date date = new Date(millis * 1000);
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm z");
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE hh:mm a");
         return sdf.format(date);
     }
 
@@ -64,6 +64,7 @@ public class Weather {
                     return R.drawable.snowyn;
                 case "Rain":
                 case "Drizzle":
+                case "Mist":
                     return R.drawable.rainyn;
                 case "Thunderstorm":
                     return R.drawable.stormyn;
@@ -78,6 +79,7 @@ public class Weather {
                 return R.drawable.snowy;
             case "Rain":
             case "Drizzle":
+            case "Mist":
                 return R.drawable.rainy;
             case "Thunderstorm":
                 return R.drawable.stormy;
@@ -138,7 +140,7 @@ public class Weather {
     public void setTemp(String temp) {
         Double tempDouble = Double.parseDouble(temp);
         tempDouble = tempDouble * (9 / 5d) - 459.67; //Fahrenheit
-        this.temp = String.format("%.0f", tempDouble);
+        this.temp = String.format("%.0f°F", tempDouble);
     }
 
     public String getTemp_min() {
@@ -148,7 +150,7 @@ public class Weather {
     public void setTemp_min(String temp_min) {
         Double temp_minDouble = Double.parseDouble(temp_min);
         temp_minDouble = temp_minDouble * (9 / 5d) - 459.67; //Fahrenheit
-        this.temp_min = String.format("%.0f", temp_minDouble);
+        this.temp_min = String.format("%.0f°F", temp_minDouble);
     }
 
     public String getTemp_max() {
@@ -158,7 +160,7 @@ public class Weather {
     public void setTemp_max(String temp_max) {
         Double temp_maxDouble = Double.parseDouble(temp_max);
         temp_maxDouble = temp_maxDouble * (9 / 5d) - 459.67; //Fahrenheit
-        this.temp_max = String.format("%.0f", temp_maxDouble);
+        this.temp_max = String.format("%.0f°F", temp_maxDouble);
     }
 
     public String getName() {
