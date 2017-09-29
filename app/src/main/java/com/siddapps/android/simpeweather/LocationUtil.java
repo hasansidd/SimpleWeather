@@ -31,7 +31,6 @@ public class LocationUtil {
     }
 
     private boolean isLocationGranted() {
-        Log.i(TAG, "requested");
         if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return false;
         }
@@ -40,7 +39,16 @@ public class LocationUtil {
 
     public String getCurrentLocationZip() throws Exception {
         if (isLocationGranted()) {
+            if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Log.i(TAG, "Permissions not granted");
+            }
             lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+            if (lastKnownLocation == null) {
+                return null;
+            }
+
             Geocoder geocoder = new Geocoder(mContext.getApplicationContext(), Locale.getDefault());
             List<Address> addresses = geocoder.getFromLocation(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude(), 1);
 

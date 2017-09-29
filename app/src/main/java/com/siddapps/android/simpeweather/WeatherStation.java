@@ -29,38 +29,38 @@ public class WeatherStation {
     }
 
     public void addWeather(Weather weather) {
-
-        //mWeathers.add(weather);
-
-        for(int i = 0; i < mWeathers.size(); i++)
-        {
-            if(mWeathers.get(i).getName().contains(weather.getName())) {
-               // mWeathers.remove(i);
-               // mWeathers.add(0,weather);
-                Log.i(TAG, "TODO");
-            } else {
-                mWeathers.add(weather);
-                break;
+        if (!mWeathers.isEmpty()) {
+            for (int i = 0; i < mWeathers.size(); i++) {
+                if (mWeathers.get(i).getName().contains(weather.getName())) {
+                    Log.i(TAG, "City: " + weather.getName() + " already exists\nmoving to beginning of list");
+                    mWeathers.remove(i);
+                    mWeathers.add(0, weather);
+                    return;
+                }
             }
         }
+        Log.i(TAG, "City: " + weather.getName() + " added to end of list");
+        mWeathers.add(weather);
     }
 
     public void addCurrentWeather(Weather weather) {
-        Log.i(TAG, "started: " + mWeathers.size());
-        if (mWeathers.isEmpty()) {
-            mWeathers.add(0, weather);
+        if (weather == null) {
+            Log.i(TAG, "addCurrentWeather weather is null");
+            return;
         }
 
-        for(int i = 0; i < mWeathers.size(); i++)
-        {
-            if(mWeathers.get(i).getName().contains(weather.getName())) {
-                Log.i(TAG, "true");
-            } else {
-                Log.i(TAG, "false");
-                mWeathers.add(0, weather);
+        Log.i(TAG, "started: " + mWeathers.size());
+
+        if (!mWeathers.isEmpty()) {
+            for (int i = 0; i < mWeathers.size(); i++) {
+                if (mWeathers.get(i).getName().contains(weather.getName())) {
+                    Log.i(TAG, "City: " + weather.getName() + " already exists, skipping");
+                    return;
+                }
             }
-            Log.i(TAG, String.valueOf(i));
         }
+        Log.i(TAG, "City: " + weather.getName() + " added to beginning of list");
+        mWeathers.add(0, weather);
     }
 
     public void deleteWeather(Weather weather) {

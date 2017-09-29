@@ -8,6 +8,7 @@ import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -44,23 +45,33 @@ public class WeatherFetcher {
     }
 
     public Weather getWeather(String source) throws Exception {
+        if (source == null) {
+            Log.i(TAG, "getWeather source is null");
+            return null;
+        }
         Weather mWeather = new Weather();
         String json = getJson(source);
 
         JSONObject jsonObject = new JSONObject(json);
-        String weatherInfo = jsonObject.getString("weather");
-        JSONArray weatherInfoArray = new JSONArray(weatherInfo);
-        JSONObject jsonPart = weatherInfoArray.getJSONObject(0);
-        JSONObject mainInfoObject = jsonObject.getJSONObject("main");
-
         mWeather.setName(jsonObject.getString("name"));
-        mWeather.setIcon(jsonPart.getString("icon"));
-        mWeather.setMainDescription(jsonPart.getString("main"));
-        mWeather.setDetailedDescription(jsonPart.getString("description"));
+        mWeather.setTime(jsonObject.getLong("dt"));
+
+        JSONArray weatherInfoArray = new JSONArray(jsonObject.getString("weather"));
+        JSONObject weatherInfoObject = weatherInfoArray.getJSONObject(0);
+        mWeather.setMainDescription(weatherInfoObject.getString("main"));
+        mWeather.setDetailedDescription(weatherInfoObject.getString("description"));
+        mWeather.setMainDescription(weatherInfoObject.getString("main"));
+        mWeather.setDetailedDescription(weatherInfoObject.getString("description"));
+
+        JSONObject mainInfoObject = jsonObject.getJSONObject("main");
         mWeather.setTemp(mainInfoObject.getString("temp"));
         mWeather.setHumidity(mainInfoObject.getString("humidity"));
         mWeather.setTemp_min(mainInfoObject.getString("temp_min"));
         mWeather.setTemp_max(mainInfoObject.getString("temp_max"));
+
+        JSONObject sysInfoObject = jsonObject.getJSONObject("sys");
+        mWeather.setSunrise(sysInfoObject.getLong("sunrise"));
+        mWeather.setSunset(sysInfoObject.getLong("sunset"));
 
         printCurrentWeather(mWeather);
 
@@ -74,7 +85,7 @@ public class WeatherFetcher {
 
     private void printCurrentWeather(Weather weather) {
         Weather mWeather = weather;
-        String fullInfo = String.format("Name: %s\n Main: %s\n Description: %s\n Temperature: %s\n Humidity: %s\n Min Temp: %s\n Max Temp: %s\n"
+        String fullInfo = String.format("Name: %s\nMain: %s\nDescription: %s\nTemperature: %s\nHumidity: %s\nMin Temp: %s\nMax Temp: %s\n"
                 , mWeather.getName()
                 , mWeather.getMainDescription()
                 , mWeather.getDetailedDescription()

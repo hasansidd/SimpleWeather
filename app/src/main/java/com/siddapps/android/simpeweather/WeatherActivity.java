@@ -11,7 +11,6 @@ public class WeatherActivity extends SingleFragmentActivity {
 
     public static Intent newIntent(Context context) {
         Intent intent = new Intent(context, WeatherActivity.class);
-        Log.i(TAG, "0");
         return intent;
     }
 

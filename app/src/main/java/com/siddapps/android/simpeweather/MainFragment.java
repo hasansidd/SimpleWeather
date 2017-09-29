@@ -81,7 +81,8 @@ public class MainFragment extends Fragment {
             String temp = String.format("%s°F", mWeather.getTemp());
             mCurrentTempText.setText(temp);
             mCurrentDescriptionText.setText(mWeather.getDetailedDescription());
-            Picasso.with(getActivity()).load(weather.getIcon()).into(mWeatherBackgroundImage);
+            Log.i(TAG, String.valueOf(mWeather.getIcon()));
+            Picasso.with(getActivity()).load(mWeather.getIcon()).into(mWeatherBackgroundImage);
         }
     }
 
