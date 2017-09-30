@@ -9,6 +9,7 @@
         android:id="@+id/dialog_add_weather"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="16dp"
         android:hint="Enter city name or zip code"/>
 
 

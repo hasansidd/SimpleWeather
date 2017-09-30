@@ -1,6 +1,7 @@
 package com.siddapps.android.simpeweather;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -20,16 +21,31 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
-
 import java.util.List;
 
-public class MainFragment extends Fragment {
-    private static final String TAG = "MainFragment";
+public class WeatherFragment extends Fragment {
+    private static final String TAG = "WeatherFragment";
     private WeatherFetcher mWeatherFetcher;
     private WeatherStation mWeatherStation;
     private RecyclerView mRecyclerView;
     private WeatherAdapter mAdapter;
+    private Callbacks mCallbacks;
+
+    public interface Callbacks {
+        void OnWeatherSelected(Weather weather);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mCallbacks = (Callbacks) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -133,15 +149,17 @@ public class MainFragment extends Fragment {
         return v;
     }
 
-    public class WeatherHolder extends RecyclerView.ViewHolder {
+    public class WeatherHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView mCityNameText;
         private TextView mCurrentTempText;
         private TextView mCurrentDescriptionText;
         private ImageView mWeatherBackgroundImage;
         private TextView mTimeText;
+        Weather mWeather;
 
         public WeatherHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.weather_item_recyclerview, parent, false));
+            itemView.setOnClickListener(this);
 
             mCityNameText = (TextView) itemView.findViewById(R.id.city_name);
             mCurrentTempText = (TextView) itemView.findViewById(R.id.weather_temp_text);
@@ -151,13 +169,17 @@ public class MainFragment extends Fragment {
         }
 
         public void bind(Weather weather) {
-            mCityNameText.setText(weather.getName());
-            mCurrentTempText.setText(weather.getTemp());
-            mCurrentDescriptionText.setText(weather.getDetailedDescription());
-            mWeatherBackgroundImage.setImageResource(weather.getIcon());
-            //Picasso.with(getActivity()).load(weather.getIcon()).into(mWeatherBackgroundImage);
-            mWeatherBackgroundImage.setLayerType(View.LAYER_TYPE_SOFTWARE,null);
-            mTimeText.setText(weather.formatTime(weather.getTime()));
+            mWeather = weather;
+            mCityNameText.setText(mWeather.getName());
+            mCurrentTempText.setText(mWeather.getTemp());
+            mCurrentDescriptionText.setText(mWeather.getDetailedDescription());
+            mWeatherBackgroundImage.setImageResource(mWeather.getIcon());
+            mTimeText.setText(mWeather.formatTime(mWeather.getTime()));
+        }
+
+        @Override
+        public void onClick(View v) {
+            mCallbacks.OnWeatherSelected(mWeather);
         }
     }
 

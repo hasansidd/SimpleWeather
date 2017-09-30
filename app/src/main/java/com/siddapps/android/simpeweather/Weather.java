@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 
 public class Weather {
     private static final String TAG = "Weather";
@@ -16,7 +17,6 @@ public class Weather {
     private String temp_min;
     private String temp_max;
     private String name;
-    private String id;
     private int icon;
     private long time;
     private long sunrise;
@@ -54,7 +54,6 @@ public class Weather {
 
     public int getIcon() {
         if (time > sunset || time < sunrise) {//night
-            Log.i(TAG, "in");
             switch (getMainDescription()) {
                 case "Clouds":
                     return R.drawable.cloudyn;
@@ -171,11 +170,4 @@ public class Weather {
         this.name = name;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 }

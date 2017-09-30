@@ -6,7 +6,7 @@ import android.support.v4.app.Fragment;
 import android.util.Log;
 
 
-public class WeatherActivity extends SingleFragmentActivity {
+public class WeatherActivity extends SingleFragmentActivity implements WeatherFragment.Callbacks {
     private static final String TAG = "WeatherActivity";
 
     public static Intent newIntent(Context context) {
@@ -16,6 +16,13 @@ public class WeatherActivity extends SingleFragmentActivity {
 
     @Override
     protected Fragment createFragment() {
-        return new MainFragment();
+        return new WeatherFragment();
+    }
+
+    @Override
+    public void OnWeatherSelected(Weather weather) {
+        Log.i(TAG, "onWeatherSelected()");
+        Intent intent = WeatherDetailActivity.newIntent(this,weather.getName());
+        startActivity(intent);
     }
 }

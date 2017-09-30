@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public class WeatherStation {
     private static final String TAG = "WeatherStation";
@@ -38,6 +39,17 @@ public class WeatherStation {
     public void setWeathers(List<Weather> weathers) {
         mWeathers = weathers;
         return;
+    }
+
+    public Weather getWeather(String cityName) {
+        for (int i = 0; i < mWeathers.size(); i++) {
+            if (mWeathers.get(i).getName().contains(cityName)) {
+                Log.i(TAG, "Found weather for " + mWeathers.get(i).getName());
+                return mWeathers.get(i);
+            }
+        }
+        Log.i(TAG, "Could not find weather");
+        return null;
     }
 
     public void addWeather(Weather weather) {

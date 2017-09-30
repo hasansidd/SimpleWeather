@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.siddapps.android.simpeweather.WeatherDetailActivity">
+
+    <FrameLayout
+        android:id="@+id/weather_master_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/master_city_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="34dp"
+            tools:text="Austin"/>
+
+        <TextView
+            android:id="@+id/master_temp_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="45dp"
+            tools:text="90°F"/>
+
+        <TextView
+            android:id="@+id/master_description_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="24dp"
+            tools:text="Cloudy"/>
+
+        <TextView
+            android:id="@+id/master_time_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="right"
+            android:textSize="10dp"
+            tools:text="Friday 4:20 pm"/>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/master_background_image"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="right|top"
+        android:padding="16dp"
+        app:srcCompat="@drawable/clear"
+        android:scaleType="centerCrop"
+        />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/weather_detail_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+</LinearLayout>
