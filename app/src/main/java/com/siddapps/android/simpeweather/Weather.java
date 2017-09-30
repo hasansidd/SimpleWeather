@@ -3,8 +3,9 @@ package com.siddapps.android.simpeweather;
 import android.util.Log;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.UUID;
+import java.util.List;
 
 public class Weather {
     private static final String TAG = "Weather";
@@ -21,6 +22,15 @@ public class Weather {
     private long time;
     private long sunrise;
     private long sunset;
+    private ExtendedForecast mExtendedForecast;
+
+    public ExtendedForecast getExtendedForecast() {
+        return mExtendedForecast;
+    }
+
+    public void setExtendedForecast(ExtendedForecast extendedForecast) {
+        mExtendedForecast = extendedForecast;
+    }
 
     public String formatTime(long millis) {
         Date date = new Date(millis * 1000);
@@ -28,25 +38,24 @@ public class Weather {
         return sdf.format(date);
     }
 
-    public long getTime() {
-        return time;
+    public String getTime() {
+        return formatTime(time);
     }
 
     public void setTime(long time) {
         this.time = time;
     }
 
-    public long getSunrise() {
-        return sunrise;
+    public String getSunrise() {
+        return formatTime(sunrise);
     }
 
     public void setSunrise(long sunrise) {
         this.sunrise = sunrise;
     }
 
-    public long getSunset() {
-        return sunset;
-    }
+    public String getSunset() {
+        return formatTime(sunset);    }
 
     public void setSunset(long sunset) {
         this.sunset = sunset;
@@ -169,5 +178,81 @@ public class Weather {
     public void setName(String name) {
         this.name = name;
     }
+
+    public static class ExtendedForecast {
+        private List<List<ArrayList<String>>> mExtendedForecast ;
+        private List<ArrayList<String>> mDay;
+        private List<String> mTemps;
+        private String mTemp;
+        private String mTemp_min;
+        private String mTemp_max;
+
+        public List<List<ArrayList<String>>> getExtendedForceast() {
+            if (mExtendedForecast == null) {
+
+            }
+            return mExtendedForecast;
+        }
+
+        public void setExtendedForceast(List<List<ArrayList<String>>> extendedForecast) {
+            this.mExtendedForecast = extendedForecast;
+        }
+
+        public List<ArrayList<String>> getDay() {
+            return mDay;
+        }
+
+        public void addDay(ArrayList<String> temps) {
+            if (mDay == null) {
+                mDay = new ArrayList<>();
+            }
+            mDay.add(temps);
+        }
+
+        public List<String> getTemps() {
+            return mTemps;
+        }
+
+        public ArrayList<String> addTemps(ArrayList<String> temps, String temp_min, String temp, String temp_max) {
+            if (temps == null) {
+                temps = new ArrayList<>();
+            }
+            temps.add(temp_min);
+            temps.add(temp);
+            temps.add(temp_max);
+            return temps;
+        }
+
+        public String getTemp() {
+            return mTemp;
+        }
+
+        public void setTemp(String temp) {
+            Double tempDouble = Double.parseDouble(temp);
+            tempDouble = tempDouble * (9 / 5d) - 459.67; //Fahrenheit
+            this.mTemp = String.format("%.0f°F", tempDouble);
+        }
+
+        public String getTemp_min() {
+            return mTemp_min;
+        }
+
+        public void setTemp_min(String temp_min) {
+            Double temp_minDouble = Double.parseDouble(temp_min);
+            temp_minDouble = temp_minDouble * (9 / 5d) - 459.67; //Fahrenheit
+            this.mTemp_min = String.format("%.0f°F", temp_minDouble);
+        }
+
+        public String getTemp_max() {
+            return mTemp_max;
+        }
+
+        public void setTemp_max(String temp_max) {
+            Double temp_maxDouble = Double.parseDouble(temp_max);
+            temp_maxDouble = temp_maxDouble * (9 / 5d) - 459.67; //Fahrenheit
+            this.mTemp_max = String.format("%.0f°F", temp_maxDouble);
+        }
+    }
+
 
 }

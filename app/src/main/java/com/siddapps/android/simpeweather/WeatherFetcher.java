@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import com.siddapps.android.simpeweather.Weather.ExtendedForecast;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -13,6 +14,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class WeatherFetcher {
     private static final String TAG = "WeatherFetcher";
@@ -80,6 +82,18 @@ public class WeatherFetcher {
 
         printCurrentWeather(mWeather);
 
+        //TODO figure out data structure for extended forcast
+/*        ExtendedForecast mExtendedforecast = new ExtendedForecast();
+
+
+        ArrayList<String> tempsList
+        for (int i = 0; i< ArrayOfHours; i++) {
+            String temp_min = "something";
+            String temp = "something";
+            String temp_max = "something";
+            mExtendedforecast.addTemps(temp_min,temp,temp_max);
+        }
+        mExtendedforecast.addDay(*/
         return mWeather;
     }
 

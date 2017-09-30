@@ -174,7 +174,7 @@ public class WeatherFragment extends Fragment {
             mCurrentTempText.setText(mWeather.getTemp());
             mCurrentDescriptionText.setText(mWeather.getDetailedDescription());
             mWeatherBackgroundImage.setImageResource(mWeather.getIcon());
-            mTimeText.setText(mWeather.formatTime(mWeather.getTime()));
+            mTimeText.setText(mWeather.getTime());
         }
 
         @Override
