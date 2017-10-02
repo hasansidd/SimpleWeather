@@ -16,9 +16,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
+import static com.siddapps.android.simpeweather.Weather.ExtendedForecast.*;
+
 public class WeatherFetcher {
     private static final String TAG = "WeatherFetcher";
     private static final String API_KEY = "7c3f5df254d3c24ed9ed5f0ab0937b49";
+    private static final String METHOD_EXTENDED = "forecast";
+    private static final String METHOD_CURRENT = "weather";
     private LocationUtil mLocationUtil;
 
     public WeatherFetcher(Context context) {
@@ -27,13 +31,14 @@ public class WeatherFetcher {
         }
     }
 
-    private String getJson(String source) throws Exception {
+    private String fetchJson(String source, String methodType) throws Exception {
         String result = "";
+
         String urlString = source.replaceAll("\\s", "");
-        URL url = new URL("http://api.openweathermap.org/data/2.5/weather?q=" + urlString + "&APPID=" + API_KEY);
+        URL url = new URL("http://api.openweathermap.org/data/2.5/" + methodType + "?q=" + urlString + "&APPID=" + API_KEY);
 
         if (source.matches(".*\\d+.*")) {
-            url = new URL("http://api.openweathermap.org/data/2.5/weather?zip=" + source + ",us&APPID=" + API_KEY);
+            url = new URL("http://api.openweathermap.org/data/2.5/" + methodType + "?zip=" + source + ",us&APPID=" + API_KEY);
         }
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -48,7 +53,7 @@ public class WeatherFetcher {
         return result;
     }
 
-    public Weather getWeather(String source) throws Exception {
+    public Weather fetchWeather(String source) throws Exception {
         if (source == null) {
             Log.i(TAG, "getWeather source is null");
             return null;
@@ -57,7 +62,7 @@ public class WeatherFetcher {
         //Log.i(TAG, "Fetching weather for city: " + source);
 
         Weather mWeather = new Weather();
-        String json = getJson(source);
+        String json = fetchJson(source, METHOD_CURRENT);
 
         JSONObject jsonObject = new JSONObject(json);
         mWeather.setName(jsonObject.getString("name"));
@@ -65,8 +70,6 @@ public class WeatherFetcher {
 
         JSONArray weatherInfoArray = new JSONArray(jsonObject.getString("weather"));
         JSONObject weatherInfoObject = weatherInfoArray.getJSONObject(0);
-        mWeather.setMainDescription(weatherInfoObject.getString("main"));
-        mWeather.setDetailedDescription(weatherInfoObject.getString("description"));
         mWeather.setMainDescription(weatherInfoObject.getString("main"));
         mWeather.setDetailedDescription(weatherInfoObject.getString("description"));
 
@@ -80,26 +83,54 @@ public class WeatherFetcher {
         mWeather.setSunrise(sysInfoObject.getLong("sunrise"));
         mWeather.setSunset(sysInfoObject.getLong("sunset"));
 
-        printCurrentWeather(mWeather);
-
-        //TODO figure out data structure for extended forcast
-/*        ExtendedForecast mExtendedforecast = new ExtendedForecast();
-
-
-        ArrayList<String> tempsList
-        for (int i = 0; i< ArrayOfHours; i++) {
-            String temp_min = "something";
-            String temp = "something";
-            String temp_max = "something";
-            mExtendedforecast.addTemps(temp_min,temp,temp_max);
-        }
-        mExtendedforecast.addDay(*/
+        // printCurrentWeather(mWeather);
         return mWeather;
     }
 
-    public Weather getCurrentWeather() throws Exception {
+    public Weather fetchExtendedForecast(Weather weather) throws Exception {
+        ExtendedForecast extendedForecast = weather.getExtendedForecast();
+        String json = fetchJson(weather.getName(), METHOD_EXTENDED);
+
+        JSONObject jsonObject = new JSONObject(json);
+        JSONArray fullInfoArray = new JSONArray(jsonObject.getString("list"));
+        Log.i(TAG, String.valueOf(fullInfoArray.length()));
+
+        for (int i = 0; i < fullInfoArray.length(); i++) {
+            HourlyData hourlyData = new HourlyData();
+            JSONObject hourlyInfoObject = fullInfoArray.getJSONObject(i);
+            hourlyData.setTime(hourlyInfoObject.getLong("dt"));
+
+            JSONObject mainInfoObject = hourlyInfoObject.getJSONObject("main");
+            hourlyData.setTemp(mainInfoObject.getString("temp"));
+            hourlyData.setTemp_min(mainInfoObject.getString("temp_min"));
+            hourlyData.setTemp_max(mainInfoObject.getString("temp_max"));
+            hourlyData.setHumidity(mainInfoObject.getString("humidity"));
+
+            JSONArray weatherInfoArray = hourlyInfoObject.getJSONArray("weather");
+            JSONObject weatherInfoObject = weatherInfoArray.getJSONObject(0);
+            hourlyData.setMainDescription(weatherInfoObject.getString("main"));
+            hourlyData.setDetailedDescription(weatherInfoObject.getString("description"));
+
+/*            String fullInfo = String.format("Main: %s\nDescription: %s\nTemperature: %s\nHumidity: %s\nMin Temp: %s\nMax Temp: %s\nTime: %s\n"
+                    , hourlyData.getMainDescription()
+                    , hourlyData.getDetailedDescription()
+                    , hourlyData.getTemp()
+                    , hourlyData.getHumidity()
+                    , hourlyData.getTemp_min()
+                    , hourlyData.getTemp_max()
+                    , hourlyData.getTime());
+
+            Log.i(TAG, fullInfo);*/
+            extendedForecast.addHourlyData(hourlyData);
+        }
+
+        weather.setExtendedForecast(extendedForecast);
+        return weather;
+    }
+
+    public Weather fetchCurrentWeather() throws Exception {
         String source = mLocationUtil.getCurrentLocationZip();
-        return getWeather(source);
+        return fetchWeather(source);
     }
 
     private void printCurrentWeather(Weather weather) {

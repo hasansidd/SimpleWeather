@@ -1,58 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_margin="8dp">
 
+    <TextView
+        android:id="@+id/detail_time_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textSize="16dp"
+        tools:text="Friday 3:00 pm"/>
     <ImageView
         android:id="@+id/detail_weather_image"
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:layout_gravity="center"
         android:layout_margin="8dp"
+        android:padding="8dp"
+        android:foregroundGravity="center"
         android:scaleType="centerCrop"
         app:srcCompat="@drawable/clear"
         />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center">
-
-        <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_gravity="center"
-            android:scaleType="centerCrop"
-            app:srcCompat="@drawable/up"
-            />
-
         <TextView
-            android:id="@+id/high_temp"
+            android:id="@+id/detail_temp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:textSize="16dp"
+            android:textSize="34dp"
             tools:text="90°F"/>
-
-        <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_gravity="center"
-            android:scaleType="centerCrop"
-            app:srcCompat="@drawable/down"
-            />
-
-        <TextView
-            android:id="@+id/low_temp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:textSize="16dp"
-            tools:text="90°F"/>
-    </LinearLayout>
 
 </LinearLayout>

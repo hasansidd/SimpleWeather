@@ -22,9 +22,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".WeatherActivity"/>
-        <activity android:name=".WeatherDetailActivity">
-        </activity>
-        <activity android:name=".WeatherDetailFragment">
+        <activity android:name=".WeatherDetailActivity"
+            android:parentActivityName=".WeatherActivity">
         </activity>
     </application>
 

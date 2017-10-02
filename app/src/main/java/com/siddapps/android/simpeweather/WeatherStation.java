@@ -44,7 +44,7 @@ public class WeatherStation {
     public Weather getWeather(String cityName) {
         for (int i = 0; i < mWeathers.size(); i++) {
             if (mWeathers.get(i).getName().contains(cityName)) {
-                Log.i(TAG, "Found weather for " + mWeathers.get(i).getName());
+               // Log.i(TAG, "Found weather for " + mWeathers.get(i).getName());
                 return mWeathers.get(i);
             }
         }
@@ -52,48 +52,76 @@ public class WeatherStation {
         return null;
     }
 
-    public void addWeather(Weather weather) {
+    public Weather addWeather(String source) throws Exception {
+        Weather weather = mWeatherFetcher.fetchWeather(source);
+
         if (!mWeathers.isEmpty()) {
             for (int i = 0; i < mWeathers.size(); i++) {
                 if (mWeathers.get(i).getName().contains(weather.getName())) {
                     Log.i(TAG, "City: " + weather.getName() + " already exists, moving to beginning of list");
                     mWeathers.remove(i);
                     mWeathers.add(0, weather);
-                    return;
+                    return weather;
                 }
             }
         }
         Log.i(TAG, "City: " + weather.getName() + " added to end of list");
         mWeathers.add(weather);
+        return weather;
     }
 
-    public void addCurrentWeather(Weather weather) {
+    public Weather getExtendedWeather(Weather weather) throws Exception {
+        for (int i = 0; i < mWeathers.size(); i++) {
+            if (mWeathers.get(i).getName().contains(weather.getName())) {
+                Log.i(TAG, "Getting extended forecast for: " + weather.getName());
+                mWeathers.set(i, mWeatherFetcher.fetchExtendedForecast(weather));
+                return weather;
+            }
+        }
+        Log.i(TAG, "Could not get extended forecast for: " + weather.getName());
+        return null;
+    }
+
+    public List<Weather.ExtendedForecast.HourlyData> getHourlyData(Weather weather) {
+        Weather.ExtendedForecast extendedForecast = weather.getExtendedForecast();
+        List<Weather.ExtendedForecast.HourlyData> hourlyData = extendedForecast.getHourlyDataList();
+        return hourlyData;
+    }
+
+    public Weather addCurrentWeather() throws Exception {
+        Weather weather = mWeatherFetcher.fetchCurrentWeather();
         if (weather == null) {
             Log.i(TAG, "addCurrentWeather weather is null");
-            return;
+            return null;
         }
 
         if (!mWeathers.isEmpty()) {
             for (int i = 0; i < mWeathers.size(); i++) {
                 if (mWeathers.get(i).getName().contains(weather.getName())) {
-                    Log.i(TAG, "City: " + weather.getName() + " already exists, skipping");
-                    return;
+                    Log.i(TAG, mWeathers.get(i).getName());
+                    mWeathers.remove(i);
+                    mWeathers.add(0, weather);
+                    Log.i(TAG, "City: " + weather.getName() + " already exists, moving to beginning of list");
+                    return weather;
                 }
             }
         }
         Log.i(TAG, "City: " + weather.getName() + " added to beginning of list");
         mWeathers.add(0, weather);
+        return weather;
     }
 
-    public void updateWeather(Weather weather) throws Exception {
+    public Weather updateWeather(Weather weather) throws Exception {
 
         for (int i = 0; i < mWeathers.size(); i++) {
             if (mWeathers.get(i).getName().contains(weather.getName())) {
                 Log.i(TAG, "City: " + weather.getName() + " being updated");
-                mWeathers.set(i, mWeatherFetcher.getWeather(weather.getName()));
-                return;
+                Weather weather1 = mWeatherFetcher.fetchWeather(weather.getName());
+                mWeathers.set(i, weather1);
+                return weather1;
             }
         }
+        return null;
     }
 
     public void setSharedPreferences() {
@@ -107,20 +135,23 @@ public class WeatherStation {
         sharedPreferences.edit().putStringSet(SHARED_PREF_LIST, cityNameSet).apply();
     }
 
-    public void getSharedPreferences() throws Exception {
+    public List<String> getSharedPreferences() throws Exception {
         if (mWeathers.size() > 0) {
             Log.i(TAG, "mWeathers is not empty: " + mWeathers.size());
-            return;
+            return null;
         }
 
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
         Set<String> cityNameSet = sharedPreferences.getStringSet(SHARED_PREF_LIST, new HashSet<String>());
-        List<Weather> weathers = new ArrayList<>();
+/*        List<Weather> weathers = new ArrayList<>();
 
         for (String cityNames : cityNameSet) {
-            weathers.add(mWeatherFetcher.getWeather(cityNames));
+            weathers.add(mWeatherFetcher.fetchWeather(cityNames));
         }
-        setWeathers(weathers);
+        setWeathers(weathers);*/
+
+        ArrayList<String> cityNameList = new ArrayList<>(cityNameSet);
+        return cityNameList;
     }
 
     public void deleteWeather(Weather weather) {

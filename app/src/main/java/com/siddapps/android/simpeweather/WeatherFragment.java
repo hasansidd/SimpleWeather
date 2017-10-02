@@ -23,9 +23,9 @@ import android.widget.TextView;
 
 import java.util.List;
 
+
 public class WeatherFragment extends Fragment {
     private static final String TAG = "WeatherFragment";
-    private WeatherFetcher mWeatherFetcher;
     private WeatherStation mWeatherStation;
     private RecyclerView mRecyclerView;
     private WeatherAdapter mAdapter;
@@ -51,7 +51,6 @@ public class WeatherFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        Log.i(TAG, "onCreate() called");
     }
 
     @Override
@@ -109,7 +108,6 @@ public class WeatherFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        Log.i(TAG, "onResume() called");
         updateUI();
     }
 
@@ -127,17 +125,18 @@ public class WeatherFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
-        Log.i(TAG, "onCreateView() called");
         mWeatherStation = WeatherStation.get(getActivity());
 
         try {
-            FetchSavedWeatherTask fetchSavedWeatherTask = new FetchSavedWeatherTask();
-            fetchSavedWeatherTask.execute();
+            List<String> cityNameSet = mWeatherStation.getSharedPreferences();
+            for (int i = 0; i<cityNameSet.size(); i++) {
+                Log.i(TAG, "Adding " + cityNameSet.get(i) + " from SharedPrefs");
+                addNewWeather(cityNameSet.get(i));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        mWeatherFetcher = new WeatherFetcher(getActivity());
         FetchCurrentWeatherTask fetchCurrentWeatherTask = new FetchCurrentWeatherTask();
         fetchCurrentWeatherTask.execute();
 
@@ -180,6 +179,9 @@ public class WeatherFragment extends Fragment {
         @Override
         public void onClick(View v) {
             mCallbacks.OnWeatherSelected(mWeather);
+            if (!mWeather.isExtendedForecastReady()) {
+
+            }
         }
     }
 
@@ -232,44 +234,49 @@ public class WeatherFragment extends Fragment {
         iTH.attachToRecyclerView(mRecyclerView);
     }
 
-    public class FetchCurrentWeatherTask extends AsyncTask<String, Void, Void> {
-
+    public class FetchCurrentWeatherTask extends AsyncTask<String, Void, Weather> {
+        Weather weather = null;
         @Override
-        protected Void doInBackground(String... params) {
+        protected Weather doInBackground(String... params) {
             try {
-                mWeatherStation.addCurrentWeather(mWeatherFetcher.getCurrentWeather());
+                weather=  mWeatherStation.addCurrentWeather();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return null;
+            return weather;
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
+        protected void onPostExecute(Weather weather) {
+            super.onPostExecute(weather);
             updateUI();
+            FetchExtendedWeatherTask fetchExtendedWeatherTask = new FetchExtendedWeatherTask();
+            fetchExtendedWeatherTask.execute(weather);
         }
     }
 
-    public class UpdateWeathersTask extends AsyncTask<String, Void, Void> {
+    public class UpdateWeathersTask extends AsyncTask<String, Void, Weather> {
+        Weather weather = null;
 
         @Override
-        protected Void doInBackground(String... zipCode) {
+        protected Weather doInBackground(String... zipCode) {
             List<Weather> weathers = mWeatherStation.getWeathers();
             try {
                 for (Weather weather : weathers) {
-                    mWeatherStation.updateWeather(weather);
+                    weather = mWeatherStation.updateWeather(weather);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return null;
+            return weather;
         }
 
     @Override
-    protected void onPostExecute(Void aVoid) {
-        super.onPostExecute(aVoid);
+    protected void onPostExecute(Weather weather) {
+        super.onPostExecute(weather);
         updateUI();
+        FetchExtendedWeatherTask fetchExtendedWeatherTask = new FetchExtendedWeatherTask();
+        fetchExtendedWeatherTask.execute(weather);
     }
 }
 
@@ -277,42 +284,44 @@ public class WeatherFragment extends Fragment {
 
         @Override
         protected Weather doInBackground(String... source) {
-
+            Weather weather = null;
             try {
                 Log.i(TAG, "Attempting to get weather for: " + source[0]);
-                mWeatherStation.addWeather(mWeatherFetcher.getWeather(source[0]));
+                weather =  mWeatherStation.addWeather(source[0]);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return null;
+            return weather;
         }
 
         @Override
         protected void onPostExecute(Weather weather) {
             super.onPostExecute(weather);
             updateUI();
+            FetchExtendedWeatherTask fetchExtendedWeatherTask = new FetchExtendedWeatherTask();
+            fetchExtendedWeatherTask.execute(weather);
         }
     }
 
-    public class FetchSavedWeatherTask extends AsyncTask<String, Void, Weather> {
+    public class FetchExtendedWeatherTask extends AsyncTask<Weather, Void, Weather> {
 
         @Override
-        protected Weather doInBackground(String... source) {
+        protected Weather doInBackground(Weather... sourceWeather) {
+            Weather weather = null;
 
             try {
-                Log.i(TAG, "getting shared preferences");
-                mWeatherStation.getSharedPreferences();
+                Log.i(TAG, "getting extended weather");
+                weather = mWeatherStation.getExtendedWeather(sourceWeather[0]);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return null;
+            return weather;
         }
 
         @Override
         protected void onPostExecute(Weather weather) {
             super.onPostExecute(weather);
-            updateUI();
+
         }
     }
-
 }

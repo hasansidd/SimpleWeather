@@ -64,19 +64,25 @@ public class LocationUtil {
     private Location getLastKnownLocation() {
         List<String> providers = mLocationManager.getProviders(true);
         Location bestLocation = null;
+        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.i(TAG, "Location permissions not granted");
+        }
+
         for (String provider : providers) {
-            if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                Log.i(TAG, "Location permissions not granted");
-            }
             Location l = mLocationManager.getLastKnownLocation(provider);
-            Log.i(TAG, String.format("last known location, provider: %s, location: %s", provider, l));
+            //Log.i(TAG, String.format("Location provider : %s, accuracy: %s", provider, l.getAccuracy()));
 
             if (l == null) {
                 continue;
             }
+
             if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
-                Log.i(TAG, "found best last known location: " + l);
+                if (bestLocation == null) {
+                    Log.i(TAG, String.format("Accuracy from %s : %.2f", l.getProvider(), l.getAccuracy()));
+                } else {
+                    Log.i(TAG, String.format("Accuracy from %s : %.2f > Accuracy from %s : %.2f", l.getProvider(), l.getAccuracy(), bestLocation.getProvider(), bestLocation.getAccuracy()));
+                }
                 bestLocation = l;
             }
         }

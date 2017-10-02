@@ -23,19 +23,32 @@ public class Weather {
     private long sunrise;
     private long sunset;
     private ExtendedForecast mExtendedForecast;
+    private boolean isExtendedForecastReady;
+
+    public boolean isExtendedForecastReady() {
+        return isExtendedForecastReady;
+    }
+
+    public void setExtendedForecastReady(boolean extendedForecastReady) {
+        isExtendedForecastReady = extendedForecastReady;
+    }
+
+    public static String formatTime(long millis) {
+        Date date = new Date(millis * 1000);
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE hh:mm a");
+        return sdf.format(date);
+    }
 
     public ExtendedForecast getExtendedForecast() {
+        if (mExtendedForecast == null) {
+            mExtendedForecast = new ExtendedForecast();
+        }
         return mExtendedForecast;
     }
 
     public void setExtendedForecast(ExtendedForecast extendedForecast) {
         mExtendedForecast = extendedForecast;
-    }
-
-    public String formatTime(long millis) {
-        Date date = new Date(millis * 1000);
-        SimpleDateFormat sdf = new SimpleDateFormat("EEEE hh:mm a");
-        return sdf.format(date);
+        setExtendedForecastReady(true);
     }
 
     public String getTime() {
@@ -180,79 +193,113 @@ public class Weather {
     }
 
     public static class ExtendedForecast {
-        private List<List<ArrayList<String>>> mExtendedForecast ;
-        private List<ArrayList<String>> mDay;
-        private List<String> mTemps;
-        private String mTemp;
-        private String mTemp_min;
-        private String mTemp_max;
+        static List<HourlyData> mHourlyDataList;
 
-        public List<List<ArrayList<String>>> getExtendedForceast() {
-            if (mExtendedForecast == null) {
-
+        private ExtendedForecast() {
+            if (mHourlyDataList == null) {
+                mHourlyDataList = new ArrayList<>();
             }
-            return mExtendedForecast;
         }
 
-        public void setExtendedForceast(List<List<ArrayList<String>>> extendedForecast) {
-            this.mExtendedForecast = extendedForecast;
+        public List<HourlyData> getHourlyDataList() {
+            return mHourlyDataList;
         }
 
-        public List<ArrayList<String>> getDay() {
-            return mDay;
+        public void addHourlyData(HourlyData hourlyData) {
+            mHourlyDataList.add(hourlyData);
         }
 
-        public void addDay(ArrayList<String> temps) {
-            if (mDay == null) {
-                mDay = new ArrayList<>();
+        public static class HourlyData {
+            private String mTemp;
+            private String mTemp_min;
+            private String mTemp_max;
+            private String mHumidity;
+            private long mTime;
+            private String mainDescription;
+            private String detailedDescription;
+            private int icon;
+
+            public int getIcon() {
+                switch (mainDescription) {
+                    case "Clouds":
+                        return R.drawable.cloudy;
+                    case "Clear":
+                        return R.drawable.clear;
+                    case "Snow":
+                        return R.drawable.snowy;
+                    case "Rain":
+                    case "Drizzle":
+                    case "Mist":
+                        return R.drawable.rainy;
+                    case "Thunderstorm":
+                        return R.drawable.stormy;
+                    default:
+                        Log.i(TAG, "Description: " + mainDescription + " not found");
+                        return R.drawable.clear;
+                }
             }
-            mDay.add(temps);
-        }
 
-        public List<String> getTemps() {
-            return mTemps;
-        }
-
-        public ArrayList<String> addTemps(ArrayList<String> temps, String temp_min, String temp, String temp_max) {
-            if (temps == null) {
-                temps = new ArrayList<>();
+            public String getHumidity() {
+                return mHumidity;
             }
-            temps.add(temp_min);
-            temps.add(temp);
-            temps.add(temp_max);
-            return temps;
-        }
 
-        public String getTemp() {
-            return mTemp;
-        }
+            public void setHumidity(String humidity) {
+                mHumidity = humidity;
+            }
 
-        public void setTemp(String temp) {
-            Double tempDouble = Double.parseDouble(temp);
-            tempDouble = tempDouble * (9 / 5d) - 459.67; //Fahrenheit
-            this.mTemp = String.format("%.0f°F", tempDouble);
-        }
+            public String getMainDescription() {
+                return mainDescription;
+            }
 
-        public String getTemp_min() {
-            return mTemp_min;
-        }
+            public void setMainDescription(String mainDescription) {
+                this.mainDescription = mainDescription;
+            }
 
-        public void setTemp_min(String temp_min) {
-            Double temp_minDouble = Double.parseDouble(temp_min);
-            temp_minDouble = temp_minDouble * (9 / 5d) - 459.67; //Fahrenheit
-            this.mTemp_min = String.format("%.0f°F", temp_minDouble);
-        }
+            public String getDetailedDescription() {
+                return detailedDescription;
+            }
 
-        public String getTemp_max() {
-            return mTemp_max;
-        }
+            public void setDetailedDescription(String detailedDescription) {
+                this.detailedDescription = detailedDescription;
+            }
 
-        public void setTemp_max(String temp_max) {
-            Double temp_maxDouble = Double.parseDouble(temp_max);
-            temp_maxDouble = temp_maxDouble * (9 / 5d) - 459.67; //Fahrenheit
-            this.mTemp_max = String.format("%.0f°F", temp_maxDouble);
+            public String getTime() {
+                return formatTime(mTime);
+            }
+
+            public void setTime(long time) {
+                mTime = time;
+            }
+
+            public String getTemp() {
+                return mTemp;
+            }
+
+            public void setTemp(String temp) {
+                Double tempDouble = Double.parseDouble(temp);
+                tempDouble = tempDouble * (9 / 5d) - 459.67; //Fahrenheit
+                this.mTemp = String.format("%.0f°F", tempDouble);
+            }
+
+            public String getTemp_min() {
+                return mTemp_min;
+            }
+
+            public void setTemp_min(String temp_min) {
+                Double temp_minDouble = Double.parseDouble(temp_min);
+                temp_minDouble = temp_minDouble * (9 / 5d) - 459.67; //Fahrenheit
+                this.mTemp_min = String.format("%.0f°F", temp_minDouble);
+            }
+
+            public String getTemp_max() {
+                return mTemp_max;
+            }
+
+            public void setTemp_max(String temp_max) {
+                Double temp_maxDouble = Double.parseDouble(temp_max);
+                temp_maxDouble = temp_maxDouble * (9 / 5d) - 459.67; //Fahrenheit
+                this.mTemp_max = String.format("%.0f°F", temp_maxDouble);
+            }
         }
     }
-
-
 }

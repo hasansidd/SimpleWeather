@@ -7,13 +7,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.List;
+
 public class WeatherDetailFragment extends Fragment {
+    private static final String TAG = "WeatherDetailFragment";
     static Weather mWeather;
     private TextView mCityNameText;
     private TextView mCurrentTempText;
@@ -26,6 +30,7 @@ public class WeatherDetailFragment extends Fragment {
     private ImageView mWeatherImage;
     private RecyclerView mRecyclerView;
     private WeatherDetailAdapter mAdapter;
+    private WeatherStation mWeatherStation;
 
     public static WeatherDetailFragment newInstance() {
         return new WeatherDetailFragment();
@@ -34,6 +39,7 @@ public class WeatherDetailFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mWeatherStation = WeatherStation.get(getActivity());
     }
 
     @Nullable
@@ -42,39 +48,57 @@ public class WeatherDetailFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_weather_detail, container, false);
         mCityNameText = (TextView) v.findViewById(R.id.master_city_name);
         mCurrentTempText = (TextView) v.findViewById(R.id.master_temp_text);
+        mHighTemp = (TextView) v.findViewById(R.id.master_temp_high_text);
+        mLowTemp = (TextView) v.findViewById(R.id.master_temp_low_text);
         mDescriptionText = (TextView) v.findViewById(R.id.master_description_text);
         mCurrentTimeText = (TextView) v.findViewById(R.id.master_time_text);
         mWeatherImage = (ImageView) v.findViewById(R.id.master_background_image);
         mRecyclerView = (RecyclerView) v.findViewById(R.id.weather_detail_recyclerview);
 
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(),LinearLayoutManager.HORIZONTAL,false));
-        mRecyclerView.setAdapter(mAdapter);
-
         updateUI();
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
+
+        while (!mWeather.isExtendedForecastReady()) {
+            mWeather = mWeatherStation.getWeather(mWeather.getName());
+
+            if (mWeather.isExtendedForecastReady()) {
+                mAdapter = new WeatherDetailAdapter(mWeather);
+                mRecyclerView.setAdapter(mAdapter);
+                return v;
+            }
+        }
+        mAdapter = new WeatherDetailAdapter(mWeather);
+        mRecyclerView.setAdapter(mAdapter);
         return v;
     }
 
     public class WeatherDetailHolder extends RecyclerView.ViewHolder {
         ImageView mWeatherImage;
-        TextView mHighTemp;
-        TextView mLowTemp;
-
+        TextView mTemp;
+        TextView mTime;
 
         public WeatherDetailHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.weather_detail_recyclerview, parent, false));
 
             mWeatherImage = (ImageView) itemView.findViewById(R.id.detail_weather_image);
-            mHighTemp = (TextView) itemView.findViewById(R.id.high_temp);
-            mLowTemp = (TextView) itemView.findViewById(R.id.low_temp);
+            mTemp = (TextView) itemView.findViewById(R.id.detail_temp);
+            mTime = (TextView) itemView.findViewById(R.id.detail_time_text);
+        }
+
+        public void bind(Weather.ExtendedForecast.HourlyData hourlyData) {
+            mWeatherImage.setImageResource(hourlyData.getIcon());
+            mTemp.setText(hourlyData.getTemp());
+            mTime.setText(hourlyData.getTime());
         }
     }
 
     public class WeatherDetailAdapter extends RecyclerView.Adapter<WeatherDetailHolder> {
-        private Weather mWeather;
+        private List<Weather.ExtendedForecast.HourlyData> hourlyData;
 
         public WeatherDetailAdapter(Weather weather) {
-            mWeather = weather;
+            hourlyData = mWeatherStation.getHourlyData(weather);
         }
+
         @Override
         public WeatherDetailHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
@@ -83,30 +107,23 @@ public class WeatherDetailFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(WeatherDetailHolder holder, int position) {
-
+            holder.bind(hourlyData.get(position));
         }
 
         @Override
         public int getItemCount() {
-            return 5;
+            return hourlyData.size();
         }
-
-
     }
 
 
     private void updateUI() {
         mCityNameText.setText(mWeather.getName());
         mCurrentTempText.setText(mWeather.getTemp());
+        mHighTemp.setText(mWeather.getTemp_max());
+        mLowTemp.setText(mWeather.getTemp_min());
         mDescriptionText.setText(mWeather.getDetailedDescription());
         mWeatherImage.setImageResource(mWeather.getIcon());
         mCurrentTimeText.setText(mWeather.getTime());
-
-        if (mAdapter == null) {
-            mAdapter = new WeatherDetailAdapter(mWeather);
-            mRecyclerView.setAdapter(mAdapter);
-        } else {
-            mAdapter.notifyDataSetChanged();
-        }
     }
 }
