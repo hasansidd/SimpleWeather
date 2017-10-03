@@ -1,4 +1,4 @@
-package com.siddapps.android.simpeweather;
+package com.siddapps.android.simpleweather;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 public class WeatherStation {
     private static final String TAG = "WeatherStation";

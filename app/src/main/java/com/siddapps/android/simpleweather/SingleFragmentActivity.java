@@ -1,4 +1,4 @@
-package com.siddapps.android.simpeweather;
+package com.siddapps.android.simpleweather;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;

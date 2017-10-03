@@ -1,4 +1,4 @@
-package com.siddapps.android.simpeweather;
+package com.siddapps.android.simpleweather;
 
 import android.app.AlertDialog;
 import android.content.Context;

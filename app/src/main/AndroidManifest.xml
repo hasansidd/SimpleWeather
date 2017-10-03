@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.siddapps.android.simpeweather">
+          package="com.siddapps.android.simpleweather">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/clear"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name="com.siddapps.android.simpleweather.MainActivity"
             android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -21,9 +21,9 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".WeatherActivity"/>
-        <activity android:name=".WeatherDetailActivity"
-            android:parentActivityName=".WeatherActivity">
+        <activity android:name="com.siddapps.android.simpleweather.WeatherActivity"/>
+        <activity android:name="com.siddapps.android.simpleweather.WeatherDetailActivity"
+            android:parentActivityName="com.siddapps.android.simpleweather.WeatherActivity">
         </activity>
     </application>
 

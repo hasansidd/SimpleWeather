@@ -1,11 +1,9 @@
-package com.siddapps.android.simpeweather;
+package com.siddapps.android.simpleweather;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.util.Log;
 
-import com.siddapps.android.simpeweather.Weather.ExtendedForecast;
-import com.squareup.picasso.Picasso;
+import com.siddapps.android.simpleweather.Weather.ExtendedForecast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -14,9 +12,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 
-import static com.siddapps.android.simpeweather.Weather.ExtendedForecast.*;
+import static com.siddapps.android.simpleweather.Weather.ExtendedForecast.*;
 
 public class WeatherFetcher {
     private static final String TAG = "WeatherFetcher";

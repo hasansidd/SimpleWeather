@@ -1,4 +1,4 @@
-package com.siddapps.android.simpeweather;
+package com.siddapps.android.simpleweather;
 
 import android.Manifest;
 import android.content.Intent;
@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 public class MainActivity extends AppCompatActivity {
     static public WeatherFetcher mWeatherFetcher;

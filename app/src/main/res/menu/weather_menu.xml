@@ -5,12 +5,12 @@
    <item
        android:id="@+id/add_weather"
        android:title="Add City"
-       android:icon="@drawable/ic_add_location_black_48dp"
+       android:icon="@drawable/add_location"
        app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/update_weather"
         android:title="Update"
-        android:icon="@drawable/ic_refresh_black_24dp"
+        android:icon="@drawable/refresh"
         app:showAsAction="ifRoom"/>
 
 </menu>
