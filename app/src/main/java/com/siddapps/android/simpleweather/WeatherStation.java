@@ -83,7 +83,9 @@ public class WeatherStation {
 
     public List<Weather.ExtendedForecast.HourlyData> getHourlyData(Weather weather) {
         Weather.ExtendedForecast extendedForecast = weather.getExtendedForecast();
+        Log.i(TAG, "GetHOURLYDATAAA : " + weather.getName());
         List<Weather.ExtendedForecast.HourlyData> hourlyData = extendedForecast.getHourlyDataList();
+        Log.i(TAG, "GetHOURLYDATAAA : " + hourlyData.get(0).getTemp());
         return hourlyData;
     }
 

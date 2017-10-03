@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,7 @@ public class WeatherDetailFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private WeatherDetailAdapter mAdapter;
     private WeatherStation mWeatherStation;
+    WeatherFetcher weatherFetcher;
 
     public static WeatherDetailFragment newInstance() {
         return new WeatherDetailFragment();
@@ -37,6 +39,7 @@ public class WeatherDetailFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mWeatherStation = WeatherStation.get(getActivity());
+        weatherFetcher =  new WeatherFetcher(getActivity());
     }
 
     @Nullable
@@ -71,21 +74,23 @@ public class WeatherDetailFragment extends Fragment {
 
     public class WeatherDetailHolder extends RecyclerView.ViewHolder {
         ImageView mWeatherImage;
-        TextView mTemp;
-        TextView mTime;
+        TextView mTempText;
+        TextView mTimeText;
 
         public WeatherDetailHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.weather_detail_recyclerview, parent, false));
 
             mWeatherImage = (ImageView) itemView.findViewById(R.id.detail_weather_image);
-            mTemp = (TextView) itemView.findViewById(R.id.detail_temp);
-            mTime = (TextView) itemView.findViewById(R.id.detail_time_text);
+            mTempText = (TextView) itemView.findViewById(R.id.detail_temp);
+            mTimeText = (TextView) itemView.findViewById(R.id.detail_time_text);
         }
 
         public void bind(Weather.ExtendedForecast.HourlyData hourlyData) {
             mWeatherImage.setImageResource(hourlyData.getIcon());
-            mTemp.setText(hourlyData.getTemp());
-            mTime.setText(hourlyData.getTime());
+            mTempText.setText(hourlyData.getTemp());
+            mTimeText.setText(hourlyData.getTime());
+            weatherFetcher.printExtendedForecastWeather(hourlyData);
+            Log.i(TAG, "this fucking city: " + mWeather.getName());
         }
     }
 
@@ -93,6 +98,7 @@ public class WeatherDetailFragment extends Fragment {
         private List<Weather.ExtendedForecast.HourlyData> hourlyData;
 
         public WeatherDetailAdapter(Weather weather) {
+            Log.i(TAG, "WeatherAdapter: " + weather.getName());
             hourlyData = mWeatherStation.getHourlyData(weather);
         }
 

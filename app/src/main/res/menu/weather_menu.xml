@@ -11,6 +11,10 @@
         android:id="@+id/update_weather"
         android:title="Update"
         android:icon="@drawable/refresh"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/temperature_setting"
+        android:title="Unit (°F)"
+        app:showAsAction="never"/>
 
 </menu>

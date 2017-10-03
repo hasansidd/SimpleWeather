@@ -57,6 +57,14 @@ public class WeatherFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.weather_menu, menu);
+
+        MenuItem tempSetting = menu.findItem(R.id.temperature_setting);
+        if (MainActivity.TEMPERATURE_SETTING == "F") {
+            tempSetting.setTitle("°C");
+        } else {
+            tempSetting.setTitle("°F");
+        }
+        updateUI();
     }
 
     @Override
@@ -72,20 +80,27 @@ public class WeatherFragment extends Fragment {
                 builder.setTitle("Add a new city")
                         .setView(viewInflated)
                         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        addNewWeather(input.getText().toString());
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                })
-                .show();
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                addNewWeather(input.getText().toString());
+                            }
+                        })
+                        .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        })
+                        .show();
                 return true;
+            case R.id.temperature_setting:
+                if (MainActivity.TEMPERATURE_SETTING == "F") {
+                    MainActivity.TEMPERATURE_SETTING = "C";
+                } else {
+                    MainActivity.TEMPERATURE_SETTING = "F";
+                }
+                getActivity().invalidateOptionsMenu();
             default:
                 return false;
         }
@@ -129,7 +144,7 @@ public class WeatherFragment extends Fragment {
 
         try {
             List<String> cityNameSet = mWeatherStation.getSharedPreferences();
-            for (int i = 0; i<cityNameSet.size(); i++) {
+            for (int i = 0; i < cityNameSet.size(); i++) {
                 Log.i(TAG, "Adding " + cityNameSet.get(i) + " from SharedPrefs");
                 addNewWeather(cityNameSet.get(i));
             }
@@ -236,10 +251,11 @@ public class WeatherFragment extends Fragment {
 
     public class FetchCurrentWeatherTask extends AsyncTask<String, Void, Weather> {
         Weather weather = null;
+
         @Override
         protected Weather doInBackground(String... params) {
             try {
-                weather=  mWeatherStation.addCurrentWeather();
+                weather = mWeatherStation.addCurrentWeather();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -256,14 +272,14 @@ public class WeatherFragment extends Fragment {
     }
 
     public class UpdateWeathersTask extends AsyncTask<String, Void, Weather> {
-        Weather weather = null;
 
         @Override
         protected Weather doInBackground(String... zipCode) {
+            Weather weather = null;
             List<Weather> weathers = mWeatherStation.getWeathers();
             try {
-                for (Weather weather : weathers) {
-                    weather = mWeatherStation.updateWeather(weather);
+                for (Weather w : weathers) {
+                    mWeatherStation.updateWeather(w);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -271,14 +287,17 @@ public class WeatherFragment extends Fragment {
             return weather;
         }
 
-    @Override
-    protected void onPostExecute(Weather weather) {
-        super.onPostExecute(weather);
-        updateUI();
-        FetchExtendedWeatherTask fetchExtendedWeatherTask = new FetchExtendedWeatherTask();
-        fetchExtendedWeatherTask.execute(weather);
+        @Override
+        protected void onPostExecute(Weather weather) {
+            super.onPostExecute(weather);
+            updateUI();
+            List<Weather> weathers = mWeatherStation.getWeathers();
+            for (Weather w : weathers) {
+                FetchExtendedWeatherTask fetchExtendedWeatherTask = new FetchExtendedWeatherTask();
+                fetchExtendedWeatherTask.execute(w);
+            }
+        }
     }
-}
 
     public class FetchNewWeatherTask extends AsyncTask<String, Void, Weather> {
 
@@ -287,7 +306,7 @@ public class WeatherFragment extends Fragment {
             Weather weather = null;
             try {
                 Log.i(TAG, "Attempting to get weather for: " + source[0]);
-                weather =  mWeatherStation.addWeather(source[0]);
+                weather = mWeatherStation.addWeather(source[0]);
             } catch (Exception e) {
                 e.printStackTrace();
             }

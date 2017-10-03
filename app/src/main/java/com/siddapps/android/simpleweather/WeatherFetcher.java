@@ -86,6 +86,7 @@ public class WeatherFetcher {
 
     public Weather fetchExtendedForecast(Weather weather) throws Exception {
         ExtendedForecast extendedForecast = weather.getExtendedForecast();
+        Log.i(TAG, "Name given: " + weather.getName());
         String json = fetchJson(weather.getName(), METHOD_EXTENDED);
 
         JSONObject jsonObject = new JSONObject(json);
@@ -108,16 +109,9 @@ public class WeatherFetcher {
             hourlyData.setMainDescription(weatherInfoObject.getString("main"));
             hourlyData.setDetailedDescription(weatherInfoObject.getString("description"));
 
-/*            String fullInfo = String.format("Main: %s\nDescription: %s\nTemperature: %s\nHumidity: %s\nMin Temp: %s\nMax Temp: %s\nTime: %s\n"
-                    , hourlyData.getMainDescription()
-                    , hourlyData.getDetailedDescription()
-                    , hourlyData.getTemp()
-                    , hourlyData.getHumidity()
-                    , hourlyData.getTemp_min()
-                    , hourlyData.getTemp_max()
-                    , hourlyData.getTime());
-
-            Log.i(TAG, fullInfo);*/
+            if (i<2) {
+                printExtendedForecastWeather(hourlyData);
+            }
             extendedForecast.addHourlyData(hourlyData);
         }
 
@@ -140,6 +134,19 @@ public class WeatherFetcher {
                 , mWeather.getHumidity()
                 , mWeather.getTemp_min()
                 , mWeather.getTemp_max());
+
+        Log.i(TAG, fullInfo);
+    }
+
+    public void printExtendedForecastWeather(HourlyData hourlyData) {
+        String fullInfo = String.format("Main: %s\nDescription: %s\nTemperature: %s\nHumidity: %s\nMin Temp: %s\nMax Temp: %s\nTime: %s\n"
+                , hourlyData.getMainDescription()
+                , hourlyData.getDetailedDescription()
+                , hourlyData.getTemp()
+                , hourlyData.getHumidity()
+                , hourlyData.getTemp_min()
+                , hourlyData.getTemp_max()
+                , hourlyData.getTime());
 
         Log.i(TAG, fullInfo);
     }

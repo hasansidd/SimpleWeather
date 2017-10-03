@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
     static public WeatherFetcher mWeatherFetcher;
+    static String TEMPERATURE_SETTING = "F";
     private static final String TAG = "MainActivity";
 
     @Override

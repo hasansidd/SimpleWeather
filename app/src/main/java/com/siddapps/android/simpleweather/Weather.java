@@ -9,8 +9,6 @@ import java.util.List;
 
 public class Weather {
     private static final String TAG = "Weather";
-    private String lon;
-    private String lat;
     private String mainDescription;
     private String detailedDescription;
     private String humidity;
@@ -39,8 +37,24 @@ public class Weather {
         return sdf.format(date);
     }
 
+    public static String formatTemp(String temp) {
+        Double tempDouble = Double.parseDouble(temp);
+
+        switch (MainActivity.TEMPERATURE_SETTING) {
+            case "C":
+                tempDouble = tempDouble - 273.15; //Celsius
+                return String.format("%.0f°C", tempDouble);
+            case "F":
+            default:
+                tempDouble = tempDouble * (9 / 5d) - 459.67; //Fahrenheit
+                return String.format("%.0f°F", tempDouble);
+        }
+    }
+
     public ExtendedForecast getExtendedForecast() {
+        Log.i(TAG, "checking for extendedForecast in " + name);
         if (mExtendedForecast == null) {
+            Log.i(TAG, "creating new Extended weather");
             mExtendedForecast = new ExtendedForecast();
         }
         return mExtendedForecast;
@@ -68,7 +82,8 @@ public class Weather {
     }
 
     public String getSunset() {
-        return formatTime(sunset);    }
+        return formatTime(sunset);
+    }
 
     public void setSunset(long sunset) {
         this.sunset = sunset;
@@ -110,25 +125,6 @@ public class Weather {
         }
     }
 
-    public void setIcon(int icon) {
-        this.icon = icon;
-    }
-
-    public String getLon() {
-        return lon;
-    }
-
-    public void setLon(String lon) {
-        this.lon = lon;
-    }
-
-    public String getLat() {
-        return lat;
-    }
-
-    public void setLat(String lat) {
-        this.lat = lat;
-    }
 
     public String getMainDescription() {
         return mainDescription;
@@ -155,33 +151,27 @@ public class Weather {
     }
 
     public String getTemp() {
-        return temp;
+        return formatTemp(temp);
     }
 
     public void setTemp(String temp) {
-        Double tempDouble = Double.parseDouble(temp);
-        tempDouble = tempDouble * (9 / 5d) - 459.67; //Fahrenheit
-        this.temp = String.format("%.0f°F", tempDouble);
+        this.temp = temp;
     }
 
     public String getTemp_min() {
-        return temp_min;
+        return formatTemp(temp_min);
     }
 
     public void setTemp_min(String temp_min) {
-        Double temp_minDouble = Double.parseDouble(temp_min);
-        temp_minDouble = temp_minDouble * (9 / 5d) - 459.67; //Fahrenheit
-        this.temp_min = String.format("%.0f°F", temp_minDouble);
+        this.temp_min = temp_min;
     }
 
     public String getTemp_max() {
-        return temp_max;
+        return formatTemp(temp_max);
     }
 
     public void setTemp_max(String temp_max) {
-        Double temp_maxDouble = Double.parseDouble(temp_max);
-        temp_maxDouble = temp_maxDouble * (9 / 5d) - 459.67; //Fahrenheit
-        this.temp_max = String.format("%.0f°F", temp_maxDouble);
+        this.temp_max = temp_max;
     }
 
     public String getName() {
@@ -193,11 +183,15 @@ public class Weather {
     }
 
     public static class ExtendedForecast {
-        static List<HourlyData> mHourlyDataList;
+        private List<HourlyData> mHourlyDataList;
 
         private ExtendedForecast() {
+            Log.i(TAG, "Checking to see if new List needed...");
             if (mHourlyDataList == null) {
+                Log.i(TAG, "List created");
                 mHourlyDataList = new ArrayList<>();
+            } else {
+                Log.i(TAG, "List not created");
             }
         }
 
@@ -272,33 +266,27 @@ public class Weather {
             }
 
             public String getTemp() {
-                return mTemp;
+                return formatTemp(mTemp);
             }
 
             public void setTemp(String temp) {
-                Double tempDouble = Double.parseDouble(temp);
-                tempDouble = tempDouble * (9 / 5d) - 459.67; //Fahrenheit
-                this.mTemp = String.format("%.0f°F", tempDouble);
+                this.mTemp = temp;
             }
 
             public String getTemp_min() {
-                return mTemp_min;
+                return formatTemp(mTemp_min);
             }
 
             public void setTemp_min(String temp_min) {
-                Double temp_minDouble = Double.parseDouble(temp_min);
-                temp_minDouble = temp_minDouble * (9 / 5d) - 459.67; //Fahrenheit
-                this.mTemp_min = String.format("%.0f°F", temp_minDouble);
+                this.mTemp_min = temp_min;
             }
 
             public String getTemp_max() {
-                return mTemp_max;
+                return formatTemp(mTemp_max);
             }
 
             public void setTemp_max(String temp_max) {
-                Double temp_maxDouble = Double.parseDouble(temp_max);
-                temp_maxDouble = temp_maxDouble * (9 / 5d) - 459.67; //Fahrenheit
-                this.mTemp_max = String.format("%.0f°F", temp_maxDouble);
+                this.mTemp_max = temp_max;
             }
         }
     }
