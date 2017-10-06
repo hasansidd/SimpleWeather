@@ -1,4 +1,4 @@
-# SimpeWeather
+# SimpleWeather
 
 A weather app for android.
 
