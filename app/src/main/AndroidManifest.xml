@@ -23,8 +23,11 @@
         </activity>
         <activity android:name="com.siddapps.android.simpleweather.WeatherActivity"/>
         <activity android:name="com.siddapps.android.simpleweather.WeatherDetailActivity"
-            android:parentActivityName="com.siddapps.android.simpleweather.WeatherActivity">
+                  android:parentActivityName="com.siddapps.android.simpleweather.WeatherActivity">
         </activity>
+        <meta-data
+            android:name="com.crashlytics.ApiKey"
+            android:value="820b5b87c89b1fe67af298c0a8ed019274bd3565" />
     </application>
 
 </manifest>

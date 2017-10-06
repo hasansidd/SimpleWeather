@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -21,7 +22,18 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.ContentViewEvent;
+
 import java.util.List;
+import java.util.concurrent.Callable;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 
 public class WeatherFragment extends Fragment {
@@ -30,6 +42,8 @@ public class WeatherFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private WeatherAdapter mAdapter;
     private Callbacks mCallbacks;
+    private FloatingActionButton mAddCityFAB;
+    private Observer<Weather> updateUIObserver;
 
     public interface Callbacks {
         void OnWeatherSelected(Weather weather);
@@ -60,9 +74,9 @@ public class WeatherFragment extends Fragment {
 
         MenuItem tempSetting = menu.findItem(R.id.temperature_setting);
         if (MainActivity.TEMPERATURE_SETTING == "F") {
-            tempSetting.setTitle("°C");
+            tempSetting.setTitle("Units (°C)");
         } else {
-            tempSetting.setTitle("°F");
+            tempSetting.setTitle("Units (°F)");
         }
         updateUI();
     }
@@ -70,30 +84,6 @@ public class WeatherFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.update_weather:
-                updateWeathers();
-                return true;
-            case R.id.add_weather:
-                View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.dialog_add_weather, (ViewGroup) getView(), false);
-                final EditText input = (EditText) viewInflated.findViewById(R.id.dialog_add_weather);
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setTitle("Add a new city")
-                        .setView(viewInflated)
-                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                                addNewWeather(input.getText().toString());
-                            }
-                        })
-                        .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                            }
-                        })
-                        .show();
-                return true;
             case R.id.temperature_setting:
                 if (MainActivity.TEMPERATURE_SETTING == "F") {
                     MainActivity.TEMPERATURE_SETTING = "C";
@@ -123,24 +113,63 @@ public class WeatherFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        updateUI();
+        Log.e(TAG, "onResume");
+        updateWeathers();
+        //updateUI();
     }
 
     public void updateWeathers() {
-        UpdateWeathersTask updateWeathersTask = new UpdateWeathersTask();
-        updateWeathersTask.execute();
+       // UpdateWeathersTask updateWeathersTask = new UpdateWeathersTask();
+       // updateWeathersTask.execute();
+        Observable<Weather> updateWeathers = mWeatherStation.updateWeathersObservable();
+        if (updateWeathers != null) {
+            updateWeathers.subscribe(updateUIObserver);
+        }
     }
 
-    private void addNewWeather(String source) {
-        FetchNewWeatherTask fetchNewWeatherTask = new FetchNewWeatherTask();
-        fetchNewWeatherTask.execute(source);
+    private void addNewWeather(final String source) {
+        //FetchNewWeatherTask fetchNewWeatherTask = new FetchNewWeatherTask();
+        //fetchNewWeatherTask.execute(source);
+
+        Observable<Weather> addNewWeather = mWeatherStation.addWeatherObservable(source);
+        addNewWeather.subscribe(updateUIObserver);
+    }
+
+    private void addCurrentWeather() {
+        Observable<Weather> addCurrentWeather = mWeatherStation.addCurrentWeatherObservable();
+        if (addCurrentWeather != null) {
+            addCurrentWeather.subscribe(updateUIObserver);
+        }
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
+        Log.e(TAG, "onCreateView");
         mWeatherStation = WeatherStation.get(getActivity());
+
+        updateUIObserver = new Observer<Weather>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+            }
+
+            @Override
+            public void onNext(Weather weather) {
+                mWeatherStation.setWeather(weather);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.e(TAG, "onError: ", e);
+            }
+
+            @Override
+            public void onComplete() {
+                Log.e(TAG, "completed");
+                updateUI();
+            }
+        };
 
         try {
             List<String> cityNameSet = mWeatherStation.getSharedPreferences();
@@ -152,13 +181,38 @@ public class WeatherFragment extends Fragment {
             e.printStackTrace();
         }
 
-        FetchCurrentWeatherTask fetchCurrentWeatherTask = new FetchCurrentWeatherTask();
-        fetchCurrentWeatherTask.execute();
+        addCurrentWeather();
 
         mRecyclerView = (RecyclerView) v.findViewById(R.id.weather_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         setupItemTouchHelper();
+
+        mAddCityFAB = (FloatingActionButton) v.findViewById(R.id.add_weather);
+        mAddCityFAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.dialog_add_weather, (ViewGroup) getView(), false);
+                final EditText input = (EditText) viewInflated.findViewById(R.id.dialog_add_weather);
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setTitle("Add a new city")
+                        .setView(viewInflated)
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                addNewWeather(input.getText().toString());
+                            }
+                        })
+                        .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        })
+                        .show();
+            }
+        });
 
         return v;
     }
@@ -194,9 +248,6 @@ public class WeatherFragment extends Fragment {
         @Override
         public void onClick(View v) {
             mCallbacks.OnWeatherSelected(mWeather);
-            if (!mWeather.isExtendedForecastReady()) {
-
-            }
         }
     }
 
@@ -247,79 +298,6 @@ public class WeatherFragment extends Fragment {
         };
         ItemTouchHelper iTH = new ItemTouchHelper(sITC);
         iTH.attachToRecyclerView(mRecyclerView);
-    }
-
-    public class FetchCurrentWeatherTask extends AsyncTask<String, Void, Weather> {
-        Weather weather = null;
-
-        @Override
-        protected Weather doInBackground(String... params) {
-            try {
-                weather = mWeatherStation.addCurrentWeather();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return weather;
-        }
-
-        @Override
-        protected void onPostExecute(Weather weather) {
-            super.onPostExecute(weather);
-            updateUI();
-            FetchExtendedWeatherTask fetchExtendedWeatherTask = new FetchExtendedWeatherTask();
-            fetchExtendedWeatherTask.execute(weather);
-        }
-    }
-
-    public class UpdateWeathersTask extends AsyncTask<String, Void, Weather> {
-
-        @Override
-        protected Weather doInBackground(String... zipCode) {
-            Weather weather = null;
-            List<Weather> weathers = mWeatherStation.getWeathers();
-            try {
-                for (Weather w : weathers) {
-                    mWeatherStation.updateWeather(w);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return weather;
-        }
-
-        @Override
-        protected void onPostExecute(Weather weather) {
-            super.onPostExecute(weather);
-            updateUI();
-            List<Weather> weathers = mWeatherStation.getWeathers();
-            for (Weather w : weathers) {
-                FetchExtendedWeatherTask fetchExtendedWeatherTask = new FetchExtendedWeatherTask();
-                fetchExtendedWeatherTask.execute(w);
-            }
-        }
-    }
-
-    public class FetchNewWeatherTask extends AsyncTask<String, Void, Weather> {
-
-        @Override
-        protected Weather doInBackground(String... source) {
-            Weather weather = null;
-            try {
-                Log.i(TAG, "Attempting to get weather for: " + source[0]);
-                weather = mWeatherStation.addWeather(source[0]);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return weather;
-        }
-
-        @Override
-        protected void onPostExecute(Weather weather) {
-            super.onPostExecute(weather);
-            updateUI();
-            FetchExtendedWeatherTask fetchExtendedWeatherTask = new FetchExtendedWeatherTask();
-            fetchExtendedWeatherTask.execute(weather);
-        }
     }
 
     public class FetchExtendedWeatherTask extends AsyncTask<Weather, Void, Weather> {

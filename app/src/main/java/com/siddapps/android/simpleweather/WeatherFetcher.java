@@ -86,12 +86,10 @@ public class WeatherFetcher {
 
     public Weather fetchExtendedForecast(Weather weather) throws Exception {
         ExtendedForecast extendedForecast = weather.getExtendedForecast();
-        Log.i(TAG, "Name given: " + weather.getName());
         String json = fetchJson(weather.getName(), METHOD_EXTENDED);
 
         JSONObject jsonObject = new JSONObject(json);
         JSONArray fullInfoArray = new JSONArray(jsonObject.getString("list"));
-        Log.i(TAG, String.valueOf(fullInfoArray.length()));
 
         for (int i = 0; i < fullInfoArray.length(); i++) {
             HourlyData hourlyData = new HourlyData();
@@ -109,9 +107,7 @@ public class WeatherFetcher {
             hourlyData.setMainDescription(weatherInfoObject.getString("main"));
             hourlyData.setDetailedDescription(weatherInfoObject.getString("description"));
 
-            if (i<2) {
-                printExtendedForecastWeather(hourlyData);
-            }
+            //printExtendedForecastWeather(hourlyData);
             extendedForecast.addHourlyData(hourlyData);
         }
 

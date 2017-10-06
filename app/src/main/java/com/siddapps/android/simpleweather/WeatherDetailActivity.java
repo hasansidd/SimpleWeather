@@ -24,9 +24,7 @@ public class WeatherDetailActivity extends SingleFragmentActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         Intent intent = getIntent();
-        String cityName = intent.getStringExtra(EXTRA_CITY_NAME);
-        WeatherStation weatherStation = WeatherStation.get(this);
-        WeatherDetailFragment.mWeather = weatherStation.getWeather(cityName);
+        WeatherDetailFragment.sCityName = intent.getStringExtra(EXTRA_CITY_NAME);
         super.onCreate(savedInstanceState);
     }
 }

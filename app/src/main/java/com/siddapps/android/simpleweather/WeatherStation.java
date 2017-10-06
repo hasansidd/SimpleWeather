@@ -8,6 +8,16 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.ObservableSource;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class WeatherStation {
     private static final String TAG = "WeatherStation";
@@ -43,12 +53,20 @@ public class WeatherStation {
     public Weather getWeather(String cityName) {
         for (int i = 0; i < mWeathers.size(); i++) {
             if (mWeathers.get(i).getName().contains(cityName)) {
-               // Log.i(TAG, "Found weather for " + mWeathers.get(i).getName());
+                // Log.i(TAG, "Found weather for " + mWeathers.get(i).getName());
                 return mWeathers.get(i);
             }
         }
         Log.i(TAG, "Could not find weather");
         return null;
+    }
+
+    public void setWeather(Weather weather) {
+        for (int i = 0; i < mWeathers.size(); i++) {
+            if (mWeathers.get(i).getName().contains(weather.getName())) {
+                mWeathers.set(i, weather);
+            }
+        }
     }
 
     public Weather addWeather(String source) throws Exception {
@@ -64,9 +82,20 @@ public class WeatherStation {
                 }
             }
         }
-        Log.i(TAG, "City: " + weather.getName() + " added to end of list");
         mWeathers.add(weather);
+        Log.i(TAG, "City: " + weather.getName() + " added to end of list");
         return weather;
+    }
+
+    public Observable addWeatherObservable(final String source) {
+        return Observable.defer(new Callable<ObservableSource<Weather>>() {
+            @Override
+            public ObservableSource<Weather> call() throws Exception {
+                return Observable.just(addWeather(source));
+            }
+        })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public Weather getExtendedWeather(Weather weather) throws Exception {
@@ -112,15 +141,50 @@ public class WeatherStation {
         return weather;
     }
 
-    public Weather updateWeather(Weather weather) throws Exception {
-
-        for (int i = 0; i < mWeathers.size(); i++) {
-            if (mWeathers.get(i).getName().contains(weather.getName())) {
-                Log.i(TAG, "City: " + weather.getName() + " being updated");
-                Weather weather1 = mWeatherFetcher.fetchWeather(weather.getName());
-                mWeathers.set(i, weather1);
-                return weather1;
+    public Observable addCurrentWeatherObservable() {
+        return Observable.defer(new Callable<ObservableSource<Weather>>() {
+            @Override
+            public ObservableSource<Weather> call() throws Exception {
+                return Observable.just(addCurrentWeather());
             }
+        })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+
+    //This method needs to be reworked. When going back from detailed view is, this method is run.
+    //When it is ran, the weather object containing the ExtendedForecast is overwritten
+    //with the new weather object. This erases the Extended Forecast. Currently the work around is to
+    //extract the Extended forecast before overwriting the weather object and then re-adding it, only
+    //if it contained data before. Yeah I know great programming.
+    // TODO: Rework to use setters to update weather instead of replacing object.
+    public Weather updateWeathers() throws Exception {
+        if (!mWeathers.isEmpty()) {
+            for (int i = 0; i < mWeathers.size(); i++) {
+                Weather.ExtendedForecast extendedForecast = mWeathers.get(i).getExtendedForecast();
+                Weather weather = mWeatherFetcher.fetchWeather(mWeathers.get(i).getName());
+                if (!extendedForecast.getHourlyDataList().isEmpty()) {
+                    weather.setExtendedForecast(extendedForecast);
+                }
+                mWeathers.set(i, weather);
+            }
+            return mWeathers.get(0);
+        }
+        return null;
+    }
+
+    public Observable updateWeathersObservable() {
+        if (!mWeathers.isEmpty() && mWeathers != null) {
+            Log.i(TAG, String.valueOf(mWeathers));
+            return Observable.defer(new Callable<ObservableSource<Weather>>() {
+                @Override
+                public ObservableSource<Weather> call() throws Exception {
+                    return Observable.just(updateWeathers());
+                }
+            })
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread());
         }
         return null;
     }
@@ -158,4 +222,6 @@ public class WeatherStation {
     public void deleteWeather(Weather weather) {
         mWeathers.remove(weather);
     }
+
+
 }

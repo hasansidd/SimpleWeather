@@ -13,10 +13,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
+import java.util.concurrent.Callable;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class WeatherDetailFragment extends Fragment {
     private static final String TAG = "WeatherDetailFragment";
-    static Weather mWeather;
+    static String sCityName;
+    private Weather mWeather;
     private TextView mCityNameText;
     private TextView mCurrentTempText;
     private TextView mHighTemp;
@@ -29,7 +38,6 @@ public class WeatherDetailFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private WeatherDetailAdapter mAdapter;
     private WeatherStation mWeatherStation;
-    WeatherFetcher weatherFetcher;
 
     public static WeatherDetailFragment newInstance() {
         return new WeatherDetailFragment();
@@ -39,7 +47,8 @@ public class WeatherDetailFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mWeatherStation = WeatherStation.get(getActivity());
-        weatherFetcher =  new WeatherFetcher(getActivity());
+        mWeather = mWeatherStation.getWeather(sCityName);
+        Log.e(TAG, mWeather.getName());
     }
 
     @Nullable
@@ -55,20 +64,10 @@ public class WeatherDetailFragment extends Fragment {
         mWeatherImage = (ImageView) v.findViewById(R.id.master_background_image);
         mRecyclerView = (RecyclerView) v.findViewById(R.id.weather_detail_recyclerview);
 
-        updateUI();
+
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
-
-        while (!mWeather.isExtendedForecastReady()) {
-            mWeather = mWeatherStation.getWeather(mWeather.getName());
-
-            if (mWeather.isExtendedForecastReady()) {
-                mAdapter = new WeatherDetailAdapter(mWeather);
-                mRecyclerView.setAdapter(mAdapter);
-                return v;
-            }
-        }
-        mAdapter = new WeatherDetailAdapter(mWeather);
-        mRecyclerView.setAdapter(mAdapter);
+        getExtendedForecast();
+        updateUI();
         return v;
     }
 
@@ -89,8 +88,6 @@ public class WeatherDetailFragment extends Fragment {
             mWeatherImage.setImageResource(hourlyData.getIcon());
             mTempText.setText(hourlyData.getTemp());
             mTimeText.setText(hourlyData.getTime());
-            weatherFetcher.printExtendedForecastWeather(hourlyData);
-            Log.i(TAG, "this fucking city: " + mWeather.getName());
         }
     }
 
@@ -98,7 +95,6 @@ public class WeatherDetailFragment extends Fragment {
         private List<Weather.ExtendedForecast.HourlyData> hourlyData;
 
         public WeatherDetailAdapter(Weather weather) {
-            Log.i(TAG, "WeatherAdapter: " + weather.getName());
             hourlyData = mWeatherStation.getHourlyData(weather);
         }
 
@@ -117,10 +113,57 @@ public class WeatherDetailFragment extends Fragment {
         public int getItemCount() {
             return hourlyData.size();
         }
+
+        public void setHourlyData(Weather weather) {
+            hourlyData = mWeatherStation.getHourlyData(weather);
+        }
     }
 
+    private void getExtendedForecast() {
+        Observer<Weather> mObserver = new Observer<Weather>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+            }
+
+            @Override
+            public void onNext(Weather weather) {
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.e(TAG, "onError: ");
+            }
+
+            @Override
+            public void onComplete() {
+                Log.i(TAG, "Extended forecast for " + mWeather.getName() + " completed");
+                updateUI();
+            }
+        };
+
+        Observable.defer(new Callable<ObservableSource<Weather>>() {
+            @Override
+            public ObservableSource<Weather> call() throws Exception {
+                return Observable.just(mWeatherStation.getExtendedWeather(mWeather));
+            }
+        })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .share()
+                .subscribe(mObserver);
+    }
 
     private void updateUI() {
+        if (mWeather.isExtendedForecastReady()) {
+            if (mAdapter == null) {
+                mAdapter = new WeatherDetailAdapter(mWeather);
+                mRecyclerView.setAdapter(mAdapter);
+            } else {
+                mAdapter.setHourlyData(mWeather);
+                mAdapter.notifyDataSetChanged();
+            }
+        }
+
         mCityNameText.setText(mWeather.getName());
         mCurrentTempText.setText(mWeather.getTemp());
         mHighTemp.setText(mWeather.getTemp_max());

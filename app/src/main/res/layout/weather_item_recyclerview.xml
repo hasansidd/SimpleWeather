@@ -9,6 +9,7 @@
     android:layout_margin="15dp"
     android:orientation="horizontal"
     app:cardElevation="2dp"
+    android:stateListAnimator="@animator/card_press"
     >
 
     <LinearLayout

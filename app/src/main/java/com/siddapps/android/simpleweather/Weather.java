@@ -52,9 +52,7 @@ public class Weather {
     }
 
     public ExtendedForecast getExtendedForecast() {
-        Log.i(TAG, "checking for extendedForecast in " + name);
         if (mExtendedForecast == null) {
-            Log.i(TAG, "creating new Extended weather");
             mExtendedForecast = new ExtendedForecast();
         }
         return mExtendedForecast;
@@ -186,12 +184,8 @@ public class Weather {
         private List<HourlyData> mHourlyDataList;
 
         private ExtendedForecast() {
-            Log.i(TAG, "Checking to see if new List needed...");
             if (mHourlyDataList == null) {
-                Log.i(TAG, "List created");
                 mHourlyDataList = new ArrayList<>();
-            } else {
-                Log.i(TAG, "List not created");
             }
         }
 
