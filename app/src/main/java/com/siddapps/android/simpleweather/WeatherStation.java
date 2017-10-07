@@ -153,7 +153,7 @@ public class WeatherStation {
     }
 
 
-    //This method needs to be reworked. When going back from detailed view is, this method is run.
+    //This method needs to be reworked. When going back from detailed view, this method is run.
     //When it is ran, the weather object containing the ExtendedForecast is overwritten
     //with the new weather object. This erases the Extended Forecast. Currently the work around is to
     //extract the Extended forecast before overwriting the weather object and then re-adding it, only
