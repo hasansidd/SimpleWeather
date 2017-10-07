@@ -100,7 +100,7 @@ public class WeatherStation {
 
     public Weather getExtendedWeather(Weather weather) throws Exception {
         for (int i = 0; i < mWeathers.size(); i++) {
-            if (mWeathers.get(i).getName().contains(weather.getName())) {
+            if (mWeathers.get(i).getName().equals(weather.getName())) {
                 Log.i(TAG, "Getting extended forecast for: " + weather.getName());
                 mWeathers.set(i, mWeatherFetcher.fetchExtendedForecast(weather));
                 return weather;
