@@ -106,6 +106,7 @@ public class WeatherFetcher {
             JSONObject weatherInfoObject = weatherInfoArray.getJSONObject(0);
             hourlyData.setMainDescription(weatherInfoObject.getString("main"));
             hourlyData.setDetailedDescription(weatherInfoObject.getString("description"));
+            hourlyData.setNight(weatherInfoObject.getString("icon"));
 
             //printExtendedForecastWeather(hourlyData);
             extendedForecast.addHourlyData(hourlyData);

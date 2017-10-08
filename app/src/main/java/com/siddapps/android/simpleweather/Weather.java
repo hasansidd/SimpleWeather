@@ -183,6 +183,16 @@ public class Weather {
     public static class ExtendedForecast {
         private List<HourlyData> mHourlyDataList;
 
+        public boolean isNotifyReady() {
+            return isNotifyReady;
+        }
+
+        public void setNotifyReady(boolean notifyReady) {
+            isNotifyReady = notifyReady;
+        }
+
+        private boolean isNotifyReady;
+
         private ExtendedForecast() {
             if (mHourlyDataList == null) {
                 mHourlyDataList = new ArrayList<>();
@@ -206,8 +216,32 @@ public class Weather {
             private String mainDescription;
             private String detailedDescription;
             private int icon;
+            private String night;
+
+            public void setNight(String night) {
+                this.night = night;
+            }
 
             public int getIcon() {
+                if (night.contains("n")) {//night
+                    switch (getMainDescription()) {
+                        case "Clouds":
+                            return R.drawable.cloudyn;
+                        case "Clear":
+                            return R.drawable.clearn;
+                        case "Snow":
+                            return R.drawable.snowyn;
+                        case "Rain":
+                        case "Drizzle":
+                        case "Mist":
+                            return R.drawable.rainyn;
+                        case "Thunderstorm":
+                            return R.drawable.stormyn;
+                        default:
+                            Log.i(TAG, "Description: " + mainDescription + " not found");
+                            return R.drawable.clearn;
+                    }
+                }
                 switch (mainDescription) {
                     case "Clouds":
                         return R.drawable.cloudy;

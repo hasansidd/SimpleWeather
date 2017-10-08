@@ -7,10 +7,15 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.siddapps.android.simpleweather.WeatherJobs.WeatherFetchJob;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -44,11 +49,44 @@ public class WeatherDetailFragment extends Fragment {
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.weather_detail_menu, menu);
+
+        MenuItem rainNotification = menu.findItem(R.id.rain_notification);
+        Weather.ExtendedForecast extendedForecast = mWeather.getExtendedForecast();
+        if (extendedForecast.isNotifyReady()) {
+            rainNotification.setTitle("Disable rain notification");
+        } else {
+            rainNotification.setTitle("Enable rain notification");
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.rain_notification:
+                Weather.ExtendedForecast extendedForecast = mWeather.getExtendedForecast();
+                if (extendedForecast.isNotifyReady()) {
+                    extendedForecast.setNotifyReady(false);
+                } else {
+                    extendedForecast.setNotifyReady(true);
+                }
+                mWeather.setExtendedForecast(extendedForecast);
+                getActivity().invalidateOptionsMenu();
+                updateUI();
+                return true;
+            default:
+                return true;
+        }
+    }
+
+    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         mWeatherStation = WeatherStation.get(getActivity());
         mWeather = mWeatherStation.getWeather(sCityName);
-        Log.e(TAG, mWeather.getName());
     }
 
     @Nullable
@@ -136,7 +174,6 @@ public class WeatherDetailFragment extends Fragment {
 
             @Override
             public void onComplete() {
-                Log.i(TAG, "Extended forecast for " + mWeather.getName() + " completed");
                 updateUI();
             }
         };
@@ -154,6 +191,7 @@ public class WeatherDetailFragment extends Fragment {
     }
 
     private void updateUI() {
+        mWeatherStation.setSharedPreferences();
         if (mWeather.isExtendedForecastReady()) {
             if (mAdapter == null) {
                 mAdapter = new WeatherDetailAdapter(mWeather);

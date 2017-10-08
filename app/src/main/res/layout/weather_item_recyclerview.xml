@@ -18,19 +18,78 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <TextView
+        <android.support.v7.widget.AppCompatTextView
             android:id="@+id/city_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="34dp"
-            tools:text="Austin"/>
+            android:layout_width="210dp"
+            android:layout_height="60dp"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMaxTextSize="56dp"
+            app:autoSizeMinTextSize="30dp"
+            tools:text="Bossier yyyy"/>
 
-        <TextView
-            android:id="@+id/weather_temp_text"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="45dp"
-            tools:text="90°F"/>
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/current_temp_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="8dp"
+                android:textSize="56dp"
+                tools:text="90°F"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/high_temps"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/master_temp_text">
+
+                    <ImageView
+                        android:id="@+id/high"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:layout_toRightOf="@id/master_temp_text"
+                        app:srcCompat="@drawable/up"/>
+
+                    <TextView
+                        android:id="@+id/temp_high_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@id/high"
+                        android:textSize="24dp"
+                        tools:text="100°F"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/high_temps"
+                    android:layout_toRightOf="@id/master_temp_text">
+
+                    <ImageView
+                        android:id="@+id/low"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        app:srcCompat="@drawable/down"/>
+
+                    <TextView
+                        android:id="@+id/temp_low_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="24dp"
+                        tools:text="50°F"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
 
         <TextView
             android:id="@+id/weather_description_text"
@@ -55,6 +114,7 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:scaleType="centerCrop"
+        app:srcCompat="@drawable/clearn"
         android:padding="8dp"
         />
 

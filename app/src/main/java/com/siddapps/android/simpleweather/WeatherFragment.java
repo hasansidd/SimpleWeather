@@ -22,19 +22,13 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.crashlytics.android.answers.Answers;
-import com.crashlytics.android.answers.ContentViewEvent;
+import com.siddapps.android.simpleweather.WeatherJobs.WeatherFetchJob;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-
 
 public class WeatherFragment extends Fragment {
     private static final String TAG = "WeatherFragment";
@@ -85,12 +79,14 @@ public class WeatherFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.temperature_setting:
+                WeatherFetchJob.scheduleJob();
                 if (MainActivity.TEMPERATURE_SETTING == "F") {
                     MainActivity.TEMPERATURE_SETTING = "C";
                 } else {
                     MainActivity.TEMPERATURE_SETTING = "F";
                 }
                 getActivity().invalidateOptionsMenu();
+                return true;
             default:
                 return false;
         }
@@ -113,14 +109,10 @@ public class WeatherFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        Log.e(TAG, "onResume");
         updateWeathers();
-        //updateUI();
     }
 
     public void updateWeathers() {
-       // UpdateWeathersTask updateWeathersTask = new UpdateWeathersTask();
-       // updateWeathersTask.execute();
         Observable<Weather> updateWeathers = mWeatherStation.updateWeathersObservable();
         if (updateWeathers != null) {
             updateWeathers.subscribe(updateUIObserver);
@@ -128,9 +120,6 @@ public class WeatherFragment extends Fragment {
     }
 
     private void addNewWeather(final String source) {
-        //FetchNewWeatherTask fetchNewWeatherTask = new FetchNewWeatherTask();
-        //fetchNewWeatherTask.execute(source);
-
         Observable<Weather> addNewWeather = mWeatherStation.addWeatherObservable(source);
         addNewWeather.subscribe(updateUIObserver);
     }
@@ -146,7 +135,6 @@ public class WeatherFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
-        Log.e(TAG, "onCreateView");
         mWeatherStation = WeatherStation.get(getActivity());
 
         updateUIObserver = new Observer<Weather>() {
@@ -166,7 +154,6 @@ public class WeatherFragment extends Fragment {
 
             @Override
             public void onComplete() {
-                Log.e(TAG, "completed");
                 updateUI();
             }
         };
@@ -220,6 +207,8 @@ public class WeatherFragment extends Fragment {
     public class WeatherHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView mCityNameText;
         private TextView mCurrentTempText;
+        private TextView mHighTemp;
+        private TextView mLowTemp;
         private TextView mCurrentDescriptionText;
         private ImageView mWeatherBackgroundImage;
         private TextView mTimeText;
@@ -230,7 +219,9 @@ public class WeatherFragment extends Fragment {
             itemView.setOnClickListener(this);
 
             mCityNameText = (TextView) itemView.findViewById(R.id.city_name);
-            mCurrentTempText = (TextView) itemView.findViewById(R.id.weather_temp_text);
+            mCurrentTempText = (TextView) itemView.findViewById(R.id.current_temp_text);
+            mHighTemp = itemView.findViewById(R.id.temp_high_text);
+            mLowTemp = itemView.findViewById(R.id.temp_low_text);
             mCurrentDescriptionText = (TextView) itemView.findViewById(R.id.weather_description_text);
             mWeatherBackgroundImage = (ImageView) itemView.findViewById(R.id.weather_background_image);
             mTimeText = (TextView) itemView.findViewById(R.id.weather_time_text);
@@ -240,6 +231,8 @@ public class WeatherFragment extends Fragment {
             mWeather = weather;
             mCityNameText.setText(mWeather.getName());
             mCurrentTempText.setText(mWeather.getTemp());
+            mHighTemp.setText(mWeather.getTemp_max());
+            mLowTemp.setText(mWeather.getTemp_min());
             mCurrentDescriptionText.setText(mWeather.getDetailedDescription());
             mWeatherBackgroundImage.setImageResource(mWeather.getIcon());
             mTimeText.setText(mWeather.getTime());
@@ -284,14 +277,12 @@ public class WeatherFragment extends Fragment {
         ItemTouchHelper.SimpleCallback sITC = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.END) {
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-                Log.i(TAG, "moved");
                 return false;
             }
 
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 List<Weather> weathers = mWeatherStation.getWeathers();
-                Log.i(TAG, "moved: " + viewHolder.getAdapterPosition());
                 mWeatherStation.deleteWeather(weathers.get(viewHolder.getAdapterPosition()));
                 updateUI();
             }
@@ -307,7 +298,6 @@ public class WeatherFragment extends Fragment {
             Weather weather = null;
 
             try {
-                Log.i(TAG, "getting extended weather");
                 weather = mWeatherStation.getExtendedWeather(sourceWeather[0]);
             } catch (Exception e) {
                 e.printStackTrace();
