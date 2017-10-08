@@ -22,10 +22,12 @@ import io.reactivex.schedulers.Schedulers;
 public class WeatherStation {
     private static final String TAG = "WeatherStation";
     private static final String SHARED_PREF_LIST = "sharedPrefList";
+    private static String SHARED_TEMPERATURE_SETTING = "temperatureSetting";
     private List<Weather> mWeathers;
     private static WeatherStation sWeatherStation;
     WeatherFetcher mWeatherFetcher;
     private Context mContext;
+
 
 
     public static WeatherStation get(Context context) {
@@ -112,9 +114,7 @@ public class WeatherStation {
 
     public List<Weather.ExtendedForecast.HourlyData> getHourlyData(Weather weather) {
         Weather.ExtendedForecast extendedForecast = weather.getExtendedForecast();
-        Log.i(TAG, "GetHOURLYDATAAA : " + weather.getName());
         List<Weather.ExtendedForecast.HourlyData> hourlyData = extendedForecast.getHourlyDataList();
-        Log.i(TAG, "GetHOURLYDATAAA : " + hourlyData.get(0).getTemp());
         return hourlyData;
     }
 
@@ -189,8 +189,18 @@ public class WeatherStation {
         return null;
     }
 
+
+    //TODO: save notification settings
     public void setSharedPreferences() {
         List<Weather> weathers = getWeathers();
+        List<Boolean> notifyReady = new ArrayList<>();
+
+        for (Weather w : weathers){
+            Weather.ExtendedForecast extendedForecast =w.getExtendedForecast();
+            notifyReady.add(extendedForecast.isNotifyReady());
+        }
+
+
         Set<String> cityNameSet = new HashSet<String>();
 
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
@@ -223,5 +233,17 @@ public class WeatherStation {
         mWeathers.remove(weather);
     }
 
+    public String getTempSetting() {
+        String tempSetting="";
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
+        if (sharedPreferences.getString(SHARED_TEMPERATURE_SETTING, "F") != null) {
+            tempSetting = sharedPreferences.getString(SHARED_TEMPERATURE_SETTING, "F");
+        }
+        return tempSetting;
+    }
 
+    public void setTempSetting(String string) {
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
+        sharedPreferences.edit().putString(SHARED_TEMPERATURE_SETTING, string).apply();
+    }
 }
