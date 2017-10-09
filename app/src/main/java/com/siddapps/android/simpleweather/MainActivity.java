@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
         JobManager.create(this).addJobCreator(new WeatherJobCreator());
+        WeatherFetchJob.scheduleJob();
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             mWeatherFetcher = new WeatherFetcher(this);

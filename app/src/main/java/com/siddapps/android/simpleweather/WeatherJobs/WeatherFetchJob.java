@@ -56,7 +56,7 @@ public class WeatherFetchJob extends Job {
             if (rainMap.size() == 1) {
                 formattedTitle = ("Rain Alert in 1 city");
             } else {
-                formattedTitle =("Rain Alert in " + rainMap.size() + " cities");
+                formattedTitle = ("Rain Alert in " + rainMap.size() + " cities");
             }
 
             Notification notification = new NotificationCompat.Builder(getContext(), "main")
@@ -105,6 +105,7 @@ public class WeatherFetchJob extends Job {
     }
 
     private String findRain(Weather weather) throws Exception {
+        int numberOfDays = 2;
         List<HourlyData> hourlyDataList = null;
         String rainStartTime;
         WeatherStation mWeatherStation = WeatherStation.get(getContext());
@@ -117,7 +118,7 @@ public class WeatherFetchJob extends Job {
 
         //find rain in extended forecast
         if (hourlyDataList != null) {
-            for (int i = 0; i < hourlyDataList.size(); i++) {
+            for (int i = 0; i < (8 * numberOfDays); i++) {
                 if (hourlyDataList.get(i).getMainDescription().equals("Rain")) {
                     rainStartTime = hourlyDataList.get(i).getTime();
                     Log.e(TAG, "Rain detected at " + rainStartTime);
@@ -131,11 +132,9 @@ public class WeatherFetchJob extends Job {
 
     public static void scheduleJob() {
         int jobId = new JobRequest.Builder(WeatherFetchJob.TAG)
-                //real .setPeriodic(TimeUnit.HOURS.toMillis(6), TimeUnit.HOURS.toMillis(1))
-                //.setPeriodic(TimeUnit.MINUTES.toMillis(15), TimeUnit.MINUTES.toMillis(5)) //test
-                .startNow()
-                //.setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
-                //.setUpdateCurrent(true)
+                .setPeriodic(TimeUnit.HOURS.toMillis(12), TimeUnit.HOURS.toMillis(1))
+                .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
+                .setUpdateCurrent(true)
                 .build()
                 .schedule();
     }

@@ -120,6 +120,17 @@
             android:scaleType="centerCrop"
             app:srcCompat="@drawable/clear"
             />
+
+        <ImageView
+            android:layout_gravity="right|bottom"
+            android:id="@+id/weather_alert_detail"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:scaleType="centerCrop"
+            app:srcCompat="@drawable/alert"
+            android:padding="8dp"
+            android:layout_margin="16dp"
+            />
     </FrameLayout>
 
     <android.support.v7.widget.RecyclerView

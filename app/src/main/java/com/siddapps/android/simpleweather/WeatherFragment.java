@@ -38,6 +38,7 @@ public class WeatherFragment extends Fragment {
     private Callbacks mCallbacks;
     private FloatingActionButton mAddCityFAB;
     private Observer<Weather> updateUIObserver;
+    private Observer sharedPrefObserver;
 
     public interface Callbacks {
         void OnWeatherSelected(Weather weather);
@@ -72,14 +73,13 @@ public class WeatherFragment extends Fragment {
         } else {
             tempSetting.setTitle("Units (°F)");
         }
-        updateUI();
+        //updateUI();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.temperature_setting:
-                WeatherFetchJob.scheduleJob();
                 if (MainActivity.TEMPERATURE_SETTING == "F") {
                     MainActivity.TEMPERATURE_SETTING = "C";
                 } else {
@@ -131,6 +131,34 @@ public class WeatherFragment extends Fragment {
         }
     }
 
+    private void getSavedWeather() {
+        Observable<List<Weather>> getSharedPreferences = mWeatherStation.getSharedPreferencesObservable();
+        if (getSharedPreferences != null) {
+            getSharedPreferences.subscribe(new Observer<List<Weather>>() {
+                @Override
+                public void onSubscribe(Disposable d) {
+
+                }
+
+                @Override
+                public void onNext(List<Weather> weathers) {
+
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    Log.e(TAG, "onError: ", e);
+                }
+
+                @Override
+                public void onComplete() {
+                    updateUI();
+                    addCurrentWeather();
+                }
+            });
+        }
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -158,17 +186,7 @@ public class WeatherFragment extends Fragment {
             }
         };
 
-        try {
-            List<String> cityNameSet = mWeatherStation.getSharedPreferences();
-            for (int i = 0; i < cityNameSet.size(); i++) {
-                Log.i(TAG, "Adding " + cityNameSet.get(i) + " from SharedPrefs");
-                addNewWeather(cityNameSet.get(i));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        addCurrentWeather();
+        getSavedWeather();
 
         mRecyclerView = (RecyclerView) v.findViewById(R.id.weather_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -211,6 +229,7 @@ public class WeatherFragment extends Fragment {
         private TextView mLowTemp;
         private TextView mCurrentDescriptionText;
         private ImageView mWeatherBackgroundImage;
+        private ImageView mWeatherAlertImage;
         private TextView mTimeText;
         Weather mWeather;
 
@@ -225,6 +244,7 @@ public class WeatherFragment extends Fragment {
             mCurrentDescriptionText = (TextView) itemView.findViewById(R.id.weather_description_text);
             mWeatherBackgroundImage = (ImageView) itemView.findViewById(R.id.weather_background_image);
             mTimeText = (TextView) itemView.findViewById(R.id.weather_time_text);
+            mWeatherAlertImage = itemView.findViewById(R.id.weather_alert);
         }
 
         public void bind(Weather weather) {
@@ -236,6 +256,8 @@ public class WeatherFragment extends Fragment {
             mCurrentDescriptionText.setText(mWeather.getDetailedDescription());
             mWeatherBackgroundImage.setImageResource(mWeather.getIcon());
             mTimeText.setText(mWeather.getTime());
+            //noinspection ResourceType
+            mWeatherAlertImage.setVisibility(mWeather.getNotifyAlert());
         }
 
         @Override

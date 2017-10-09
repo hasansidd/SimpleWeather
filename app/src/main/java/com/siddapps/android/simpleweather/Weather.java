@@ -1,6 +1,7 @@
 package com.siddapps.android.simpleweather;
 
 import android.util.Log;
+import android.view.View;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,6 +23,14 @@ public class Weather {
     private long sunset;
     private ExtendedForecast mExtendedForecast;
     private boolean isExtendedForecastReady;
+
+    public int getNotifyAlert() {
+        if (mExtendedForecast.isNotifyReady()){
+            return View.VISIBLE;
+        } else {
+            return View.GONE;
+        }
+    }
 
     public boolean isExtendedForecastReady() {
         return isExtendedForecastReady;

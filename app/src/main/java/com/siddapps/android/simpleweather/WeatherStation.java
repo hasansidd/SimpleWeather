@@ -4,8 +4,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -21,13 +25,12 @@ import io.reactivex.schedulers.Schedulers;
 
 public class WeatherStation {
     private static final String TAG = "WeatherStation";
-    private static final String SHARED_PREF_LIST = "sharedPrefList";
+    private static final String SHARED_PREF_MAP = "sharedPrefList";
     private static String SHARED_TEMPERATURE_SETTING = "temperatureSetting";
     private List<Weather> mWeathers;
     private static WeatherStation sWeatherStation;
     WeatherFetcher mWeatherFetcher;
     private Context mContext;
-
 
 
     public static WeatherStation get(Context context) {
@@ -71,15 +74,17 @@ public class WeatherStation {
         }
     }
 
-    public Weather addWeather(String source) throws Exception {
+    private Weather addWeather(String source) throws Exception {
         Weather weather = mWeatherFetcher.fetchWeather(source);
 
         if (!mWeathers.isEmpty()) {
             for (int i = 0; i < mWeathers.size(); i++) {
                 if (mWeathers.get(i).getName().contains(weather.getName())) {
                     Log.i(TAG, "City: " + weather.getName() + " already exists, moving to beginning of list");
+                    Weather.ExtendedForecast extendedForecast = weather.getExtendedForecast();
                     mWeathers.remove(i);
                     mWeathers.add(0, weather);
+                    mWeathers.get(0).setExtendedForecast(extendedForecast);
                     return weather;
                 }
             }
@@ -118,7 +123,7 @@ public class WeatherStation {
         return hourlyData;
     }
 
-    public Weather addCurrentWeather() throws Exception {
+    private Weather addCurrentWeather() throws Exception {
         Weather weather = mWeatherFetcher.fetchCurrentWeather();
         if (weather == null) {
             Log.i(TAG, "addCurrentWeather weather is null");
@@ -127,10 +132,11 @@ public class WeatherStation {
 
         if (!mWeathers.isEmpty()) {
             for (int i = 0; i < mWeathers.size(); i++) {
-                if (mWeathers.get(i).getName().contains(weather.getName())) {
-                    Log.i(TAG, mWeathers.get(i).getName());
+                if (mWeathers.get(i).getName().equals(weather.getName())) {
+                    Weather.ExtendedForecast extendedForecast = mWeathers.get(i).getExtendedForecast();
                     mWeathers.remove(i);
                     mWeathers.add(0, weather);
+                    mWeathers.get(0).setExtendedForecast(extendedForecast);
                     Log.i(TAG, "City: " + weather.getName() + " already exists, moving to beginning of list");
                     return weather;
                 }
@@ -159,14 +165,15 @@ public class WeatherStation {
     //extract the Extended forecast before overwriting the weather object and then re-adding it, only
     //if it contained data before. Yeah I know great programming.
     // TODO: Rework to use setters to update weather instead of replacing object.
-    public Weather updateWeathers() throws Exception {
+    private Weather updateWeathers() throws Exception {
+
         if (!mWeathers.isEmpty()) {
             for (int i = 0; i < mWeathers.size(); i++) {
                 Weather.ExtendedForecast extendedForecast = mWeathers.get(i).getExtendedForecast();
                 Weather weather = mWeatherFetcher.fetchWeather(mWeathers.get(i).getName());
-                if (!extendedForecast.getHourlyDataList().isEmpty()) {
-                    weather.setExtendedForecast(extendedForecast);
-                }
+
+                weather.setExtendedForecast(extendedForecast);
+
                 mWeathers.set(i, weather);
             }
             return mWeathers.get(0);
@@ -176,7 +183,6 @@ public class WeatherStation {
 
     public Observable updateWeathersObservable() {
         if (!mWeathers.isEmpty() && mWeathers != null) {
-            Log.i(TAG, String.valueOf(mWeathers));
             return Observable.defer(new Callable<ObservableSource<Weather>>() {
                 @Override
                 public ObservableSource<Weather> call() throws Exception {
@@ -189,44 +195,65 @@ public class WeatherStation {
         return null;
     }
 
-
-    //TODO: save notification settings
     public void setSharedPreferences() {
-        List<Weather> weathers = getWeathers();
-        List<Boolean> notifyReady = new ArrayList<>();
-
-        for (Weather w : weathers){
-            Weather.ExtendedForecast extendedForecast =w.getExtendedForecast();
-            notifyReady.add(extendedForecast.isNotifyReady());
-        }
-
-
-        Set<String> cityNameSet = new HashSet<String>();
-
+        HashMap<String, Boolean> weathersMap = new HashMap<>();
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
-        for (Weather weather : weathers) {
-            cityNameSet.add(weather.getName());
+
+        for (Weather w : mWeathers) {
+            Weather.ExtendedForecast extendedForecast = w.getExtendedForecast();
+            weathersMap.put(w.getName(), extendedForecast.isNotifyReady());
         }
-        sharedPreferences.edit().putStringSet(SHARED_PREF_LIST, cityNameSet).apply();
+
+        JSONObject jsonObject = new JSONObject(weathersMap);
+        String jsonString = jsonObject.toString();
+
+        sharedPreferences.edit().putString(SHARED_PREF_MAP, jsonString).apply();
     }
 
-    public List<String> getSharedPreferences() throws Exception {
+    public List<Weather> getSharedPreferences() throws Exception {
+
+        HashMap<String, Boolean> weathersMap = new HashMap<>();
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
+
+        if (sharedPreferences != null) {
+            String jsonString = sharedPreferences.getString(SHARED_PREF_MAP, (new JSONObject()).toString());
+            JSONObject jsonObject = new JSONObject(jsonString);
+
+            Iterator<String> keysItr = jsonObject.keys();
+            while (keysItr.hasNext()) {
+                String key = keysItr.next();
+                Boolean value = (Boolean) jsonObject.get(key);
+                weathersMap.put(key, value);
+            }
+
+            for (String key : weathersMap.keySet()) {
+                Weather weather = addWeather(key);
+                Weather.ExtendedForecast extendedForecast = weather.getExtendedForecast();
+                extendedForecast.setNotifyReady(weathersMap.get(key));
+            }
+
+            for (Weather w : mWeathers) {
+            }
+
+            return mWeathers;
+        }
+
+        return null;
+    }
+
+    public Observable getSharedPreferencesObservable() {
         if (mWeathers.size() > 0) {
-            Log.i(TAG, "mWeathers is not empty: " + mWeathers.size());
             return null;
         }
 
-        SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
-        Set<String> cityNameSet = sharedPreferences.getStringSet(SHARED_PREF_LIST, new HashSet<String>());
-/*        List<Weather> weathers = new ArrayList<>();
-
-        for (String cityNames : cityNameSet) {
-            weathers.add(mWeatherFetcher.fetchWeather(cityNames));
-        }
-        setWeathers(weathers);*/
-
-        ArrayList<String> cityNameList = new ArrayList<>(cityNameSet);
-        return cityNameList;
+        return Observable.defer(new Callable<ObservableSource<List<Weather>>>() {
+            @Override
+            public ObservableSource<List<Weather>> call() throws Exception {
+                return Observable.just(getSharedPreferences());
+            }
+        })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public void deleteWeather(Weather weather) {
@@ -234,7 +261,7 @@ public class WeatherStation {
     }
 
     public String getTempSetting() {
-        String tempSetting="";
+        String tempSetting = "";
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
         if (sharedPreferences.getString(SHARED_TEMPERATURE_SETTING, "F") != null) {
             tempSetting = sharedPreferences.getString(SHARED_TEMPERATURE_SETTING, "F");

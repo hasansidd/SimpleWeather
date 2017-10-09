@@ -43,6 +43,7 @@ public class WeatherDetailFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private WeatherDetailAdapter mAdapter;
     private WeatherStation mWeatherStation;
+    private ImageView mWeatherAlertImage;
 
     public static WeatherDetailFragment newInstance() {
         return new WeatherDetailFragment();
@@ -71,6 +72,7 @@ public class WeatherDetailFragment extends Fragment {
                     extendedForecast.setNotifyReady(false);
                 } else {
                     extendedForecast.setNotifyReady(true);
+                    WeatherFetchJob.scheduleJob();
                 }
                 mWeather.setExtendedForecast(extendedForecast);
                 getActivity().invalidateOptionsMenu();
@@ -101,6 +103,7 @@ public class WeatherDetailFragment extends Fragment {
         mCurrentTimeText = (TextView) v.findViewById(R.id.master_time_text);
         mWeatherImage = (ImageView) v.findViewById(R.id.master_background_image);
         mRecyclerView = (RecyclerView) v.findViewById(R.id.weather_detail_recyclerview);
+        mWeatherAlertImage = v.findViewById(R.id.weather_alert_detail);
 
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
@@ -158,26 +161,6 @@ public class WeatherDetailFragment extends Fragment {
     }
 
     private void getExtendedForecast() {
-        Observer<Weather> mObserver = new Observer<Weather>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-            }
-
-            @Override
-            public void onNext(Weather weather) {
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Log.e(TAG, "onError: ");
-            }
-
-            @Override
-            public void onComplete() {
-                updateUI();
-            }
-        };
-
         Observable.defer(new Callable<ObservableSource<Weather>>() {
             @Override
             public ObservableSource<Weather> call() throws Exception {
@@ -187,7 +170,27 @@ public class WeatherDetailFragment extends Fragment {
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .share()
-                .subscribe(mObserver);
+                .subscribe(new Observer<Weather>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(Weather weather) {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(TAG, "onError: ");
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        updateUI();
+                    }
+                });
     }
 
     private void updateUI() {
@@ -209,5 +212,7 @@ public class WeatherDetailFragment extends Fragment {
         mDescriptionText.setText(mWeather.getDetailedDescription());
         mWeatherImage.setImageResource(mWeather.getIcon());
         mCurrentTimeText.setText(mWeather.getTime());
+        //noinspection ResourceType
+        mWeatherAlertImage.setVisibility(mWeather.getNotifyAlert());
     }
 }
