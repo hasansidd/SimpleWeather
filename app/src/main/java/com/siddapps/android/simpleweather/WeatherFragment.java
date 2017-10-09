@@ -22,8 +22,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.siddapps.android.simpleweather.WeatherJobs.WeatherFetchJob;
-
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -73,11 +71,11 @@ public class WeatherFragment extends Fragment {
 
         MenuItem tempSetting = menu.findItem(R.id.temperature_setting);
         if (MainActivity.TEMPERATURE_SETTING == "F") {
-            tempSetting.setTitle("Units (°C)");
+            tempSetting.setTitle(getString(R.string.units_f));
         } else {
-            tempSetting.setTitle("Units (°F)");
+            tempSetting.setTitle(R.string.units_c);
         }
-        //updateUI();
+        updateUI();
     }
 
     @Override
@@ -204,7 +202,7 @@ public class WeatherFragment extends Fragment {
                 View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.dialog_add_weather, (ViewGroup) getView(), false);
                 final EditText input = (EditText) viewInflated.findViewById(R.id.dialog_add_weather);
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setTitle("Add a new city")
+                builder.setTitle(getString(R.string.add_new_city))
                         .setView(viewInflated)
                         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                             @Override

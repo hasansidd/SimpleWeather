@@ -50,13 +50,13 @@ public class WeatherFetchJob extends Job {
             String formattedTitle;
 
             for (String key : rainMap.keySet()) {
-                formattedText += ("Rain in " + key + " on " + rainMap.get(key) + "\n");
+                formattedText += (getContext().getString(R.string.weather_alert_content, key, rainMap.get(key)));
             }
 
             if (rainMap.size() == 1) {
-                formattedTitle = ("Rain Alert in 1 city");
+                formattedTitle = getContext().getString(R.string.weather_alert_title_single);
             } else {
-                formattedTitle = ("Rain Alert in " + rainMap.size() + " cities");
+                formattedTitle = (getContext().getString(R.string.weather_alert_title,rainMap.size()));
             }
 
             Notification notification = new NotificationCompat.Builder(getContext(), "main")

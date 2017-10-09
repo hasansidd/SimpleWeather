@@ -57,9 +57,9 @@ public class WeatherDetailFragment extends Fragment {
         MenuItem rainNotification = menu.findItem(R.id.rain_notification);
         Weather.ExtendedForecast extendedForecast = mWeather.getExtendedForecast();
         if (extendedForecast.isNotifyReady()) {
-            rainNotification.setTitle("Disable rain notification");
+            rainNotification.setTitle(getString(R.string.disable_weather_notification));
         } else {
-            rainNotification.setTitle("Enable rain notification");
+            rainNotification.setTitle(getString(R.string.enable_weather_notification));
         }
     }
 

@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">SimpleWeather</string>
+    <string name="weather_alert_title_single">Weather alert in 1 city</string>
+    <string name="weather_alert_title">Weather alert in %1$d cities</string>
+    <string name="weather_alert_content">Rain in %1$s on %2$s\n</string>
+    <string name="units_c">Units (°C)</string>
+    <string name="units_f">Units (°F)</string>
+    <string name="add_new_city">Add a new city</string>
+    <string name="disable_weather_notification">Disable weather notification</string>
+    <string name="enable_weather_notification">Enable weather notification</string>
 </resources>
