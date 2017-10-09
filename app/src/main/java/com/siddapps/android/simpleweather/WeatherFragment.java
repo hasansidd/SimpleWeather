@@ -38,7 +38,10 @@ public class WeatherFragment extends Fragment {
     private Callbacks mCallbacks;
     private FloatingActionButton mAddCityFAB;
     private Observer<Weather> updateUIObserver;
-    private Observer sharedPrefObserver;
+    Observable<Weather> addCurrentWeather;
+    Observable<Weather> addNewWeather;
+    Observable<Weather> updateWeathers;
+    Observable<List<Weather>> getSharedPreferences;
 
     public interface Callbacks {
         void OnWeatherSelected(Weather weather);
@@ -54,6 +57,7 @@ public class WeatherFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mCallbacks = null;
+
     }
 
     @Override
@@ -113,26 +117,26 @@ public class WeatherFragment extends Fragment {
     }
 
     public void updateWeathers() {
-        Observable<Weather> updateWeathers = mWeatherStation.updateWeathersObservable();
+        updateWeathers = mWeatherStation.updateWeathersObservable();
         if (updateWeathers != null) {
             updateWeathers.subscribe(updateUIObserver);
         }
     }
 
     private void addNewWeather(final String source) {
-        Observable<Weather> addNewWeather = mWeatherStation.addWeatherObservable(source);
+        addNewWeather = mWeatherStation.addWeatherObservable(source);
         addNewWeather.subscribe(updateUIObserver);
     }
 
     private void addCurrentWeather() {
-        Observable<Weather> addCurrentWeather = mWeatherStation.addCurrentWeatherObservable();
+        addCurrentWeather = mWeatherStation.addCurrentWeatherObservable();
         if (addCurrentWeather != null) {
             addCurrentWeather.subscribe(updateUIObserver);
         }
     }
 
     private void getSavedWeather() {
-        Observable<List<Weather>> getSharedPreferences = mWeatherStation.getSharedPreferencesObservable();
+        getSharedPreferences = mWeatherStation.getSharedPreferencesObservable();
         if (getSharedPreferences != null) {
             getSharedPreferences.subscribe(new Observer<List<Weather>>() {
                 @Override

@@ -72,7 +72,7 @@ public class WeatherDetailFragment extends Fragment {
                     extendedForecast.setNotifyReady(false);
                 } else {
                     extendedForecast.setNotifyReady(true);
-                    WeatherFetchJob.scheduleJob();
+                    WeatherFetchJob.scheduleJobOnce();
                 }
                 mWeather.setExtendedForecast(extendedForecast);
                 getActivity().invalidateOptionsMenu();

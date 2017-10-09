@@ -134,7 +134,13 @@ public class WeatherFetchJob extends Job {
         int jobId = new JobRequest.Builder(WeatherFetchJob.TAG)
                 .setPeriodic(TimeUnit.HOURS.toMillis(12), TimeUnit.HOURS.toMillis(1))
                 .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
-                .setUpdateCurrent(true)
+                .build()
+                .schedule();
+    }
+
+    public static void scheduleJobOnce() {
+        int jobId = new JobRequest.Builder(WeatherFetchJob.TAG)
+                .startNow()
                 .build()
                 .schedule();
     }
