@@ -1,6 +1,7 @@
 package com.siddapps.android.simpleweather;
 
 import android.content.Context;
+import android.location.Location;
 import android.util.Log;
 
 import com.siddapps.android.simpleweather.Weather.ExtendedForecast;
@@ -12,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 
 import static com.siddapps.android.simpleweather.Weather.ExtendedForecast.*;
 
@@ -37,6 +39,12 @@ public class WeatherFetcher {
         if (source.matches(".*\\d+.*")) {
             url = new URL("http://api.openweathermap.org/data/2.5/" + methodType + "?zip=" + source + ",us&APPID=" + API_KEY);
         }
+
+        if (source.contains(",")) {
+            String[] location = source.split(",");
+            url = new URL("http://api.openweathermap.org/data/2.5/" + methodType + "?lat=" + location[0] + "&lon=" + location[1] + "&APPID=" + API_KEY);
+        }
+
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         InputStream in = connection.getInputStream();
@@ -117,6 +125,9 @@ public class WeatherFetcher {
     }
 
     public Weather fetchCurrentWeather() throws Exception {
+        //Location location = mLocationUtil.getCurrentLocationLatLon();
+        //String source = String.format("%f,%f", location.getLatitude(), location.getLongitude());
+
         String source = mLocationUtil.getCurrentLocationZip();
         return fetchWeather(source);
     }

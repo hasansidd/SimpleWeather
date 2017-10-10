@@ -126,7 +126,7 @@ public class WeatherStation {
     private Weather addCurrentWeather() throws Exception {
         Weather weather = mWeatherFetcher.fetchCurrentWeather();
         if (weather == null) {
-            Log.i(TAG, "addCurrentWeather weather is null");
+            Log.e(TAG, "addCurrentWeather weather is null");
             return null;
         }
 
@@ -166,12 +166,10 @@ public class WeatherStation {
     //if it contained data before. Yeah I know great programming.
     // TODO: Rework to use setters to update weather instead of replacing object.
     private Weather updateWeathers() throws Exception {
-
         if (!mWeathers.isEmpty()) {
             for (int i = 0; i < mWeathers.size(); i++) {
                 Weather.ExtendedForecast extendedForecast = mWeathers.get(i).getExtendedForecast();
                 Weather weather = mWeatherFetcher.fetchWeather(mWeathers.get(i).getName());
-
                 weather.setExtendedForecast(extendedForecast);
 
                 mWeathers.set(i, weather);
@@ -215,8 +213,8 @@ public class WeatherStation {
         HashMap<String, Boolean> weathersMap = new HashMap<>();
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
 
-        if (sharedPreferences != null) {
-            String jsonString = sharedPreferences.getString(SHARED_PREF_MAP, (new JSONObject()).toString());
+        if (sharedPreferences.contains(SHARED_PREF_MAP)) {
+            String jsonString = sharedPreferences.getString(SHARED_PREF_MAP, (new JSONObject()).toString()).toString();
             JSONObject jsonObject = new JSONObject(jsonString);
 
             Iterator<String> keysItr = jsonObject.keys();

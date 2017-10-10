@@ -34,11 +34,6 @@ public class WeatherFetchJob extends Job {
     @NonNull
     protected Result onRunJob(Params params) {
         HashMap<String, String> rainMap = new HashMap<>();
-
-
-        PendingIntent pi = PendingIntent.getActivity(getContext(), 0,
-                new Intent(getContext(), MainActivity.class), 0);
-
         try {
             rainMap = findRainMap();
         } catch (Exception e) {
@@ -56,13 +51,13 @@ public class WeatherFetchJob extends Job {
             if (rainMap.size() == 1) {
                 formattedTitle = getContext().getString(R.string.weather_alert_title_single);
             } else {
-                formattedTitle = (getContext().getString(R.string.weather_alert_title,rainMap.size()));
+                formattedTitle = (getContext().getString(R.string.weather_alert_title, rainMap.size()));
             }
 
             Notification notification = new NotificationCompat.Builder(getContext(), "main")
                     .setContentTitle(formattedTitle)
                     .setAutoCancel(true)
-                    .setContentIntent(pi)
+                    .setContentIntent(PendingIntent.getActivity(getContext(), 0, new Intent(getContext(), MainActivity.class), 0))
                     .setSmallIcon(R.drawable.notification)
                     .setLargeIcon(BitmapFactory.decodeResource(getContext().getResources(), R.drawable.clear))
                     .setShowWhen(true)
@@ -127,12 +122,17 @@ public class WeatherFetchJob extends Job {
             }
         }
 
+        if (JobManager.instance().getAllJobRequests().size() == 0) {
+            WeatherFetchJob.scheduleJob();
+        }
         return null;
     }
 
     public static void scheduleJob() {
         int jobId = new JobRequest.Builder(WeatherFetchJob.TAG)
-                .setPeriodic(TimeUnit.HOURS.toMillis(12), TimeUnit.HOURS.toMillis(1))
+                //.setPeriodic(TimeUnit.HOURS.toMillis(12), TimeUnit.HOURS.toMillis(1))
+                .setPeriodic(TimeUnit.MINUTES.toMillis(15), TimeUnit.MINUTES.toMillis(5))
+                .setUpdateCurrent(true)
                 .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
                 .build()
                 .schedule();

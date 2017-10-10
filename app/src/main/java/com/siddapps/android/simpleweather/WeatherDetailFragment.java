@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.evernote.android.job.JobManager;
 import com.siddapps.android.simpleweather.WeatherJobs.WeatherFetchJob;
 
 import java.util.List;
@@ -70,6 +71,15 @@ public class WeatherDetailFragment extends Fragment {
                 Weather.ExtendedForecast extendedForecast = mWeather.getExtendedForecast();
                 if (extendedForecast.isNotifyReady()) {
                     extendedForecast.setNotifyReady(false);
+
+                    List<Weather> weathers = mWeatherStation.getWeathers();
+                    for (Weather w : weathers) {
+                        if (w.getExtendedForecast().isNotifyReady()) {
+                            break;
+                        } else {
+                            JobManager.instance().cancelAllForTag(WeatherFetchJob.TAG);
+                        }
+                    }
                 } else {
                     extendedForecast.setNotifyReady(true);
                     WeatherFetchJob.scheduleJobOnce();

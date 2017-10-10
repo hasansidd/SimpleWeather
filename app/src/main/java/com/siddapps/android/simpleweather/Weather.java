@@ -25,7 +25,7 @@ public class Weather {
     private boolean isExtendedForecastReady;
 
     public int getNotifyAlert() {
-        if (mExtendedForecast.isNotifyReady()){
+        if (mExtendedForecast!=null && mExtendedForecast.isNotifyReady()){
             return View.VISIBLE;
         } else {
             return View.GONE;

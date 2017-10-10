@@ -22,6 +22,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.evernote.android.job.JobManager;
+
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -150,11 +152,14 @@ public class WeatherFragment extends Fragment {
                 @Override
                 public void onError(Throwable e) {
                     Log.e(TAG, "onError: ", e);
+                    Log.e(TAG,"getSavedWeather() onError");
+                    addCurrentWeather();
                 }
 
                 @Override
                 public void onComplete() {
                     updateUI();
+                    Log.e(TAG,"getSavedWeather() onComplete");
                     addCurrentWeather();
                 }
             });
