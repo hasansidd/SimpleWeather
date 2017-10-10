@@ -38,8 +38,6 @@ public class WeatherDetailFragment extends Fragment {
     private TextView mLowTemp;
     private TextView mDescriptionText;
     private TextView mCurrentTimeText;
-    private TextView mSunrise;
-    private TextView mSunset;
     private ImageView mWeatherImage;
     private RecyclerView mRecyclerView;
     private WeatherDetailAdapter mAdapter;
