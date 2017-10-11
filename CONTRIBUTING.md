@@ -1,4 +1,4 @@
-# Contributing to Remote-Desktop
+# Contributing to SimpleWeather
 Before you get started contributing to this repository, please read below. This contains information to help you submit your contribution to this repository quickly and easily.
 
 
