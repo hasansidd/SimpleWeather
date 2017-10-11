@@ -1,4 +1,4 @@
-package com.siddapps.android.simpleweather;
+package com.siddapps.android.simpleweather.weatherdetail;
 
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,8 +15,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.evernote.android.job.JobManager;
-import com.siddapps.android.simpleweather.WeatherJobs.WeatherFetchJob;
+import com.siddapps.android.simpleweather.R;
+import com.siddapps.android.simpleweather.data.Weather;
+import com.siddapps.android.simpleweather.data.WeatherStation;
+import com.siddapps.android.simpleweather.weatherjobs.WeatherFetchJob;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -69,15 +71,7 @@ public class WeatherDetailFragment extends Fragment {
                 Weather.ExtendedForecast extendedForecast = mWeather.getExtendedForecast();
                 if (extendedForecast.isNotifyReady()) {
                     extendedForecast.setNotifyReady(false);
-
-                    List<Weather> weathers = mWeatherStation.getWeathers();
-                    for (Weather w : weathers) {
-                        if (w.getExtendedForecast().isNotifyReady()) {
-                            break;
-                        } else {
-                            JobManager.instance().cancelAllForTag(WeatherFetchJob.TAG);
-                        }
-                    }
+                    mWeatherStation.shouldCancelJobs();
                 } else {
                     extendedForecast.setNotifyReady(true);
                     WeatherFetchJob.scheduleJobOnce();

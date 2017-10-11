@@ -1,4 +1,4 @@
-package com.siddapps.android.simpleweather.WeatherJobs;
+package com.siddapps.android.simpleweather.weatherjobs;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;

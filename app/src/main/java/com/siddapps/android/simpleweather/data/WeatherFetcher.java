@@ -1,10 +1,9 @@
-package com.siddapps.android.simpleweather;
+package com.siddapps.android.simpleweather.data;
 
 import android.content.Context;
-import android.location.Location;
 import android.util.Log;
 
-import com.siddapps.android.simpleweather.Weather.ExtendedForecast;
+import com.siddapps.android.simpleweather.LocationUtil;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -13,9 +12,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
-
-import static com.siddapps.android.simpleweather.Weather.ExtendedForecast.*;
 
 public class WeatherFetcher {
     private static final String TAG = "WeatherFetcher";
@@ -93,14 +89,14 @@ public class WeatherFetcher {
     }
 
     public Weather fetchExtendedForecast(Weather weather) throws Exception {
-        ExtendedForecast extendedForecast = weather.getExtendedForecast();
+        Weather.ExtendedForecast extendedForecast = weather.getExtendedForecast();
         String json = fetchJson(weather.getName(), METHOD_EXTENDED);
 
         JSONObject jsonObject = new JSONObject(json);
         JSONArray fullInfoArray = new JSONArray(jsonObject.getString("list"));
 
         for (int i = 0; i < fullInfoArray.length(); i++) {
-            HourlyData hourlyData = new HourlyData();
+            Weather.ExtendedForecast.HourlyData hourlyData = new Weather.ExtendedForecast.HourlyData();
             JSONObject hourlyInfoObject = fullInfoArray.getJSONObject(i);
             hourlyData.setTime(hourlyInfoObject.getLong("dt"));
 
@@ -146,7 +142,7 @@ public class WeatherFetcher {
         Log.i(TAG, fullInfo);
     }
 
-    public void printExtendedForecastWeather(HourlyData hourlyData) {
+    public void printExtendedForecastWeather(Weather.ExtendedForecast.HourlyData hourlyData) {
         String fullInfo = String.format("Main: %s\nDescription: %s\nTemperature: %s\nHumidity: %s\nMin Temp: %s\nMax Temp: %s\nTime: %s\n"
                 , hourlyData.getMainDescription()
                 , hourlyData.getDetailedDescription()

@@ -1,9 +1,8 @@
-package com.siddapps.android.simpleweather.WeatherJobs;
+package com.siddapps.android.simpleweather.weatherjobs;
 
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
@@ -15,14 +14,12 @@ import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
 import com.siddapps.android.simpleweather.MainActivity;
 import com.siddapps.android.simpleweather.R;
-import com.siddapps.android.simpleweather.Weather;
-import com.siddapps.android.simpleweather.Weather.ExtendedForecast.HourlyData;
-import com.siddapps.android.simpleweather.WeatherStation;
+import com.siddapps.android.simpleweather.data.Weather;
+import com.siddapps.android.simpleweather.data.Weather.ExtendedForecast.HourlyData;
+import com.siddapps.android.simpleweather.data.WeatherStation;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class WeatherFetchJob extends Job {
@@ -68,6 +65,11 @@ public class WeatherFetchJob extends Job {
 
             NotificationManagerCompat.from(getContext())
                     .notify(1, notification);
+
+            if (JobManager.instance().getAllJobRequests().size() == 0) {
+                scheduleJob();
+            }
+
 
             Log.e(TAG, "notification sent");
         } else {
@@ -121,17 +123,12 @@ public class WeatherFetchJob extends Job {
                 }
             }
         }
-
-        if (JobManager.instance().getAllJobRequests().size() == 0) {
-            WeatherFetchJob.scheduleJob();
-        }
         return null;
     }
 
     public static void scheduleJob() {
         int jobId = new JobRequest.Builder(WeatherFetchJob.TAG)
-                //.setPeriodic(TimeUnit.HOURS.toMillis(12), TimeUnit.HOURS.toMillis(1))
-                .setPeriodic(TimeUnit.MINUTES.toMillis(15), TimeUnit.MINUTES.toMillis(5))
+                .setPeriodic(TimeUnit.HOURS.toMillis(12), TimeUnit.HOURS.toMillis(1))
                 .setUpdateCurrent(true)
                 .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
                 .build()

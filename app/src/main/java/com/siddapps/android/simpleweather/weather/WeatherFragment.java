@@ -1,4 +1,4 @@
-package com.siddapps.android.simpleweather;
+package com.siddapps.android.simpleweather.weather;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -22,7 +22,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.evernote.android.job.JobManager;
+import com.siddapps.android.simpleweather.MainActivity;
+import com.siddapps.android.simpleweather.R;
+import com.siddapps.android.simpleweather.data.Weather;
+import com.siddapps.android.simpleweather.data.WeatherStation;
 
 import java.util.List;
 
@@ -152,14 +155,12 @@ public class WeatherFragment extends Fragment {
                 @Override
                 public void onError(Throwable e) {
                     Log.e(TAG, "onError: ", e);
-                    Log.e(TAG,"getSavedWeather() onError");
                     addCurrentWeather();
                 }
 
                 @Override
                 public void onComplete() {
                     updateUI();
-                    Log.e(TAG,"getSavedWeather() onComplete");
                     addCurrentWeather();
                 }
             });

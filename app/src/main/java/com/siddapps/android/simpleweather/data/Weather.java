@@ -1,7 +1,10 @@
-package com.siddapps.android.simpleweather;
+package com.siddapps.android.simpleweather.data;
 
 import android.util.Log;
 import android.view.View;
+
+import com.siddapps.android.simpleweather.MainActivity;
+import com.siddapps.android.simpleweather.R;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

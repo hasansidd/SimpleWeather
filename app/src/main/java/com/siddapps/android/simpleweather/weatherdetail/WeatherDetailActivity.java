@@ -1,10 +1,12 @@
-package com.siddapps.android.simpleweather;
+package com.siddapps.android.simpleweather.weatherdetail;
 
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+
+import com.siddapps.android.simpleweather.SingleFragmentActivity;
 
 public class WeatherDetailActivity extends SingleFragmentActivity {
     private static final String TAG = "WeatherDetailActivity";

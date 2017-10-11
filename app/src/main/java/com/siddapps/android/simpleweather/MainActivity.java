@@ -1,21 +1,20 @@
 package com.siddapps.android.simpleweather;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.evernote.android.job.JobManager;
-import com.siddapps.android.simpleweather.WeatherJobs.WeatherFetchJob;
-import com.siddapps.android.simpleweather.WeatherJobs.WeatherJobCreator;
+import com.siddapps.android.simpleweather.data.WeatherFetcher;
+import com.siddapps.android.simpleweather.data.WeatherStation;
+import com.siddapps.android.simpleweather.weather.WeatherActivity;
+import com.siddapps.android.simpleweather.weatherjobs.WeatherJobCreator;
 
 import io.fabric.sdk.android.Fabric;
 

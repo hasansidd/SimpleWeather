@@ -21,9 +21,9 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name="com.siddapps.android.simpleweather.WeatherActivity"/>
-        <activity android:name="com.siddapps.android.simpleweather.WeatherDetailActivity"
-                  android:parentActivityName="com.siddapps.android.simpleweather.WeatherActivity">
+        <activity android:name="com.siddapps.android.simpleweather.weather.WeatherActivity"/>
+        <activity android:name="com.siddapps.android.simpleweather.weatherdetail.WeatherDetailActivity"
+                  android:parentActivityName="com.siddapps.android.simpleweather.weather.WeatherActivity">
         </activity>
         <meta-data
             android:name="com.crashlytics.ApiKey"
