@@ -9,14 +9,10 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 
-import com.crashlytics.android.Crashlytics;
-import com.evernote.android.job.JobManager;
 import com.siddapps.android.simpleweather.data.WeatherFetcher;
 import com.siddapps.android.simpleweather.data.WeatherStation;
 import com.siddapps.android.simpleweather.weather.WeatherActivity;
-import com.siddapps.android.simpleweather.weatherjobs.WeatherJobCreator;
 
-import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends AppCompatActivity {
     static public WeatherFetcher mWeatherFetcher;
@@ -33,8 +29,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Fabric.with(this, new Crashlytics());
-        JobManager.create(this).addJobCreator(new WeatherJobCreator());
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             mWeatherFetcher = new WeatherFetcher(this);

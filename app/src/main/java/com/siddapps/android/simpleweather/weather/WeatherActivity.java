@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 
-import com.siddapps.android.simpleweather.SingleFragmentActivity;
+import com.siddapps.android.simpleweather.util.SingleFragmentActivity;
 import com.siddapps.android.simpleweather.weatherdetail.WeatherDetailActivity;
 import com.siddapps.android.simpleweather.data.Weather;
 

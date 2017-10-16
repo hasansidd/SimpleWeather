@@ -1,9 +1,10 @@
 package com.siddapps.android.simpleweather.data;
 
 import android.content.Context;
+import android.location.Location;
 import android.util.Log;
 
-import com.siddapps.android.simpleweather.LocationUtil;
+import com.siddapps.android.simpleweather.util.LocationUtil;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -69,6 +70,10 @@ public class WeatherFetcher {
         mWeather.setName(jsonObject.getString("name"));
         mWeather.setTime(jsonObject.getLong("dt"));
 
+        JSONObject coordInfoObject = jsonObject.getJSONObject("coord");
+        mWeather.setLat(coordInfoObject.getString("lat"));
+        mWeather.setLon(coordInfoObject.getString("lon"));
+
         JSONArray weatherInfoArray = new JSONArray(jsonObject.getString("weather"));
         JSONObject weatherInfoObject = weatherInfoArray.getJSONObject(0);
         mWeather.setMainDescription(weatherInfoObject.getString("main"));
@@ -121,10 +126,10 @@ public class WeatherFetcher {
     }
 
     public Weather fetchCurrentWeather() throws Exception {
-        //Location location = mLocationUtil.getCurrentLocationLatLon();
-        //String source = String.format("%f,%f", location.getLatitude(), location.getLongitude());
+        Location location = mLocationUtil.getCurrentLocationLatLon();
+        String source = String.format("%f,%f", location.getLatitude(), location.getLongitude());
 
-        String source = mLocationUtil.getCurrentLocationZip();
+        //String source = mLocationUtil.getCurrentLocationZip();
         return fetchWeather(source);
     }
 

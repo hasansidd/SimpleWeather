@@ -1,6 +1,7 @@
 package com.siddapps.android.simpleweather.data;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
@@ -12,6 +13,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -63,31 +65,33 @@ public class WeatherStation {
         return null;
     }
 
-    public void setWeather(Weather weather) {
-        for (int i = 0; i < mWeathers.size(); i++) {
-            if (mWeathers.get(i).getName().contains(weather.getName())) {
-                mWeathers.set(i, weather);
+    private int getWeatherIndex(Weather weather) {
+
+        if (!mWeathers.isEmpty()) {
+            for (int i = 0; i < mWeathers.size(); i++) {
+                if (mWeathers.get(i).getName().equals(weather.getName()) || mWeathers.get(i).getLatLon().equals(weather.getLatLon())) {
+                    return i;
+                }
             }
         }
+        return -1;
     }
 
     private Weather addWeather(String source) throws Exception {
         Weather weather = mWeatherFetcher.fetchWeather(source);
+        int index = getWeatherIndex(weather);
 
-        if (!mWeathers.isEmpty()) {
-            for (int i = 0; i < mWeathers.size(); i++) {
-                if (mWeathers.get(i).getName().contains(weather.getName())) {
-                    Log.i(TAG, "City: " + weather.getName() + " already exists, moving to beginning of list");
-                    Weather.ExtendedForecast extendedForecast = weather.getExtendedForecast();
-                    mWeathers.remove(i);
-                    mWeathers.add(0, weather);
-                    mWeathers.get(0).setExtendedForecast(extendedForecast);
-                    return weather;
-                }
-            }
+        if (index == -1) {
+            mWeathers.add(weather);
+            Log.i(TAG, "City: " + weather.getName() + " added to end of list");
+            return weather;
         }
-        mWeathers.add(weather);
-        Log.i(TAG, "City: " + weather.getName() + " added to end of list");
+
+        Log.i(TAG, "City: " + weather.getName() + " already exists, moving to beginning of list");
+        Weather.ExtendedForecast extendedForecast = weather.getExtendedForecast();
+        mWeathers.remove(index);
+        mWeathers.add(0, weather);
+        mWeathers.get(0).setExtendedForecast(extendedForecast);
         return weather;
     }
 
@@ -103,21 +107,15 @@ public class WeatherStation {
     }
 
     public Weather getExtendedWeather(Weather weather) throws Exception {
-        for (int i = 0; i < mWeathers.size(); i++) {
-            if (mWeathers.get(i).getName().equals(weather.getName())) {
-                Log.i(TAG, "Getting extended forecast for: " + weather.getName());
-                mWeathers.set(i, mWeatherFetcher.fetchExtendedForecast(weather));
-                return weather;
-            }
+        int index = getWeatherIndex(weather);
+        if (index == -1) {
+            Log.i(TAG, "Could not get extended forecast for: " + weather.getName());
+            return null;
         }
-        Log.i(TAG, "Could not get extended forecast for: " + weather.getName());
-        return null;
-    }
 
-    public List<Weather.ExtendedForecast.HourlyData> getHourlyData(Weather weather) {
-        Weather.ExtendedForecast extendedForecast = weather.getExtendedForecast();
-        List<Weather.ExtendedForecast.HourlyData> hourlyData = extendedForecast.getHourlyDataList();
-        return hourlyData;
+        Log.i(TAG, "Getting extended forecast for: " + weather.getName());
+        mWeathers.set(index, mWeatherFetcher.fetchExtendedForecast(weather));
+        return weather;
     }
 
     private Weather addCurrentWeather() throws Exception {
@@ -127,20 +125,18 @@ public class WeatherStation {
             return null;
         }
 
-        if (!mWeathers.isEmpty()) {
-            for (int i = 0; i < mWeathers.size(); i++) {
-                if (mWeathers.get(i).getName().equals(weather.getName())) {
-                    Weather.ExtendedForecast extendedForecast = mWeathers.get(i).getExtendedForecast();
-                    mWeathers.remove(i);
-                    mWeathers.add(0, weather);
-                    mWeathers.get(0).setExtendedForecast(extendedForecast);
-                    Log.i(TAG, "City: " + weather.getName() + " already exists, moving to beginning of list");
-                    return weather;
-                }
-            }
+        int index = getWeatherIndex(weather);
+        if (index == -1) {
+            Log.i(TAG, "City: " + weather.getName() + " added to beginning of list");
+            mWeathers.add(0, weather);
+            return weather;
         }
-        Log.i(TAG, "City: " + weather.getName() + " added to beginning of list");
+
+        Weather.ExtendedForecast extendedForecast = mWeathers.get(index).getExtendedForecast();
+        mWeathers.remove(index);
         mWeathers.add(0, weather);
+        mWeathers.get(0).setExtendedForecast(extendedForecast);
+        Log.i(TAG, "City: " + weather.getName() + " already exists, moved to beginning of list");
         return weather;
     }
 
@@ -155,7 +151,6 @@ public class WeatherStation {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-
     //This method needs to be reworked. When going back from detailed view, this method is run.
     //When it is ran, the weather object containing the ExtendedForecast is overwritten
     //with the new weather object. This erases the Extended Forecast. Currently the work around is to
@@ -166,9 +161,13 @@ public class WeatherStation {
         if (!mWeathers.isEmpty()) {
             for (int i = 0; i < mWeathers.size(); i++) {
                 Weather.ExtendedForecast extendedForecast = mWeathers.get(i).getExtendedForecast();
-                Weather weather = mWeatherFetcher.fetchWeather(mWeathers.get(i).getName());
+                Weather weather;
+                if (i==0) { //current weather, using lat/lon gives unreliable results when city originally inputted as zip or city name
+                    weather = mWeatherFetcher.fetchWeather(mWeathers.get(i).getLatLon());
+                } else {
+                    weather = mWeatherFetcher.fetchWeather(mWeathers.get(i).getName());
+                }
                 weather.setExtendedForecast(extendedForecast);
-
                 mWeathers.set(i, weather);
             }
             return mWeathers.get(0);
@@ -205,14 +204,13 @@ public class WeatherStation {
         }
     }
 
-
     public void setSharedPreferences() {
-        HashMap<String, Boolean> weathersMap = new HashMap<>();
+        LinkedHashMap<String, Boolean> weathersMap = new LinkedHashMap<>();
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
 
         for (Weather w : mWeathers) {
             Weather.ExtendedForecast extendedForecast = w.getExtendedForecast();
-            weathersMap.put(w.getName(), extendedForecast.isNotifyReady());
+            weathersMap.put(w.getLatLon(), extendedForecast.isNotifyReady());
         }
 
         JSONObject jsonObject = new JSONObject(weathersMap);
@@ -222,8 +220,11 @@ public class WeatherStation {
     }
 
     public List<Weather> getSharedPreferences() throws Exception {
+        if (mWeathers.size() > 0 ) {
+            return mWeathers;
+        }
 
-        HashMap<String, Boolean> weathersMap = new HashMap<>();
+        LinkedHashMap<String, Boolean> weathersMap = new LinkedHashMap<>();
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
 
         if (sharedPreferences.contains(SHARED_PREF_MAP)) {
@@ -239,11 +240,7 @@ public class WeatherStation {
 
             for (String key : weathersMap.keySet()) {
                 Weather weather = addWeather(key);
-                Weather.ExtendedForecast extendedForecast = weather.getExtendedForecast();
-                extendedForecast.setNotifyReady(weathersMap.get(key));
-            }
-
-            for (Weather w : mWeathers) {
+                weather.getExtendedForecast().setNotifyReady(weathersMap.get(key));
             }
 
             return mWeathers;

@@ -22,6 +22,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.evernote.android.job.JobManager;
 import com.siddapps.android.simpleweather.MainActivity;
 import com.siddapps.android.simpleweather.R;
 import com.siddapps.android.simpleweather.data.Weather;
@@ -87,6 +88,10 @@ public class WeatherFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.temperature_setting:
+                String temp = JobManager.instance().getAllJobRequests().toString();
+                temp = temp.replace("},","\n");
+                Log.e(TAG, temp);
+
                 if (MainActivity.TEMPERATURE_SETTING == "F") {
                     MainActivity.TEMPERATURE_SETTING = "C";
                 } else {
@@ -119,7 +124,7 @@ public class WeatherFragment extends Fragment {
         updateWeathers();
     }
 
-    public void updateWeathers() {
+    private void updateWeathers() {
         updateWeathers = mWeatherStation.updateWeathersObservable();
         if (updateWeathers != null) {
             updateWeathers.subscribe(updateUIObserver);
@@ -180,7 +185,7 @@ public class WeatherFragment extends Fragment {
 
             @Override
             public void onNext(Weather weather) {
-                mWeatherStation.setWeather(weather);
+               // mWeatherStation.setWeather(weather);
             }
 
             @Override
@@ -196,17 +201,17 @@ public class WeatherFragment extends Fragment {
 
         getSavedWeather();
 
-        mRecyclerView = (RecyclerView) v.findViewById(R.id.weather_recycler_view);
+        mRecyclerView = v.findViewById(R.id.weather_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         setupItemTouchHelper();
 
-        mAddCityFAB = (FloatingActionButton) v.findViewById(R.id.add_weather);
+        mAddCityFAB = v.findViewById(R.id.add_weather);
         mAddCityFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.dialog_add_weather, (ViewGroup) getView(), false);
-                final EditText input = (EditText) viewInflated.findViewById(R.id.dialog_add_weather);
+                final EditText input = viewInflated.findViewById(R.id.dialog_add_weather);
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 builder.setTitle(getString(R.string.add_new_city))
                         .setView(viewInflated)
@@ -245,13 +250,13 @@ public class WeatherFragment extends Fragment {
             super(inflater.inflate(R.layout.weather_item_recyclerview, parent, false));
             itemView.setOnClickListener(this);
 
-            mCityNameText = (TextView) itemView.findViewById(R.id.city_name);
-            mCurrentTempText = (TextView) itemView.findViewById(R.id.current_temp_text);
+            mCityNameText = itemView.findViewById(R.id.city_name);
+            mCurrentTempText = itemView.findViewById(R.id.current_temp_text);
             mHighTemp = itemView.findViewById(R.id.temp_high_text);
             mLowTemp = itemView.findViewById(R.id.temp_low_text);
-            mCurrentDescriptionText = (TextView) itemView.findViewById(R.id.weather_description_text);
-            mWeatherBackgroundImage = (ImageView) itemView.findViewById(R.id.weather_background_image);
-            mTimeText = (TextView) itemView.findViewById(R.id.weather_time_text);
+            mCurrentDescriptionText = itemView.findViewById(R.id.weather_description_text);
+            mWeatherBackgroundImage = itemView.findViewById(R.id.weather_background_image);
+            mTimeText = itemView.findViewById(R.id.weather_time_text);
             mWeatherAlertImage = itemView.findViewById(R.id.weather_alert);
         }
 
@@ -319,26 +324,5 @@ public class WeatherFragment extends Fragment {
         };
         ItemTouchHelper iTH = new ItemTouchHelper(sITC);
         iTH.attachToRecyclerView(mRecyclerView);
-    }
-
-    public class FetchExtendedWeatherTask extends AsyncTask<Weather, Void, Weather> {
-
-        @Override
-        protected Weather doInBackground(Weather... sourceWeather) {
-            Weather weather = null;
-
-            try {
-                weather = mWeatherStation.getExtendedWeather(sourceWeather[0]);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return weather;
-        }
-
-        @Override
-        protected void onPostExecute(Weather weather) {
-            super.onPostExecute(weather);
-
-        }
     }
 }

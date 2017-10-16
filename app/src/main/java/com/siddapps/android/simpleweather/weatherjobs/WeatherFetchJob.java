@@ -30,6 +30,8 @@ public class WeatherFetchJob extends Job {
     @Override
     @NonNull
     protected Result onRunJob(Params params) {
+        Log.e(TAG, "running");
+
         HashMap<String, String> rainMap = new HashMap<>();
         try {
             rainMap = findRainMap();
@@ -75,6 +77,7 @@ public class WeatherFetchJob extends Job {
         } else {
             Log.e(TAG, "No rain detected");
         }
+
         return Result.SUCCESS;
     }
 
@@ -85,17 +88,19 @@ public class WeatherFetchJob extends Job {
         WeatherStation mWeatherStation = WeatherStation.get(getContext());
         HashMap<String, String> rainMap = new HashMap<>();
 
-        mWeathers = mWeatherStation.getWeathers();
+        mWeathers = mWeatherStation.getSharedPreferences();
         for (Weather w : mWeathers) {
             Weather.ExtendedForecast extendedForecast = w.getExtendedForecast();
 
             if (extendedForecast.isNotifyReady()) {
                 String rainTime = findRain(w);
+
                 if (rainTime != null && rainTime.length() > 0) {
                     rainMap.put(w.getName(), rainTime);
                 } else {
-                    Log.i(TAG, "No rain detected for " + w.getName());
+                    Log.d(TAG, "No rain detected for " + w.getName());
                 }
+
             }
         }
         return rainMap;
@@ -103,32 +108,35 @@ public class WeatherFetchJob extends Job {
 
     private String findRain(Weather weather) throws Exception {
         int numberOfDays = 2;
-        List<HourlyData> hourlyDataList = null;
+
+        List<HourlyData> hourlyDataList;
         String rainStartTime;
+
         WeatherStation mWeatherStation = WeatherStation.get(getContext());
 
         if (weather != null) {
             weather = mWeatherStation.getExtendedWeather(weather);
-            Weather.ExtendedForecast extendedForecast = weather.getExtendedForecast();
-            hourlyDataList = extendedForecast.getHourlyDataList();
-        }
+            hourlyDataList = weather.getExtendedForecast().getHourlyDataList();
 
-        //find rain in extended forecast
-        if (hourlyDataList != null) {
-            for (int i = 0; i < (8 * numberOfDays); i++) {
-                if (hourlyDataList.get(i).getMainDescription().equals("Rain")) {
-                    rainStartTime = hourlyDataList.get(i).getTime();
-                    Log.e(TAG, "Rain detected at " + rainStartTime);
-                    return rainStartTime;
+            //find rain in extended forecast
+            if (hourlyDataList.size() >= (8 * numberOfDays)) {
+                for (int i = 0; i < (8 * numberOfDays); i++) {
+                    if (hourlyDataList.get(i).getMainDescription().equals("Rain")) {
+                        rainStartTime = hourlyDataList.get(i).getTime();
+                        Log.d(TAG, "Rain detected in " + weather.getName() + " at " + rainStartTime);
+                        return rainStartTime;
+                    }
                 }
             }
         }
+
         return null;
     }
 
     public static void scheduleJob() {
         int jobId = new JobRequest.Builder(WeatherFetchJob.TAG)
-                .setPeriodic(TimeUnit.HOURS.toMillis(12), TimeUnit.HOURS.toMillis(1))
+                //.setPeriodic(TimeUnit.HOURS.toMillis(12), TimeUnit.HOURS.toMillis(1))
+                .setPeriodic(TimeUnit.MINUTES.toMillis(15), TimeUnit.MINUTES.toMillis(5))
                 .setUpdateCurrent(true)
                 .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
                 .build()
@@ -141,9 +149,4 @@ public class WeatherFetchJob extends Job {
                 .build()
                 .schedule();
     }
-
-    public void cancelJob(int jobId) {
-        JobManager.instance().cancel(jobId);
-    }
-
 }

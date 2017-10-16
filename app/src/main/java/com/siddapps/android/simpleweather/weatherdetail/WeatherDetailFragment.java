@@ -97,14 +97,14 @@ public class WeatherDetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_weather_detail, container, false);
-        mCityNameText = (TextView) v.findViewById(R.id.master_city_name);
-        mCurrentTempText = (TextView) v.findViewById(R.id.master_temp_text);
-        mHighTemp = (TextView) v.findViewById(R.id.master_temp_high_text);
-        mLowTemp = (TextView) v.findViewById(R.id.master_temp_low_text);
-        mDescriptionText = (TextView) v.findViewById(R.id.master_description_text);
-        mCurrentTimeText = (TextView) v.findViewById(R.id.master_time_text);
-        mWeatherImage = (ImageView) v.findViewById(R.id.master_background_image);
-        mRecyclerView = (RecyclerView) v.findViewById(R.id.weather_detail_recyclerview);
+        mCityNameText = v.findViewById(R.id.master_city_name);
+        mCurrentTempText = v.findViewById(R.id.master_temp_text);
+        mHighTemp = v.findViewById(R.id.master_temp_high_text);
+        mLowTemp = v.findViewById(R.id.master_temp_low_text);
+        mDescriptionText = v.findViewById(R.id.master_description_text);
+        mCurrentTimeText = v.findViewById(R.id.master_time_text);
+        mWeatherImage = v.findViewById(R.id.master_background_image);
+        mRecyclerView = v.findViewById(R.id.weather_detail_recyclerview);
         mWeatherAlertImage = v.findViewById(R.id.weather_alert_detail);
 
 
@@ -122,9 +122,9 @@ public class WeatherDetailFragment extends Fragment {
         public WeatherDetailHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.weather_detail_recyclerview, parent, false));
 
-            mWeatherImage = (ImageView) itemView.findViewById(R.id.detail_weather_image);
-            mTempText = (TextView) itemView.findViewById(R.id.detail_temp);
-            mTimeText = (TextView) itemView.findViewById(R.id.detail_time_text);
+            mWeatherImage = itemView.findViewById(R.id.detail_weather_image);
+            mTempText = itemView.findViewById(R.id.detail_temp);
+            mTimeText = itemView.findViewById(R.id.detail_time_text);
         }
 
         public void bind(Weather.ExtendedForecast.HourlyData hourlyData) {
@@ -138,7 +138,7 @@ public class WeatherDetailFragment extends Fragment {
         private List<Weather.ExtendedForecast.HourlyData> hourlyData;
 
         public WeatherDetailAdapter(Weather weather) {
-            hourlyData = mWeatherStation.getHourlyData(weather);
+            hourlyData = weather.getExtendedForecast().getHourlyDataList();
         }
 
         @Override
@@ -158,7 +158,7 @@ public class WeatherDetailFragment extends Fragment {
         }
 
         public void setHourlyData(Weather weather) {
-            hourlyData = mWeatherStation.getHourlyData(weather);
+            hourlyData = weather.getExtendedForecast().getHourlyDataList();
         }
     }
 

@@ -1,4 +1,4 @@
-package com.siddapps.android.simpleweather;
+package com.siddapps.android.simpleweather.util;
 
 import android.Manifest;
 import android.app.Activity;
@@ -57,6 +57,7 @@ public class LocationUtil {
         }
         return null;
     }
+
     public Location getCurrentLocationLatLon() throws Exception {
         if (isLocationGranted()) {
             if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -67,7 +68,6 @@ public class LocationUtil {
         }
         return null;
     }
-
 
     private Location getLastKnownLocation() {
         List<String> providers = mLocationManager.getProviders(true);

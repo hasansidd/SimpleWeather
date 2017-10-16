@@ -20,12 +20,27 @@ public class Weather {
     private String temp_min;
     private String temp_max;
     private String name;
+    private String lat;
+    private String lon;
     private int icon;
     private long time;
     private long sunrise;
     private long sunset;
     private ExtendedForecast mExtendedForecast;
     private boolean isExtendedForecastReady;
+
+
+    public void setLat(String lat) {
+        this.lat = lat;
+    }
+
+    public void setLon(String lon) {
+        this.lon = lon;
+    }
+
+    public String getLatLon() {
+        return String.format("%s,%s", lat, lon);
+    }
 
     public int getNotifyAlert() {
         if (mExtendedForecast!=null && mExtendedForecast.isNotifyReady()){
@@ -102,6 +117,7 @@ public class Weather {
     public int getIcon() {
         if (time > sunset || time < sunrise) {//night
             switch (getMainDescription()) {
+                case "Haze":
                 case "Clouds":
                     return R.drawable.cloudyn;
                 case "Clear":
@@ -117,6 +133,7 @@ public class Weather {
             }
         }
         switch (getMainDescription()) {//day
+            case "Haze":
             case "Clouds":
                 return R.drawable.cloudy;
             case "Clear":
@@ -237,6 +254,7 @@ public class Weather {
             public int getIcon() {
                 if (night.contains("n")) {//night
                     switch (getMainDescription()) {
+                        case "Haze":
                         case "Clouds":
                             return R.drawable.cloudyn;
                         case "Clear":
@@ -255,6 +273,7 @@ public class Weather {
                     }
                 }
                 switch (mainDescription) {
+                    case "Haze":
                     case "Clouds":
                         return R.drawable.cloudy;
                     case "Clear":
