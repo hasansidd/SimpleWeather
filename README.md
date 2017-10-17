@@ -1,4 +1,4 @@
-# SimpleWeather 
+# SimpleWeather <img src="https://github.com/hasansidd/SimpeWeather/blob/screenshots/icon.png?raw=true" height="100">
 
 A weather app for Android.
 
