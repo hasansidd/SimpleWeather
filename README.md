@@ -1,5 +1,4 @@
 # SimpleWeather 
-===================================
 
 A weather app for Android.
 
