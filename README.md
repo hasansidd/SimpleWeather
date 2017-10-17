@@ -30,22 +30,13 @@ Pre-requisites
 Screenshots
 -------------
 
-<img src="https://github.com/hasansidd/SimpeWeather/blob/screenshots/screenshot5.png?raw=true" height="600">
+<img src="https://github.com/hasansidd/SimpeWeather/blob/screenshots/screenshot5.png?raw=true" height="600"> <img src="https://github.com/hasansidd/SimpeWeather/blob/screenshots/screenshot4.png?raw=true" height="600">
 <br>
 <br>
-<img src="https://github.com/hasansidd/SimpeWeather/blob/screenshots/screenshot4.png?raw=true" height="600">
+<img src="https://github.com/hasansidd/SimpeWeather/blob/screenshots/screenshot3.png?raw=true" height="600"> <img src="https://github.com/hasansidd/SimpeWeather/blob/screenshots/screenshot2.png?raw=true" height="600">
 <br>
 <br>
-<img src="https://github.com/hasansidd/SimpeWeather/blob/screenshots/screenshot3.png?raw=true" height="600">
-<br>
-<br>
-<img src="https://github.com/hasansidd/SimpeWeather/blob/screenshots/screenshot2.png?raw=true" height="600">
-<br>
-<br>
-<img src="https://github.com/hasansidd/SimpeWeather/blob/screenshots/screenshot1.png?raw=true" height="600">
-<br>
-<br>
-<img src="https://github.com/hasansidd/SimpeWeather/blob/screenshots/screenshot6.png?raw=true" height="600">
+<img src="https://github.com/hasansidd/SimpeWeather/blob/screenshots/screenshot1.png?raw=true" height="600"> <img src="https://github.com/hasansidd/SimpeWeather/blob/screenshots/screenshot6.png?raw=true" height="600">
 
 Support
 -------
