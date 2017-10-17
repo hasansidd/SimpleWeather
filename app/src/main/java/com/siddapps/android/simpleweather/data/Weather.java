@@ -64,20 +64,6 @@ public class Weather {
         return sdf.format(date);
     }
 
-    public static String formatTemp(String temp) {
-        Double tempDouble = Double.parseDouble(temp);
-
-        switch (MainActivity.TEMPERATURE_SETTING) {
-            case "C":
-                tempDouble = tempDouble - 273.15; //Celsius
-                return String.format("%.0f°C", tempDouble);
-            case "F":
-            default:
-                tempDouble = tempDouble * (9 / 5d) - 459.67; //Fahrenheit
-                return String.format("%.0f°F", tempDouble);
-        }
-    }
-
     public ExtendedForecast getExtendedForecast() {
         if (mExtendedForecast == null) {
             mExtendedForecast = new ExtendedForecast();
@@ -178,7 +164,7 @@ public class Weather {
     }
 
     public String getTemp() {
-        return formatTemp(temp);
+        return temp;
     }
 
     public void setTemp(String temp) {
@@ -186,7 +172,7 @@ public class Weather {
     }
 
     public String getTemp_min() {
-        return formatTemp(temp_min);
+        return temp_min;
     }
 
     public void setTemp_min(String temp_min) {
@@ -194,7 +180,7 @@ public class Weather {
     }
 
     public String getTemp_max() {
-        return formatTemp(temp_max);
+        return temp_max;
     }
 
     public void setTemp_max(String temp_max) {
@@ -325,7 +311,7 @@ public class Weather {
             }
 
             public String getTemp() {
-                return formatTemp(mTemp);
+                return mTemp;
             }
 
             public void setTemp(String temp) {
@@ -333,7 +319,7 @@ public class Weather {
             }
 
             public String getTemp_min() {
-                return formatTemp(mTemp_min);
+                return mTemp_min;
             }
 
             public void setTemp_min(String temp_min) {
@@ -341,7 +327,7 @@ public class Weather {
             }
 
             public String getTemp_max() {
-                return formatTemp(mTemp_max);
+                return mTemp_max;
             }
 
             public void setTemp_max(String temp_max) {

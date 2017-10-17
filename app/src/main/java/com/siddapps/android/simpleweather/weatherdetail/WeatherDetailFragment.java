@@ -129,7 +129,7 @@ public class WeatherDetailFragment extends Fragment {
 
         public void bind(Weather.ExtendedForecast.HourlyData hourlyData) {
             mWeatherImage.setImageResource(hourlyData.getIcon());
-            mTempText.setText(hourlyData.getTemp());
+            mTempText.setText(mWeatherStation.formatTemp(hourlyData.getTemp()));
             mTimeText.setText(hourlyData.getTime());
         }
     }
@@ -208,9 +208,9 @@ public class WeatherDetailFragment extends Fragment {
         }
 
         mCityNameText.setText(mWeather.getName());
-        mCurrentTempText.setText(mWeather.getTemp());
-        mHighTemp.setText(mWeather.getTemp_max());
-        mLowTemp.setText(mWeather.getTemp_min());
+        mCurrentTempText.setText(mWeatherStation.formatTemp(mWeather.getTemp()));
+        mHighTemp.setText(mWeatherStation.formatTemp(mWeather.getTemp_max()));
+        mLowTemp.setText(mWeatherStation.formatTemp(mWeather.getTemp_min()));
         mDescriptionText.setText(mWeather.getDetailedDescription());
         mWeatherImage.setImageResource(mWeather.getIcon());
         mCurrentTimeText.setText(mWeather.getTime());

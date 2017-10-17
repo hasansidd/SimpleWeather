@@ -49,10 +49,6 @@ public class WeatherStation {
         return mWeathers;
     }
 
-    public void setWeathers(List<Weather> weathers) {
-        mWeathers = weathers;
-        return;
-    }
 
     public Weather getWeather(String cityName) {
         for (int i = 0; i < mWeathers.size(); i++) {
@@ -66,7 +62,6 @@ public class WeatherStation {
     }
 
     private int getWeatherIndex(Weather weather) {
-
         if (!mWeathers.isEmpty()) {
             for (int i = 0; i < mWeathers.size(); i++) {
                 if (mWeathers.get(i).getName().equals(weather.getName()) || mWeathers.get(i).getLatLon().equals(weather.getLatLon())) {
@@ -162,7 +157,7 @@ public class WeatherStation {
             for (int i = 0; i < mWeathers.size(); i++) {
                 Weather.ExtendedForecast extendedForecast = mWeathers.get(i).getExtendedForecast();
                 Weather weather;
-                if (i==0) { //current weather, using lat/lon gives unreliable results when city originally inputted as zip or city name
+                if (i == 0) { //current weather, using lat/lon gives unreliable results when city originally inputted as zip or city name
                     weather = mWeatherFetcher.fetchWeather(mWeathers.get(i).getLatLon());
                 } else {
                     weather = mWeatherFetcher.fetchWeather(mWeathers.get(i).getName());
@@ -220,7 +215,7 @@ public class WeatherStation {
     }
 
     public List<Weather> getSharedPreferences() throws Exception {
-        if (mWeathers.size() > 0 ) {
+        if (mWeathers.size() > 0) {
             return mWeathers;
         }
 
@@ -228,7 +223,7 @@ public class WeatherStation {
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
 
         if (sharedPreferences.contains(SHARED_PREF_MAP)) {
-            String jsonString = sharedPreferences.getString(SHARED_PREF_MAP, (new JSONObject()).toString()).toString();
+            String jsonString = sharedPreferences.getString(SHARED_PREF_MAP, (new JSONObject()).toString());
             JSONObject jsonObject = new JSONObject(jsonString);
 
             Iterator<String> keysItr = jsonObject.keys();
@@ -269,13 +264,36 @@ public class WeatherStation {
     }
 
     public String getTempSetting() {
-        String tempSetting = "";
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
-        if (sharedPreferences.getString(SHARED_TEMPERATURE_SETTING, "F") != null) {
-            tempSetting = sharedPreferences.getString(SHARED_TEMPERATURE_SETTING, "F");
-        }
+        String tempSetting = sharedPreferences.getString(SHARED_TEMPERATURE_SETTING, "F");
         return tempSetting;
     }
+
+    public void changeTempSetting() {
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
+
+        if (getTempSetting() == "F") {
+            sharedPreferences.edit().putString(SHARED_TEMPERATURE_SETTING, "C").apply();
+        } else {
+            sharedPreferences.edit().putString(SHARED_TEMPERATURE_SETTING, "F").apply();
+        }
+    }
+
+    public String formatTemp(String temp) {
+        Double tempDouble = Double.parseDouble(temp);
+        String tempSetting = getTempSetting();
+
+        switch (tempSetting) {
+            case "C":
+                tempDouble = tempDouble - 273.15; //Celsius
+                return String.format("%.0f°C", tempDouble);
+            case "F":
+            default:
+                tempDouble = tempDouble * (9 / 5d) - 459.67; //Fahrenheit
+                return String.format("%.0f°F", tempDouble);
+        }
+    }
+
 
     public void setTempSetting(String string) {
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);

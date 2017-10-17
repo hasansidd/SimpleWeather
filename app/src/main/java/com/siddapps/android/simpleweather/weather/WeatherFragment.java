@@ -76,7 +76,7 @@ public class WeatherFragment extends Fragment {
         inflater.inflate(R.menu.weather_menu, menu);
 
         MenuItem tempSetting = menu.findItem(R.id.temperature_setting);
-        if (MainActivity.TEMPERATURE_SETTING == "F") {
+        if (mWeatherStation.getTempSetting() == "F") {
             tempSetting.setTitle(getString(R.string.units_f));
         } else {
             tempSetting.setTitle(R.string.units_c);
@@ -88,15 +88,7 @@ public class WeatherFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.temperature_setting:
-                String temp = JobManager.instance().getAllJobRequests().toString();
-                temp = temp.replace("},","\n");
-                Log.e(TAG, temp);
-
-                if (MainActivity.TEMPERATURE_SETTING == "F") {
-                    MainActivity.TEMPERATURE_SETTING = "C";
-                } else {
-                    MainActivity.TEMPERATURE_SETTING = "F";
-                }
+                mWeatherStation.changeTempSetting();
                 getActivity().invalidateOptionsMenu();
                 return true;
             default:
@@ -263,9 +255,9 @@ public class WeatherFragment extends Fragment {
         public void bind(Weather weather) {
             mWeather = weather;
             mCityNameText.setText(mWeather.getName());
-            mCurrentTempText.setText(mWeather.getTemp());
-            mHighTemp.setText(mWeather.getTemp_max());
-            mLowTemp.setText(mWeather.getTemp_min());
+            mCurrentTempText.setText(mWeatherStation.formatTemp(mWeather.getTemp()));
+            mHighTemp.setText(mWeatherStation.formatTemp(mWeather.getTemp_max()));
+            mLowTemp.setText(mWeatherStation.formatTemp(mWeather.getTemp_min()));
             mCurrentDescriptionText.setText(mWeather.getDetailedDescription());
             mWeatherBackgroundImage.setImageResource(mWeather.getIcon());
             mTimeText.setText(mWeather.getTime());

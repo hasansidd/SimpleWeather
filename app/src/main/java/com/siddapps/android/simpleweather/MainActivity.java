@@ -16,7 +16,6 @@ import com.siddapps.android.simpleweather.weather.WeatherActivity;
 
 public class MainActivity extends AppCompatActivity {
     static public WeatherFetcher mWeatherFetcher;
-    static public String TEMPERATURE_SETTING = "F";
     private static final String TAG = "MainActivity";
 
     @Override
@@ -37,10 +36,4 @@ public class MainActivity extends AppCompatActivity {
             startActivity(i);
         }
     }
-
-    public void changeTemp() {
-        WeatherStation weatherStation = WeatherStation.get(this);
-        TEMPERATURE_SETTING = weatherStation.getTempSetting();
-    }
-
 }
