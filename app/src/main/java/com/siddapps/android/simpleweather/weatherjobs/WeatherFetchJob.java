@@ -86,7 +86,7 @@ public class WeatherFetchJob extends Job {
     //TODO: find multiple instances of rain. Group together long instances of rain (multiple hours).
     private HashMap<String, String> findRainMap() throws Exception {
         HashMap<String, String> rainMap = new HashMap<>();
-        mWeathers = WeatherStation.get(getContext()).getSharedPreferences();
+        mWeathers = WeatherStation.get().getSharedPreferences(getContext());
 
         for (Weather w : mWeathers) {
             Weather.ExtendedForecast extendedForecast = w.getExtendedForecast();
@@ -111,7 +111,7 @@ public class WeatherFetchJob extends Job {
         String rainStartTime;
 
         if (weather != null) {
-            weather = WeatherStation.get(getContext()).getExtendedWeather(weather);
+            weather = WeatherStation.get().getExtendedWeather(weather);
             hourlyDataList = weather.getExtendedForecast().getHourlyDataList();
 
             //find rain in extended forecast

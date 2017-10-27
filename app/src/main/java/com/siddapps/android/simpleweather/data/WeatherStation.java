@@ -27,19 +27,16 @@ public class WeatherStation {
     private List<Weather> mWeathers;
     private static WeatherStation sWeatherStation;
     WeatherFetcher mWeatherFetcher;
-    private Context mContext;
 
-
-    public static WeatherStation get(Context context) {
+    public static WeatherStation get() {
         if (sWeatherStation == null) {
-            sWeatherStation = new WeatherStation(context);
+            sWeatherStation = new WeatherStation();
         }
         return sWeatherStation;
     }
 
-    private WeatherStation(Context context) {
-        mContext = context.getApplicationContext();
-        mWeatherFetcher = new WeatherFetcher(mContext);
+    private WeatherStation() {
+        mWeatherFetcher = new WeatherFetcher();
         mWeathers = new ArrayList<>();
     }
 
@@ -111,8 +108,8 @@ public class WeatherStation {
         return weather;
     }
 
-    private Weather addCurrentWeather() throws Exception {
-        Weather weather = mWeatherFetcher.fetchCurrentWeather();
+    private Weather addCurrentWeather(Context context) throws Exception {
+        Weather weather = mWeatherFetcher.fetchCurrentWeather(context);
         if (weather == null) {
             Log.e(TAG, "addCurrentWeather weather is null");
             return null;
@@ -133,11 +130,11 @@ public class WeatherStation {
         return weather;
     }
 
-    public Observable addCurrentWeatherObservable() {
+    public Observable addCurrentWeatherObservable(final Context context) {
         return Observable.defer(new Callable<ObservableSource<Weather>>() {
             @Override
             public ObservableSource<Weather> call() throws Exception {
-                return Observable.just(addCurrentWeather());
+                return Observable.just(addCurrentWeather(context));
             }
         })
                 .subscribeOn(Schedulers.newThread())
@@ -193,9 +190,9 @@ public class WeatherStation {
         }
     }
 
-    public void setSharedPreferences() {
+    public void setSharedPreferences(Context context) {
         LinkedHashMap<String, Boolean> weathersMap = new LinkedHashMap<>();
-        SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
 
         for (Weather w : mWeathers) {
             Weather.ExtendedForecast extendedForecast = w.getExtendedForecast();
@@ -208,13 +205,13 @@ public class WeatherStation {
         sharedPreferences.edit().putString(SHARED_PREF_MAP, jsonString).apply();
     }
 
-    public List<Weather> getSharedPreferences() throws Exception {
+    public List<Weather> getSharedPreferences(Context context) throws Exception {
         if (mWeathers.size() > 0) {
             return mWeathers;
         }
 
         LinkedHashMap<String, Boolean> weathersMap = new LinkedHashMap<>();
-        SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
 
         if (sharedPreferences.contains(SHARED_PREF_MAP)) {
             String jsonString = sharedPreferences.getString(SHARED_PREF_MAP, (new JSONObject()).toString());
@@ -238,7 +235,7 @@ public class WeatherStation {
         return null;
     }
 
-    public Observable getSharedPreferencesObservable() {
+    public Observable getSharedPreferencesObservable(final Context context) {
         if (mWeathers.size() > 0) {
             return null;
         }
@@ -246,7 +243,7 @@ public class WeatherStation {
         return Observable.defer(new Callable<ObservableSource<List<Weather>>>() {
             @Override
             public ObservableSource<List<Weather>> call() throws Exception {
-                return Observable.just(getSharedPreferences());
+                return Observable.just(getSharedPreferences(context));
             }
         })
                 .subscribeOn(Schedulers.newThread())
@@ -257,24 +254,24 @@ public class WeatherStation {
         mWeathers.remove(weather);
     }
 
-    public String getTempSetting() {
-        SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
+    public String getTempSetting(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
         return sharedPreferences.getString(SHARED_TEMPERATURE_SETTING, "F");
     }
 
-    public void changeTempSetting() {
-        SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
+    public void changeTempSetting(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
 
-        if (getTempSetting().equals("F")) {
+        if (getTempSetting(context).equals("F")) {
             sharedPreferences.edit().putString(SHARED_TEMPERATURE_SETTING, "C").apply();
         } else {
             sharedPreferences.edit().putString(SHARED_TEMPERATURE_SETTING, "F").apply();
         }
     }
 
-    public String formatTemp(String temp) {
+    public String formatTemp(Context context, String temp) {
         Double tempDouble = Double.parseDouble(temp);
-        String tempSetting = getTempSetting();
+        String tempSetting = getTempSetting(context);
 
         switch (tempSetting) {
             case "C":

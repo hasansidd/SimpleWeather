@@ -22,13 +22,6 @@ public class WeatherFetcher {
     public static final String SOURCE_LATLON = "latlon";
     private static final String METHOD_EXTENDED = "forecast";
     private static final String METHOD_CURRENT = "weather";
-    private LocationUtil mLocationUtil;
-
-    public WeatherFetcher(Context context) {
-        if (mLocationUtil == null) {
-            mLocationUtil = new LocationUtil(context);
-        }
-    }
 
     private String[] fetchWeatherByType(String source, String methodType) throws Exception {
         String urlString = source.replaceAll("\\s", "");
@@ -141,8 +134,9 @@ public class WeatherFetcher {
         return weather;
     }
 
-    public Weather fetchCurrentWeather() throws Exception {
-        Location location = mLocationUtil.getCurrentLocationLatLon();
+    public Weather fetchCurrentWeather(Context context) throws Exception {
+        LocationUtil locationUtil = new LocationUtil(context);
+        Location location = locationUtil.getCurrentLocationLatLon();
         String source = String.format("%f,%f", location.getLatitude(), location.getLongitude());
 
         //String source = mLocationUtil.getCurrentLocationZip();

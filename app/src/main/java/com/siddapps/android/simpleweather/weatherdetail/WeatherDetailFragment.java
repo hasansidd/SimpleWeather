@@ -89,7 +89,7 @@ public class WeatherDetailFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        mWeatherStation = WeatherStation.get(getActivity());
+        mWeatherStation = WeatherStation.get();
         mWeather = mWeatherStation.getWeather(sCityName);
     }
 
@@ -129,7 +129,7 @@ public class WeatherDetailFragment extends Fragment {
 
         public void bind(Weather.ExtendedForecast.HourlyData hourlyData) {
             mWeatherImage.setImageResource(hourlyData.getIcon());
-            mTempText.setText(mWeatherStation.formatTemp(hourlyData.getTemp()));
+            mTempText.setText(mWeatherStation.formatTemp(getActivity(), hourlyData.getTemp()));
             mTimeText.setText(hourlyData.getTime());
         }
     }
@@ -196,7 +196,7 @@ public class WeatherDetailFragment extends Fragment {
     }
 
     private void updateUI() {
-        mWeatherStation.setSharedPreferences();
+        mWeatherStation.setSharedPreferences(getActivity());
         if (mWeather.isExtendedForecastReady()) {
             if (mAdapter == null) {
                 mAdapter = new WeatherDetailAdapter(mWeather);
@@ -208,9 +208,9 @@ public class WeatherDetailFragment extends Fragment {
         }
 
         mCityNameText.setText(mWeather.getName());
-        mCurrentTempText.setText(mWeatherStation.formatTemp(mWeather.getTemp()));
-        mHighTemp.setText(mWeatherStation.formatTemp(mWeather.getTemp_max()));
-        mLowTemp.setText(mWeatherStation.formatTemp(mWeather.getTemp_min()));
+        mCurrentTempText.setText(mWeatherStation.formatTemp(getActivity(), mWeather.getTemp()));
+        mHighTemp.setText(mWeatherStation.formatTemp(getActivity(), mWeather.getTemp_max()));
+        mLowTemp.setText(mWeatherStation.formatTemp(getActivity(), mWeather.getTemp_min()));
         mDescriptionText.setText(mWeather.getDetailedDescription());
         mWeatherImage.setImageResource(mWeather.getIcon());
         mCurrentTimeText.setText(mWeather.getTime());

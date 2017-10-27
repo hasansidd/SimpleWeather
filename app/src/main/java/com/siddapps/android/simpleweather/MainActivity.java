@@ -11,11 +11,11 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.siddapps.android.simpleweather.data.WeatherFetcher;
 import com.siddapps.android.simpleweather.data.WeatherStation;
+import com.siddapps.android.simpleweather.util.LocationUtil;
 import com.siddapps.android.simpleweather.weather.WeatherActivity;
 
 
 public class MainActivity extends AppCompatActivity {
-    static public WeatherFetcher mWeatherFetcher;
     private static final String TAG = "MainActivity";
 
     @Override
@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            mWeatherFetcher = new WeatherFetcher(this);
+            LocationUtil locationUtil = new LocationUtil(this);
         } else {
             Intent i = WeatherActivity.newIntent(this);
             startActivity(i);

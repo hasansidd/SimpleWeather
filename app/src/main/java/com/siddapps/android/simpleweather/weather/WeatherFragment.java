@@ -74,7 +74,7 @@ public class WeatherFragment extends Fragment {
         inflater.inflate(R.menu.weather_menu, menu);
 
         MenuItem tempSetting = menu.findItem(R.id.temperature_setting);
-        if (mWeatherStation.getTempSetting() == "F") {
+        if (mWeatherStation.getTempSetting(getActivity()) == "F") {
             tempSetting.setTitle(getString(R.string.units_f));
         } else {
             tempSetting.setTitle(R.string.units_c);
@@ -86,7 +86,7 @@ public class WeatherFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.temperature_setting:
-                mWeatherStation.changeTempSetting();
+                mWeatherStation.changeTempSetting(getActivity());
                 getActivity().invalidateOptionsMenu();
                 return true;
             default:
@@ -97,7 +97,7 @@ public class WeatherFragment extends Fragment {
     private void updateUI() {
         Log.i(TAG, "Updating UI");
         List<Weather> weathers = mWeatherStation.getWeathers();
-        mWeatherStation.setSharedPreferences();
+        mWeatherStation.setSharedPreferences(getActivity());
 
         if (mAdapter == null) {
             mAdapter = new WeatherAdapter(weathers);
@@ -127,14 +127,14 @@ public class WeatherFragment extends Fragment {
     }
 
     private void addCurrentWeather() {
-        addCurrentWeather = mWeatherStation.addCurrentWeatherObservable();
+        addCurrentWeather = mWeatherStation.addCurrentWeatherObservable(getActivity());
         if (addCurrentWeather != null) {
             addCurrentWeather.subscribe(updateUIObserver);
         }
     }
 
     private void getSavedWeather() {
-        getSharedPreferences = mWeatherStation.getSharedPreferencesObservable();
+        getSharedPreferences = mWeatherStation.getSharedPreferencesObservable(getActivity());
         if (getSharedPreferences != null) {
             getSharedPreferences.subscribe(new Observer<List<Weather>>() {
                 @Override
@@ -166,7 +166,7 @@ public class WeatherFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
-        mWeatherStation = WeatherStation.get(getActivity());
+        mWeatherStation = WeatherStation.get();
 
         updateUIObserver = new Observer<Weather>() {
             @Override
@@ -253,9 +253,9 @@ public class WeatherFragment extends Fragment {
         public void bind(Weather weather) {
             mWeather = weather;
             mCityNameText.setText(mWeather.getName());
-            mCurrentTempText.setText(mWeatherStation.formatTemp(mWeather.getTemp()));
-            mHighTemp.setText(mWeatherStation.formatTemp(mWeather.getTemp_max()));
-            mLowTemp.setText(mWeatherStation.formatTemp(mWeather.getTemp_min()));
+            mCurrentTempText.setText(mWeatherStation.formatTemp(getActivity(), mWeather.getTemp()));
+            mHighTemp.setText(mWeatherStation.formatTemp(getActivity(), mWeather.getTemp_max()));
+            mLowTemp.setText(mWeatherStation.formatTemp(getActivity(), mWeather.getTemp_min()));
             mCurrentDescriptionText.setText(mWeather.getDetailedDescription());
             mWeatherBackgroundImage.setImageResource(mWeather.getIcon());
             mTimeText.setText(mWeather.getTime());
