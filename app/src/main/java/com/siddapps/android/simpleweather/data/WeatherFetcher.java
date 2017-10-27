@@ -17,6 +17,9 @@ import java.net.URL;
 public class WeatherFetcher {
     private static final String TAG = "WeatherFetcher";
     private static final String API_KEY = "7c3f5df254d3c24ed9ed5f0ab0937b49";
+    public static final String SOURCE_CITY = "city";
+    public static final String SOURCE_ZIP = "zip";
+    public static final String SOURCE_LATLON = "latlon";
     private static final String METHOD_EXTENDED = "forecast";
     private static final String METHOD_CURRENT = "weather";
     private LocationUtil mLocationUtil;
@@ -27,21 +30,29 @@ public class WeatherFetcher {
         }
     }
 
-    private String fetchJson(String source, String methodType) throws Exception {
-        String result = "";
-
+    private String[] fetchWeatherByType(String source, String methodType) throws Exception {
         String urlString = source.replaceAll("\\s", "");
-        URL url = new URL("http://api.openweathermap.org/data/2.5/" + methodType + "?q=" + urlString + "&APPID=" + API_KEY);
+        URL url = new URL("http://api.openweathermap.org/data/2.5/" + methodType + "?q=" + urlString + "&APPID=" + API_KEY); //by city name
+        String sourceType = SOURCE_CITY;
 
         if (source.matches(".*\\d+.*")) {
-            url = new URL("http://api.openweathermap.org/data/2.5/" + methodType + "?zip=" + source + ",us&APPID=" + API_KEY);
+            url = new URL("http://api.openweathermap.org/data/2.5/" + methodType + "?zip=" + source + ",us&APPID=" + API_KEY); //by zip
+            sourceType = SOURCE_ZIP;
         }
 
         if (source.contains(",")) {
             String[] location = source.split(",");
-            url = new URL("http://api.openweathermap.org/data/2.5/" + methodType + "?lat=" + location[0] + "&lon=" + location[1] + "&APPID=" + API_KEY);
+            url = new URL("http://api.openweathermap.org/data/2.5/" + methodType + "?lat=" + location[0] + "&lon=" + location[1] + "&APPID=" + API_KEY); //by lon/lat
+            sourceType = SOURCE_LATLON;
         }
 
+        String json = fetchJson(url);
+
+        return new String[] {json, sourceType};
+    }
+
+    private String fetchJson(URL url) throws Exception {
+        String result = "";
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         InputStream in = connection.getInputStream();
@@ -61,10 +72,9 @@ public class WeatherFetcher {
             return null;
         }
 
-        //Log.i(TAG, "Fetching weather for city: " + source);
-
         Weather mWeather = new Weather();
-        String json = fetchJson(source, METHOD_CURRENT);
+        String weatherInfo[] = fetchWeatherByType(source, METHOD_CURRENT);
+        String json = weatherInfo[0];
 
         JSONObject jsonObject = new JSONObject(json);
         mWeather.setName(jsonObject.getString("name"));
@@ -89,13 +99,19 @@ public class WeatherFetcher {
         mWeather.setSunrise(sysInfoObject.getLong("sunrise"));
         mWeather.setSunset(sysInfoObject.getLong("sunset"));
 
+        mWeather.setSourceType(weatherInfo[1]);
+
+        if (weatherInfo[1].equals(SOURCE_ZIP)) {
+            mWeather.setZipCode(source);
+        }
+
         // printCurrentWeather(mWeather);
         return mWeather;
     }
 
     public Weather fetchExtendedForecast(Weather weather) throws Exception {
         Weather.ExtendedForecast extendedForecast = weather.getExtendedForecast();
-        String json = fetchJson(weather.getName(), METHOD_EXTENDED);
+        String json = fetchWeatherByType(weather.getName(), METHOD_EXTENDED)[0];
 
         JSONObject jsonObject = new JSONObject(json);
         JSONArray fullInfoArray = new JSONArray(jsonObject.getString("list"));

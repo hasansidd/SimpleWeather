@@ -1,7 +1,6 @@
 package com.siddapps.android.simpleweather.data;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
@@ -11,7 +10,6 @@ import com.siddapps.android.simpleweather.weatherjobs.WeatherFetchJob;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -156,12 +154,7 @@ public class WeatherStation {
         if (!mWeathers.isEmpty()) {
             for (int i = 0; i < mWeathers.size(); i++) {
                 Weather.ExtendedForecast extendedForecast = mWeathers.get(i).getExtendedForecast();
-                Weather weather;
-                if (i == 0) { //current weather, using lat/lon gives unreliable results when city originally inputted as zip or city name
-                    weather = mWeatherFetcher.fetchWeather(mWeathers.get(i).getLatLon());
-                } else {
-                    weather = mWeatherFetcher.fetchWeather(mWeathers.get(i).getName());
-                }
+                Weather weather = mWeatherFetcher.fetchWeather(mWeathers.get(i).getSource());
                 weather.setExtendedForecast(extendedForecast);
                 mWeathers.set(i, weather);
             }
@@ -169,6 +162,7 @@ public class WeatherStation {
         }
         return null;
     }
+
 
     public Observable updateWeathersObservable() {
         if (!mWeathers.isEmpty() && mWeathers != null) {
@@ -205,7 +199,7 @@ public class WeatherStation {
 
         for (Weather w : mWeathers) {
             Weather.ExtendedForecast extendedForecast = w.getExtendedForecast();
-            weathersMap.put(w.getLatLon(), extendedForecast.isNotifyReady());
+            weathersMap.put(w.getSource(), extendedForecast.isNotifyReady());
         }
 
         JSONObject jsonObject = new JSONObject(weathersMap);
@@ -265,14 +259,13 @@ public class WeatherStation {
 
     public String getTempSetting() {
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
-        String tempSetting = sharedPreferences.getString(SHARED_TEMPERATURE_SETTING, "F");
-        return tempSetting;
+        return sharedPreferences.getString(SHARED_TEMPERATURE_SETTING, "F");
     }
 
     public void changeTempSetting() {
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
 
-        if (getTempSetting() == "F") {
+        if (getTempSetting().equals("F")) {
             sharedPreferences.edit().putString(SHARED_TEMPERATURE_SETTING, "C").apply();
         } else {
             sharedPreferences.edit().putString(SHARED_TEMPERATURE_SETTING, "F").apply();
@@ -292,11 +285,5 @@ public class WeatherStation {
                 tempDouble = tempDouble * (9 / 5d) - 459.67; //Fahrenheit
                 return String.format("%.0f°F", tempDouble);
         }
-    }
-
-
-    public void setTempSetting(String string) {
-        SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE);
-        sharedPreferences.edit().putString(SHARED_TEMPERATURE_SETTING, string).apply();
     }
 }

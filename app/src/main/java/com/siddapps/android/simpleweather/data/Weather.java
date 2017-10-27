@@ -3,7 +3,6 @@ package com.siddapps.android.simpleweather.data;
 import android.util.Log;
 import android.view.View;
 
-import com.siddapps.android.simpleweather.MainActivity;
 import com.siddapps.android.simpleweather.R;
 
 import java.text.SimpleDateFormat;
@@ -28,7 +27,33 @@ public class Weather {
     private long sunset;
     private ExtendedForecast mExtendedForecast;
     private boolean isExtendedForecastReady;
+    private String sourceType;
 
+    public String getZipCode() {
+        return zipCode;
+    }
+
+    public void setZipCode(String zipCode) {
+        this.zipCode = zipCode;
+    }
+
+    private String zipCode;
+
+    public String getSource() {
+        switch (sourceType) {
+            case WeatherFetcher.SOURCE_ZIP:
+                return zipCode;
+            case WeatherFetcher.SOURCE_LATLON:
+                return getLatLon();
+            case WeatherFetcher.SOURCE_CITY:
+            default:
+                return name;
+        }
+    }
+
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
+    }
 
     public void setLat(String lat) {
         this.lat = lat;

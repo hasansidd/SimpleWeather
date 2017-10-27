@@ -22,8 +22,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.evernote.android.job.JobManager;
-import com.siddapps.android.simpleweather.MainActivity;
 import com.siddapps.android.simpleweather.R;
 import com.siddapps.android.simpleweather.data.Weather;
 import com.siddapps.android.simpleweather.data.WeatherStation;
