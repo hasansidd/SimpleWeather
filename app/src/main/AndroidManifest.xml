@@ -13,19 +13,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
             android:name="com.siddapps.android.simpleweather.MainActivity"
             android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
         <activity android:name="com.siddapps.android.simpleweather.weather.WeatherActivity"/>
+
         <activity android:name="com.siddapps.android.simpleweather.weatherdetail.WeatherDetailActivity"
-                  android:parentActivityName="com.siddapps.android.simpleweather.weather.WeatherActivity">
-        </activity>
+                  android:parentActivityName="com.siddapps.android.simpleweather.weather.WeatherActivity"/>
+
         <meta-data
             android:name="com.crashlytics.ApiKey"
             android:value="820b5b87c89b1fe67af298c0a8ed019274bd3565" />

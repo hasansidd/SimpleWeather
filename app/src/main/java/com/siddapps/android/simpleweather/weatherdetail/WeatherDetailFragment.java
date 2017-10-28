@@ -45,6 +45,7 @@ public class WeatherDetailFragment extends Fragment {
     private WeatherDetailAdapter mAdapter;
     private WeatherStation mWeatherStation;
     private ImageView mWeatherAlertImage;
+    private Disposable mDisposable;
 
     public static WeatherDetailFragment newInstance() {
         return new WeatherDetailFragment();
@@ -81,7 +82,7 @@ public class WeatherDetailFragment extends Fragment {
                 updateUI();
                 return true;
             default:
-                return true;
+                return super.onOptionsItemSelected(item);
         }
     }
 
@@ -112,6 +113,13 @@ public class WeatherDetailFragment extends Fragment {
         getExtendedForecast();
         updateUI();
         return v;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mDisposable.dispose();
+        Log.e(TAG, "disposed");
     }
 
     public class WeatherDetailHolder extends RecyclerView.ViewHolder {
@@ -175,7 +183,7 @@ public class WeatherDetailFragment extends Fragment {
                 .subscribe(new Observer<Weather>() {
                     @Override
                     public void onSubscribe(Disposable d) {
-
+                        mDisposable = d;
                     }
 
                     @Override
