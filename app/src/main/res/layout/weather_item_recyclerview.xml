@@ -124,7 +124,7 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:scaleType="centerCrop"
-        app:srcCompat="@drawable/alert"
+        app:srcCompat="@drawable/alarm"
         android:padding="8dp"
         android:layout_margin="16dp"
         />

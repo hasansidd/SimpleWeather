@@ -1,5 +1,7 @@
 package com.siddapps.android.simpleweather.weatherdetail;
 
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -59,10 +61,12 @@ public class WeatherDetailFragment extends Fragment {
         MenuItem rainNotification = menu.findItem(R.id.rain_notification);
         Weather.ExtendedForecast extendedForecast = mWeather.getExtendedForecast();
         if (extendedForecast.isNotifyReady()) {
-            rainNotification.setTitle(getString(R.string.disable_weather_notification));
+            rainNotification.setIcon(R.drawable.alarm);
         } else {
-            rainNotification.setTitle(getString(R.string.enable_weather_notification));
+            rainNotification.setIcon(R.drawable.alarm_off);
         }
+        Drawable drawable = rainNotification.getIcon();
+        drawable.mutate().setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.SRC_IN);
     }
 
     @Override

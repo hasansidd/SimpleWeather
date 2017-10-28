@@ -4,7 +4,8 @@
 
     <item
         android:id="@+id/rain_notification"
-        android:title="Enable Rain Notification"
-        app:showAsAction="never"/>
+        android:title="@string/enable_weather_notification"
+        android:icon="@drawable/alarm"
+        app:showAsAction="always"/>
 
 </menu>
