@@ -10,6 +10,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
+import java.text.DateFormat;
 import java.util.List;
 
 public class LocationUtil {
@@ -46,6 +47,7 @@ public class LocationUtil {
     }
 
     private Location getLastKnownLocation() {
+
         List<String> providers = mLocationManager.getProviders(true);
         Location bestLocation = null;
         if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -61,11 +63,11 @@ public class LocationUtil {
                 continue;
             }
 
-            if (bestLocation == null || location.getAccuracy() < bestLocation.getAccuracy()) {
+            if (bestLocation == null || location.getTime() > bestLocation.getTime()) {
                 if (bestLocation == null) {
-                    Log.i(TAG, String.format("Accuracy from %s : %.2f", location.getProvider(), location.getAccuracy()));
+                    Log.i(TAG, String.format("Location data from %s : %s", location.getProvider(), android.text.format.DateFormat.format("MM-dd hh:mm:ss a", location.getTime())));
                 } else {
-                    Log.i(TAG, String.format("Accuracy from %s : %.2f > Accuracy from %s : %.2f", location.getProvider(), location.getAccuracy(), bestLocation.getProvider(), bestLocation.getAccuracy()));
+                    Log.i(TAG, String.format("Location data from %s : %s > Location data from %s : %s", location.getProvider(), android.text.format.DateFormat.format("MM-dd hh:mm:ss a", location.getTime()), bestLocation.getProvider(), android.text.format.DateFormat.format("MM-dd hh:mm:ss a", bestLocation.getTime())));
                 }
                 bestLocation = location;
             }
