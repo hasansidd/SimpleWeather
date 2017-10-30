@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+       xmlns:app="http://schemas.android.com/apk/res-auto"
+       xmlns:tools="http://schemas.android.com/tools">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp">
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/city_name"
+            android:layout_width="210dp"
+            android:layout_height="60dp"
+            app:autoSizeMaxTextSize="56dp"
+            app:autoSizeMinTextSize="20dp"
+            app:autoSizeTextType="uniform"
+            tools:text="Bossier City"/>
+
+        <TextView
+            android:id="@+id/current_temp_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/city_name"
+            android:layout_marginRight="8dp"
+            android:textSize="56dp"
+            tools:text="90°F"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/city_name"
+            android:layout_marginTop="3dp"
+            android:layout_toRightOf="@id/current_temp_text"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/high"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    app:srcCompat="@drawable/up"/>
+
+                <TextView
+                    android:id="@+id/temp_high_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="24dp"
+                    tools:text="100°F"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/low"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    app:srcCompat="@drawable/down"/>
+
+                <TextView
+                    android:id="@+id/temp_low_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="24dp"
+                    tools:text="50°F"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/weather_description_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/current_temp_text"
+            android:textSize="24dp"
+            tools:text="Cloudy"/>
+
+        <TextView
+            android:id="@+id/weather_time_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/weather_description_text"
+            android:layout_marginTop="16dp"
+            android:gravity="right"
+            android:textSize="10dp"
+            tools:text="Friday 4:20 pm"/>
+
+        <ImageView
+            android:id="@+id/weather_background_image"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentRight="true"
+            app:srcCompat="@drawable/clearn"
+            />
+
+        <ImageView
+            android:id="@+id/weather_alert"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignBottom="@+id/weather_time_text"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="8dp"
+            android:padding="8dp"
+            app:srcCompat="@drawable/alarm"/>
+
+    </RelativeLayout>
+
+</merge>

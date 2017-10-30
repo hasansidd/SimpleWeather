@@ -25,6 +25,7 @@ import android.widget.TextView;
 import com.siddapps.android.simpleweather.R;
 import com.siddapps.android.simpleweather.data.Weather;
 import com.siddapps.android.simpleweather.data.WeatherStation;
+import com.siddapps.android.simpleweather.views.WeatherView;
 
 import java.util.List;
 
@@ -226,41 +227,18 @@ public class WeatherFragment extends Fragment {
     }
 
     public class WeatherHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private TextView mCityNameText;
-        private TextView mCurrentTempText;
-        private TextView mHighTemp;
-        private TextView mLowTemp;
-        private TextView mCurrentDescriptionText;
-        private ImageView mWeatherBackgroundImage;
-        private ImageView mWeatherAlertImage;
-        private TextView mTimeText;
-        Weather mWeather;
+        private Weather mWeather;
+        private WeatherView mWeatherView;
 
         public WeatherHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.weather_item_recyclerview, parent, false));
             itemView.setOnClickListener(this);
-
-            mCityNameText = itemView.findViewById(R.id.city_name);
-            mCurrentTempText = itemView.findViewById(R.id.current_temp_text);
-            mHighTemp = itemView.findViewById(R.id.temp_high_text);
-            mLowTemp = itemView.findViewById(R.id.temp_low_text);
-            mCurrentDescriptionText = itemView.findViewById(R.id.weather_description_text);
-            mWeatherBackgroundImage = itemView.findViewById(R.id.weather_background_image);
-            mTimeText = itemView.findViewById(R.id.weather_time_text);
-            mWeatherAlertImage = itemView.findViewById(R.id.weather_alert);
+            mWeatherView = itemView.findViewById(R.id.weather_view);
         }
 
         public void bind(Weather weather) {
             mWeather = weather;
-            mCityNameText.setText(mWeather.getName());
-            mCurrentTempText.setText(mWeatherStation.formatTemp(getActivity(), mWeather.getTemp()));
-            mHighTemp.setText(mWeatherStation.formatTemp(getActivity(), mWeather.getTemp_max()));
-            mLowTemp.setText(mWeatherStation.formatTemp(getActivity(), mWeather.getTemp_min()));
-            mCurrentDescriptionText.setText(mWeather.getDetailedDescription());
-            mWeatherBackgroundImage.setImageResource(mWeather.getIcon());
-            mTimeText.setText(mWeather.getTime());
-            //noinspection ResourceType
-            mWeatherAlertImage.setVisibility(mWeather.getNotifyAlert());
+            mWeatherView.bindWeather(mWeather);
         }
 
         @Override

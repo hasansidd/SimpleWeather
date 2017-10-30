@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.siddapps.android.simpleweather.R;
 import com.siddapps.android.simpleweather.data.Weather;
 import com.siddapps.android.simpleweather.data.WeatherStation;
+import com.siddapps.android.simpleweather.views.WeatherView;
 import com.siddapps.android.simpleweather.weatherjobs.WeatherFetchJob;
 
 import java.util.List;
@@ -36,18 +37,11 @@ public class WeatherDetailFragment extends Fragment {
     private static final String TAG = "WeatherDetailFragment";
     static String sCityName;
     private Weather mWeather;
-    private TextView mCityNameText;
-    private TextView mCurrentTempText;
-    private TextView mHighTemp;
-    private TextView mLowTemp;
-    private TextView mDescriptionText;
-    private TextView mCurrentTimeText;
-    private ImageView mWeatherImage;
     private RecyclerView mRecyclerView;
     private WeatherDetailAdapter mAdapter;
     private WeatherStation mWeatherStation;
-    private ImageView mWeatherAlertImage;
     private Disposable mDisposable;
+    private WeatherView mWeatherView;
 
     public static WeatherDetailFragment newInstance() {
         return new WeatherDetailFragment();
@@ -67,6 +61,7 @@ public class WeatherDetailFragment extends Fragment {
         }
         Drawable drawable = rainNotification.getIcon();
         drawable.mutate().setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.SRC_IN);
+        updateUI();
     }
 
     @Override
@@ -102,17 +97,10 @@ public class WeatherDetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_weather_detail, container, false);
-        mCityNameText = v.findViewById(R.id.master_city_name);
-        mCurrentTempText = v.findViewById(R.id.master_temp_text);
-        mHighTemp = v.findViewById(R.id.master_temp_high_text);
-        mLowTemp = v.findViewById(R.id.master_temp_low_text);
-        mDescriptionText = v.findViewById(R.id.master_description_text);
-        mCurrentTimeText = v.findViewById(R.id.master_time_text);
-        mWeatherImage = v.findViewById(R.id.master_background_image);
+        mWeatherView = v.findViewById(R.id.weather_view);
+        mWeatherView.bindWeather(mWeather);
+
         mRecyclerView = v.findViewById(R.id.weather_detail_recyclerview);
-        mWeatherAlertImage = v.findViewById(R.id.weather_alert_detail);
-
-
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
         getExtendedForecast();
         updateUI();
@@ -218,15 +206,7 @@ public class WeatherDetailFragment extends Fragment {
                 mAdapter.notifyDataSetChanged();
             }
         }
-
-        mCityNameText.setText(mWeather.getName());
-        mCurrentTempText.setText(mWeatherStation.formatTemp(getActivity(), mWeather.getTemp()));
-        mHighTemp.setText(mWeatherStation.formatTemp(getActivity(), mWeather.getTemp_max()));
-        mLowTemp.setText(mWeatherStation.formatTemp(getActivity(), mWeather.getTemp_min()));
-        mDescriptionText.setText(mWeather.getDetailedDescription());
-        mWeatherImage.setImageResource(mWeather.getIcon());
-        mCurrentTimeText.setText(mWeather.getTime());
-        //noinspection ResourceType
-        mWeatherAlertImage.setVisibility(mWeather.getNotifyAlert());
+        mWeatherView.bindWeather(mWeather);
     }
+
 }
