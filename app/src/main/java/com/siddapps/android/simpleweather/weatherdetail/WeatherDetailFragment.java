@@ -90,13 +90,13 @@ public class WeatherDetailFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         mWeatherStation = WeatherStation.get();
-        mWeather = mWeatherStation.getWeather(sCityName);
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_weather_detail, container, false);
+        mWeather = mWeatherStation.getWeather(sCityName);
         mWeatherView = v.findViewById(R.id.weather_view);
         mWeatherView.bindWeather(mWeather);
 
@@ -111,7 +111,6 @@ public class WeatherDetailFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         mDisposable.dispose();
-        Log.e(TAG, "disposed");
     }
 
     public class WeatherDetailHolder extends RecyclerView.ViewHolder {
