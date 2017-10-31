@@ -3,8 +3,8 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/temperature_setting"
-        android:title="Units (°F)"
-        app:showAsAction="ifRoom"/>
+        android:id="@+id/settings"
+        android:title="@string/settings"
+        app:showAsAction="never"/>
 
 </menu>

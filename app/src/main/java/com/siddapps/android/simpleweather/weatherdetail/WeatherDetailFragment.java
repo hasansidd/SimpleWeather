@@ -1,5 +1,6 @@
 package com.siddapps.android.simpleweather.weatherdetail;
 
+import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
@@ -20,6 +21,7 @@ import android.widget.TextView;
 import com.siddapps.android.simpleweather.R;
 import com.siddapps.android.simpleweather.data.Weather;
 import com.siddapps.android.simpleweather.data.WeatherStation;
+import com.siddapps.android.simpleweather.settings.SettingsActivity;
 import com.siddapps.android.simpleweather.views.WeatherView;
 import com.siddapps.android.simpleweather.weatherjobs.WeatherFetchJob;
 
@@ -80,6 +82,9 @@ public class WeatherDetailFragment extends Fragment {
                 getActivity().invalidateOptionsMenu();
                 updateUI();
                 return true;
+            case R.id.settings:
+                startActivity(new Intent(getActivity(), SettingsActivity.class));
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -90,13 +95,14 @@ public class WeatherDetailFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         mWeatherStation = WeatherStation.get();
+        mWeather = mWeatherStation.getWeather(sCityName);
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_weather_detail, container, false);
-        mWeather = mWeatherStation.getWeather(sCityName);
+
         mWeatherView = v.findViewById(R.id.weather_view);
         mWeatherView.bindWeather(mWeather);
 

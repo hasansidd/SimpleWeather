@@ -2,9 +2,11 @@ package com.siddapps.android.simpleweather.data;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.evernote.android.job.JobManager;
+import com.siddapps.android.simpleweather.R;
 import com.siddapps.android.simpleweather.weatherjobs.WeatherFetchJob;
 
 import org.json.JSONObject;
@@ -255,18 +257,8 @@ public class WeatherStation {
     }
 
     public String getTempSetting(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
-        return sharedPreferences.getString(SHARED_TEMPERATURE_SETTING, "F");
-    }
-
-    public void changeTempSetting(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
-
-        if (getTempSetting(context).equals("F")) {
-            sharedPreferences.edit().putString(SHARED_TEMPERATURE_SETTING, "C").apply();
-        } else {
-            sharedPreferences.edit().putString(SHARED_TEMPERATURE_SETTING, "F").apply();
-        }
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getString(context.getString(R.string.pref_temp_units_key),context.getString(R.string.pref_temp_units_default));
     }
 
     public String formatTemp(Context context, String temp) {

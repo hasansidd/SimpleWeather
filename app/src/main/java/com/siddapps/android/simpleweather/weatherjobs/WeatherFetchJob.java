@@ -1,9 +1,8 @@
 package com.siddapps.android.simpleweather.weatherjobs;
 
-import android.app.Notification;
 import android.app.PendingIntent;
-import android.content.Intent;
-import android.graphics.BitmapFactory;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -12,11 +11,12 @@ import android.util.Log;
 import com.evernote.android.job.Job;
 import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
-import com.siddapps.android.simpleweather.MainActivity;
 import com.siddapps.android.simpleweather.R;
 import com.siddapps.android.simpleweather.data.Weather;
 import com.siddapps.android.simpleweather.data.Weather.ExtendedForecast.HourlyData;
 import com.siddapps.android.simpleweather.data.WeatherStation;
+import com.siddapps.android.simpleweather.weather.WeatherActivity;
+import com.siddapps.android.simpleweather.weatherdetail.WeatherDetailActivity;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,11 +25,13 @@ import java.util.concurrent.TimeUnit;
 public class WeatherFetchJob extends Job {
 
     public static final String TAG = "WeatherFetchJob";
+    private final static String GROUP_KEY = "weathernotification";
     public List<Weather> mWeathers;
 
     @Override
     @NonNull
     protected Result onRunJob(Params params) {
+        NotificationManagerCompat notificationManager =  NotificationManagerCompat.from(getContext());
         Log.e(TAG, "running");
 
         HashMap<String, String> rainMap = new HashMap<>();
@@ -40,38 +42,31 @@ public class WeatherFetchJob extends Job {
         }
 
         if (rainMap != null && rainMap.size() > 0) {
-            String formattedText = "";
-            String formattedTitle;
+            for (int i = 0; i < rainMap.keySet().size(); i++) {
+                String key = (String) rainMap.keySet().toArray()[i];
+                String formattedText = (getContext().getString(R.string.weather_alert_content_individual, rainMap.get(key)));
 
-            for (String key : rainMap.keySet()) {
-                formattedText += (getContext().getString(R.string.weather_alert_content, key, rainMap.get(key)));
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), "main")
+                        .setContentTitle(key)
+                        .setContentText(formattedText)
+                        .setAutoCancel(true)
+                        .setContentIntent(PendingIntent.getActivity(getContext(), i, WeatherDetailActivity.newIntent(getContext(),key), 0))
+                        .setSmallIcon(R.drawable.notification)
+                        .setShowWhen(true)
+                        .setColor(getContext().getResources().getColor(R.color.colorAccent))
+                        .setLocalOnly(true)
+                        .setGroup(GROUP_KEY);
+
+                notificationManager.notify(i,builder.build());
             }
 
-            if (rainMap.size() == 1) {
-                formattedTitle = getContext().getString(R.string.weather_alert_title_single);
-            } else {
-                formattedTitle = (getContext().getString(R.string.weather_alert_title, rainMap.size()));
-            }
+            getNotificationSummary(rainMap);
 
-            Notification notification = new NotificationCompat.Builder(getContext(), "main")
-                    .setContentTitle(formattedTitle)
-                    .setAutoCancel(true)
-                    .setContentIntent(PendingIntent.getActivity(getContext(), 0, new Intent(getContext(), MainActivity.class), 0))
-                    .setSmallIcon(R.drawable.notification)
-                    .setLargeIcon(BitmapFactory.decodeResource(getContext().getResources(), R.drawable.clear))
-                    .setShowWhen(true)
-                    .setColor(getContext().getResources().getColor(R.color.colorAccent))
-                    .setLocalOnly(true)
-                    .setStyle(new NotificationCompat.BigTextStyle().bigText(formattedText))
-                    .build();
-
-            NotificationManagerCompat.from(getContext())
-                    .notify(1, notification);
-
+            //https://github.com/evernote/android-job/issues/298
+            //If the job is ran from scheduleJobOnce(), this will set it to run periodically
             if (JobManager.instance().getAllJobRequests().size() == 0) {
-                scheduleJob();
+                scheduleJobPeriodic();
             }
-
 
             Log.e(TAG, "notification sent");
         } else {
@@ -106,7 +101,7 @@ public class WeatherFetchJob extends Job {
     }
 
     private String findRain(Weather weather) throws Exception {
-        int numberOfDays = 2;
+        int numberOfDays = getAlertRange();
         List<HourlyData> hourlyDataList;
         String rainStartTime;
 
@@ -129,7 +124,44 @@ public class WeatherFetchJob extends Job {
         return null;
     }
 
-    public static void scheduleJob() {
+    private int getAlertRange() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String numberOfDaysString = sharedPreferences.getString(getContext().getString(R.string.pref_alert_range_key), getContext().getString(R.string.pref_alert_range_default));
+        int numberOfDays = Integer.parseInt(numberOfDaysString);
+        return numberOfDays;
+    }
+
+    private void getNotificationSummary(HashMap<String, String> rainMap){
+        NotificationManagerCompat notificationManager =  NotificationManagerCompat.from(getContext());
+
+        String formattedTitle;
+        if (rainMap.size() == 1) {
+            formattedTitle = getContext().getString(R.string.weather_alert_title_single);
+        } else {
+            formattedTitle = (getContext().getString(R.string.weather_alert_title, rainMap.size()));
+        }
+
+        String formattedText="";
+        for (String key: rainMap.keySet()){
+            formattedText += getContext().getString(R.string.weather_alert_content_summnary, key, rainMap.get(key));
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), "main")
+                .setContentTitle(formattedTitle)
+                .setContentText(formattedText)
+                .setAutoCancel(true)
+                .setContentIntent(PendingIntent.getActivity(getContext(), -1, WeatherActivity.newIntent(getContext()), 0))
+                .setSmallIcon(R.drawable.notification)
+                .setShowWhen(true)
+                .setColor(getContext().getResources().getColor(R.color.colorAccent))
+                .setLocalOnly(true)
+                .setGroup(GROUP_KEY)
+                .setGroupSummary(true);
+
+        notificationManager.notify(-1,builder.build());
+    }
+
+    public static void scheduleJobPeriodic() {
         int jobId = new JobRequest.Builder(WeatherFetchJob.TAG)
                 .setPeriodic(TimeUnit.HOURS.toMillis(12), TimeUnit.HOURS.toMillis(1))
                 .setUpdateCurrent(true)

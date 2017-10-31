@@ -7,5 +7,9 @@
         android:title="@string/enable_weather_notification"
         android:icon="@drawable/alarm"
         app:showAsAction="always"/>
+    <item
+        android:id="@+id/settings"
+        android:title="@string/settings"
+        app:showAsAction="never"/>
 
 </menu>

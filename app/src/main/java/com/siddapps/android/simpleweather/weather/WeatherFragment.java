@@ -3,7 +3,7 @@ package com.siddapps.android.simpleweather.weather;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.os.AsyncTask;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -19,12 +19,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.siddapps.android.simpleweather.R;
 import com.siddapps.android.simpleweather.data.Weather;
 import com.siddapps.android.simpleweather.data.WeatherStation;
+import com.siddapps.android.simpleweather.settings.SettingsActivity;
 import com.siddapps.android.simpleweather.views.WeatherView;
 
 import java.util.List;
@@ -73,22 +72,13 @@ public class WeatherFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.weather_menu, menu);
-
-        MenuItem tempSetting = menu.findItem(R.id.temperature_setting);
-        if (mWeatherStation.getTempSetting(getActivity()) == "F") {
-            tempSetting.setTitle(getString(R.string.units_f));
-        } else {
-            tempSetting.setTitle(R.string.units_c);
-        }
-        updateUI();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.temperature_setting:
-                mWeatherStation.changeTempSetting(getActivity());
-                getActivity().invalidateOptionsMenu();
+            case R.id.settings:
+                startActivity(new Intent(getActivity(), SettingsActivity.class));
                 return true;
             default:
                 return false;

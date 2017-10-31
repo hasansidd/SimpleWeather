@@ -23,10 +23,15 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.siddapps.android.simpleweather.weather.WeatherActivity"/>
+        <activity
+            android:name="com.siddapps.android.simpleweather.weather.WeatherActivity"/>
 
-        <activity android:name="com.siddapps.android.simpleweather.weatherdetail.WeatherDetailActivity"
-                  android:parentActivityName="com.siddapps.android.simpleweather.weather.WeatherActivity"/>
+        <activity
+            android:name="com.siddapps.android.simpleweather.weatherdetail.WeatherDetailActivity"
+            android:parentActivityName="com.siddapps.android.simpleweather.weather.WeatherActivity"/>
+
+        <activity
+            android:name="com.siddapps.android.simpleweather.settings.SettingsActivity"/>
 
         <meta-data
             android:name="com.crashlytics.ApiKey"

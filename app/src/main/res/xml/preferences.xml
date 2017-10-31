@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:defaultValue="@string/pref_temp_units_default"
+        android:dialogTitle="@string/pref_temp_units_dialog_title"
+        android:entries="@array/pref_temp_entries"
+        android:entryValues="@array/pref_temp_values"
+        android:key="@string/pref_temp_units_key"
+        android:summary="@string/pref_temp_units_summary"
+        android:title="@string/pref_temp_units_title" />
+
+    <ListPreference
+        android:defaultValue="@string/pref_alert_range_default"
+        android:dialogTitle="@string/pref_alert_range_dialog_title"
+        android:entries="@array/pref_alert_range_entries"
+        android:entryValues="@array/pref_alert_range_values"
+        android:key="@string/pref_alert_range_key"
+        android:summary="@string/pref_alert_range_summary"
+        android:title="@string/pref_alert_range_title" />
+
+</PreferenceScreen>

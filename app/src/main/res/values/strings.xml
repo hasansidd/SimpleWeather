@@ -2,10 +2,31 @@
     <string name="app_name">SimpleWeather</string>
     <string name="weather_alert_title_single">Weather alert in 1 city</string>
     <string name="weather_alert_title">Weather alert in %1$d cities</string>
-    <string name="weather_alert_content">Rain in %1$s on %2$s\n</string>
-    <string name="units_c">Units (°C)</string>
-    <string name="units_f">Units (°F)</string>
+    <string name="weather_alert_content_individual">Rain on %1$s</string>
+    <string name="weather_alert_content_summnary">Rain in %1s on %2$s\n</string>
+    <string name="units_c">°C</string>
+    <string name="units_f">°F</string>
     <string name="add_new_city">Add a new city</string>
     <string name="disable_weather_notification">Disable weather notification</string>
     <string name="enable_weather_notification">Enable weather notification</string>
+    <string name="settings">Settings</string>
+
+    <string name="pref_temp_units_default">F</string>
+    <string name="pref_temp_units_f">F</string>
+    <string name="pref_temp_units_c">C</string>
+    <string name="pref_temp_units_dialog_title">Temperature Unit: </string>
+    <string name="pref_temp_units_key">tempunits</string>
+    <string name="pref_temp_units_summary">Select temperature units</string>
+    <string name="pref_temp_units_title">Temperature Units</string>
+
+    <string name="pref_alert_range_default">2</string>
+    <string name="pref_alert_range_1">1</string>
+    <string name="pref_alert_range_2">2</string>
+    <string name="pref_alert_range_3">3</string>
+    <string name="pref_alert_range_4">4</string>
+    <string name="pref_alert_range_5">5</string>
+    <string name="pref_alert_range_dialog_title">Days: </string>
+    <string name="pref_alert_range_key">alertrange</string>
+    <string name="pref_alert_range_summary">Select how many days in advance to be alerted of rain</string>
+    <string name="pref_alert_range_title">Weather Alert</string>
 </resources>

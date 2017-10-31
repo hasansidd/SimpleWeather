@@ -2,7 +2,7 @@
     <string name="app_name">TiempoSimple</string>
     <string name="weather_alert_title_single">Alerta meteorológica en 1 ciudad</string>
     <string name="weather_alert_title">Alerta meteorológica en %1$d ciudades</string>
-    <string name="weather_alert_content">lluvia en %1$s on %2$s\n</string>
+    <string name="weather_alert_content_individual">lluvia on %1$s</string>
     <string name="units_c">Unidades (°C)</string>
     <string name="units_f">Unidades (°F)</string>
     <string name="add_new_city">Añadir nueva ciudad</string>
