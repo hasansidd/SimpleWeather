@@ -88,7 +88,7 @@ public class WeatherFragment extends Fragment {
     private void updateUI() {
         Log.i(TAG, "Updating UI");
         List<Weather> weathers = mWeatherStation.getWeathers();
-        mWeatherStation.setSharedPreferences(getActivity());
+        mWeatherStation.setSharedPreferences(getContext());
 
         if (mAdapter == null) {
             mAdapter = new WeatherAdapter(weathers);

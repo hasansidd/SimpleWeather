@@ -201,7 +201,7 @@ public class WeatherDetailFragment extends Fragment {
     }
 
     private void updateUI() {
-        mWeatherStation.setSharedPreferences(getActivity());
+        mWeatherStation.setSharedPreferences(getContext());
         if (mWeather.isExtendedForecastReady()) {
             if (mAdapter == null) {
                 mAdapter = new WeatherDetailAdapter(mWeather);

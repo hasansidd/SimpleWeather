@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linear_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="15dp"
+    android:orientation="horizontal"
+    android:stateListAnimator="@animator/card_press"
+    app:cardElevation="2dp"
+    >
+
+    <com.siddapps.android.simpleweather.views.WeatherView
+        android:id="@+id/weather_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </com.siddapps.android.simpleweather.views.WeatherView>
+
+</android.support.v7.widget.CardView>
