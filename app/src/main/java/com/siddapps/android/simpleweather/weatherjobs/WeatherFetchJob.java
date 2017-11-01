@@ -44,13 +44,15 @@ public class WeatherFetchJob extends Job {
         if (rainMap != null && rainMap.size() > 0) {
             for (int i = 0; i < rainMap.keySet().size(); i++) {
                 String key = (String) rainMap.keySet().toArray()[i];
+                Log.e(TAG,i +" : " + key);
+                PendingIntent pi = PendingIntent.getActivity(getContext(), i, WeatherDetailActivity.newIntent(getContext(),key), PendingIntent.FLAG_CANCEL_CURRENT);
                 String formattedText = (getContext().getString(R.string.weather_alert_content_individual, rainMap.get(key)));
 
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), "main")
                         .setContentTitle(key)
                         .setContentText(formattedText)
                         .setAutoCancel(true)
-                        .setContentIntent(PendingIntent.getActivity(getContext(), i, WeatherDetailActivity.newIntent(getContext(),key), 0))
+                        .setContentIntent(pi)
                         .setSmallIcon(R.drawable.notification)
                         .setShowWhen(true)
                         .setColor(getContext().getResources().getColor(R.color.colorAccent))
