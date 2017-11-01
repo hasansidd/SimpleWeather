@@ -166,7 +166,7 @@ public class WeatherFragment extends Fragment {
 
             @Override
             public void onNext(Weather weather) {
-               // mWeatherStation.setWeather(weather);
+                // mWeatherStation.setWeather(weather);
             }
 
             @Override
@@ -267,7 +267,7 @@ public class WeatherFragment extends Fragment {
     }
 
     private void setupItemTouchHelper() {
-        ItemTouchHelper.SimpleCallback sITC = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.END) {
+        ItemTouchHelper.SimpleCallback sITC = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
                 return false;

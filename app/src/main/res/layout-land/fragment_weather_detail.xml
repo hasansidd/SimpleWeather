@@ -9,7 +9,6 @@
     tools:context="com.siddapps.android.simpleweather.weatherdetail.WeatherDetailActivity"
     android:id="@+id/weather_master_container">
 
-
         <com.siddapps.android.simpleweather.views.WeatherView
             android:id="@+id/weather_view"
             android:layout_width="match_parent"
@@ -20,6 +19,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:foregroundGravity="bottom"/>
+            android:foregroundGravity="bottom"
+            android:scrollbars="horizontal"
+            android:scrollbarAlwaysDrawHorizontalTrack="true"/>
 
 </LinearLayout>
