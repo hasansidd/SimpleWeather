@@ -6,6 +6,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 import com.evernote.android.job.Job;
@@ -31,7 +32,7 @@ public class WeatherFetchJob extends Job {
     @Override
     @NonNull
     protected Result onRunJob(Params params) {
-        NotificationManagerCompat notificationManager =  NotificationManagerCompat.from(getContext());
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getContext());
         Log.e(TAG, "running");
 
         HashMap<String, String> rainMap = new HashMap<>();
@@ -44,9 +45,13 @@ public class WeatherFetchJob extends Job {
         if (rainMap != null && rainMap.size() > 0) {
             for (int i = 0; i < rainMap.keySet().size(); i++) {
                 String key = (String) rainMap.keySet().toArray()[i];
-                Log.e(TAG,i +" : " + key);
-                PendingIntent pi = PendingIntent.getActivity(getContext(), i, WeatherDetailActivity.newIntent(getContext(),key), PendingIntent.FLAG_CANCEL_CURRENT);
                 String formattedText = (getContext().getString(R.string.weather_alert_content_individual, rainMap.get(key)));
+
+                //https://stackoverflow.com/questions/23328367/up-to-parent-activity-on-android
+                TaskStackBuilder stackBuilder = TaskStackBuilder.create(getContext());
+                stackBuilder.addParentStack(WeatherDetailActivity.class);
+                stackBuilder.addNextIntent(WeatherDetailActivity.newIntent(getContext(), key));
+                PendingIntent pi = stackBuilder.getPendingIntent(i, PendingIntent.FLAG_UPDATE_CURRENT);
 
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), "main")
                         .setContentTitle(key)
@@ -59,7 +64,7 @@ public class WeatherFetchJob extends Job {
                         .setLocalOnly(true)
                         .setGroup(GROUP_KEY);
 
-                notificationManager.notify(i,builder.build());
+                notificationManager.notify(i, builder.build());
             }
 
             getNotificationSummary(rainMap);
@@ -133,8 +138,8 @@ public class WeatherFetchJob extends Job {
         return numberOfDays;
     }
 
-    private void getNotificationSummary(HashMap<String, String> rainMap){
-        NotificationManagerCompat notificationManager =  NotificationManagerCompat.from(getContext());
+    private void getNotificationSummary(HashMap<String, String> rainMap) {
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getContext());
 
         String formattedTitle;
         if (rainMap.size() == 1) {
@@ -143,8 +148,8 @@ public class WeatherFetchJob extends Job {
             formattedTitle = (getContext().getString(R.string.weather_alert_title, rainMap.size()));
         }
 
-        String formattedText="";
-        for (String key: rainMap.keySet()){
+        String formattedText = "";
+        for (String key : rainMap.keySet()) {
             formattedText += getContext().getString(R.string.weather_alert_content_summnary, key, rainMap.get(key));
         }
 
@@ -160,7 +165,7 @@ public class WeatherFetchJob extends Job {
                 .setGroup(GROUP_KEY)
                 .setGroupSummary(true);
 
-        notificationManager.notify(-1,builder.build());
+        notificationManager.notify(-1, builder.build());
     }
 
     public static void scheduleJobPeriodic() {
