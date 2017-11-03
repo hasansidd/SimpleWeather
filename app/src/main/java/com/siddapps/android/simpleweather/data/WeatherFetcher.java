@@ -13,9 +13,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Calendar;
 
 public class WeatherFetcher {
-    private static final String TAG = "WeatherFetcher";
+    private final String TAG = this.getClass().getSimpleName();
     private static final String API_KEY = "7c3f5df254d3c24ed9ed5f0ab0937b49";
     public static final String SOURCE_CITY = "city";
     public static final String SOURCE_ZIP = "zip";
@@ -97,6 +98,8 @@ public class WeatherFetcher {
         if (weatherInfo[1].equals(SOURCE_ZIP)) {
             mWeather.setZipCode(source);
         }
+
+        mWeather.setTimeFetched(Calendar.getInstance().getTimeInMillis());
 
         // printCurrentWeather(mWeather);
         return mWeather;

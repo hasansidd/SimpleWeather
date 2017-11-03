@@ -28,6 +28,15 @@ public class Weather {
     private ExtendedForecast mExtendedForecast;
     private boolean isExtendedForecastReady;
     private String sourceType;
+    private Long timeFetched;
+
+    public Long getTimeFetched() {
+        return timeFetched;
+    }
+
+    public void setTimeFetched(Long timeFetched) {
+        this.timeFetched = timeFetched;
+    }
 
     public String getZipCode() {
         return zipCode;

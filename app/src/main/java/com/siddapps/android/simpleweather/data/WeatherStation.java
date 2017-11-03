@@ -12,10 +12,12 @@ import com.siddapps.android.simpleweather.weatherjobs.WeatherFetchJob;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
@@ -151,11 +153,14 @@ public class WeatherStation {
     // TODO: Rework to use setters to update weather instead of replacing object.
     private Weather updateWeathers() throws Exception {
         if (!mWeathers.isEmpty()) {
-            for (int i = 0; i < mWeathers.size(); i++) {
-                Weather.ExtendedForecast extendedForecast = mWeathers.get(i).getExtendedForecast();
-                Weather weather = mWeatherFetcher.fetchWeather(mWeathers.get(i).getSource());
-                weather.setExtendedForecast(extendedForecast);
-                mWeathers.set(i, weather);
+            long minUpdateTime = TimeUnit.MINUTES.toMillis(30);
+            if (mWeathers.get(0).getTimeFetched() < (Calendar.getInstance().getTimeInMillis() - minUpdateTime)) {
+                for (int i = 0; i < mWeathers.size(); i++) {
+                    Weather.ExtendedForecast extendedForecast = mWeathers.get(i).getExtendedForecast();
+                    Weather weather = mWeatherFetcher.fetchWeather(mWeathers.get(i).getSource());
+                    weather.setExtendedForecast(extendedForecast);
+                    mWeathers.set(i, weather);
+                }
             }
             return mWeathers.get(0);
         }
@@ -257,7 +262,7 @@ public class WeatherStation {
 
     public String getTempSetting(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getString(context.getString(R.string.pref_temp_units_key),context.getString(R.string.pref_temp_units_default));
+        return sharedPreferences.getString(context.getString(R.string.pref_temp_units_key), context.getString(R.string.pref_temp_units_default));
     }
 
     public String formatTemp(Context context, String temp) {
