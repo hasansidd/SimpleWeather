@@ -233,7 +233,6 @@ public class WeatherStation {
 
             return mWeathers;
         }
-
         return null;
     }
 
