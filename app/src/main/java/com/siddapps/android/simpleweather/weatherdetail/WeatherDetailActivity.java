@@ -22,7 +22,6 @@ public class WeatherDetailActivity extends SingleFragmentActivity {
     @Override
     protected Fragment createFragment() {
         String cityName = getIntent().getStringExtra(WeatherDetailFragment.EXTRA_CITY_NAME);
-        Log.e("createFragment()", cityName);
         return WeatherDetailFragment.newInstance(cityName);
     }
 

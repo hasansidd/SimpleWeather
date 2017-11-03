@@ -47,9 +47,9 @@ public class WeatherStation {
     }
 
 
-    public Weather getWeather(String cityName) {
+    public Weather getWeather(String citySource) {
         for (int i = 0; i < mWeathers.size(); i++) {
-            if (mWeathers.get(i).getName().contains(cityName)) {
+            if (mWeathers.get(i).getSource().contains(citySource) || mWeathers.get(i).getName().contains(citySource)) {
                 // Log.i(TAG, "Found weather for " + mWeathers.get(i).getName());
                 return mWeathers.get(i);
             }

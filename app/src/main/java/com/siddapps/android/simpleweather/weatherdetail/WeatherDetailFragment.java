@@ -43,12 +43,13 @@ public class WeatherDetailFragment extends Fragment {
     private WeatherDetailAdapter mAdapter;
     private WeatherStation mWeatherStation;
     private Disposable mDisposable;
+    private Disposable mDisposableExtended;
     private WeatherView mWeatherView;
+    private String mCityName;
 
     public static WeatherDetailFragment newInstance(String cityName) {
         WeatherDetailFragment fragment = new WeatherDetailFragment();
         Bundle args = new Bundle();
-        Log.e("ARGS", cityName);
         args.putString(EXTRA_CITY_NAME, cityName);
         fragment.setArguments(args);
         return fragment;
@@ -60,11 +61,13 @@ public class WeatherDetailFragment extends Fragment {
         inflater.inflate(R.menu.weather_detail_menu, menu);
 
         MenuItem rainNotification = menu.findItem(R.id.rain_notification);
-        Weather.ExtendedForecast extendedForecast = mWeather.getExtendedForecast();
-        if (extendedForecast.isNotifyReady()) {
-            rainNotification.setIcon(R.drawable.alarm);
-        } else {
-            rainNotification.setIcon(R.drawable.alarm_off);
+        if (mWeather != null) {
+            Weather.ExtendedForecast extendedForecast = mWeather.getExtendedForecast();
+            if (extendedForecast.isNotifyReady()) {
+                rainNotification.setIcon(R.drawable.alarm);
+            } else {
+                rainNotification.setIcon(R.drawable.alarm_off);
+            }
         }
         Drawable drawable = rainNotification.getIcon();
         drawable.mutate().setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.SRC_IN);
@@ -98,9 +101,14 @@ public class WeatherDetailFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         setHasOptionsMenu(true);
-        String mCityName = getArguments().getString(EXTRA_CITY_NAME);
         mWeatherStation = WeatherStation.get();
-        mWeather = mWeatherStation.getWeather(mCityName);
+        mCityName = getArguments().getString(EXTRA_CITY_NAME);
+
+        if (mWeatherStation.getWeathers().size() == 0) {
+            getWeather();
+        } else {
+            mWeather = mWeatherStation.getWeather(mCityName);
+        }
         super.onCreate(savedInstanceState);
     }
 
@@ -108,13 +116,14 @@ public class WeatherDetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_weather_detail, container, false);
-
         mWeatherView = v.findViewById(R.id.weather_view);
-        mWeatherView.bindWeather(mWeather);
 
         mRecyclerView = v.findViewById(R.id.weather_detail_recyclerview);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
-        getExtendedForecast();
+
+        if (mWeather!= null) {
+            getExtendedForecast();
+        }
         updateUI();
         return v;
     }
@@ -122,7 +131,12 @@ public class WeatherDetailFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mDisposable.dispose();
+        if (mDisposable != null) {
+            mDisposable.dispose();
+        }
+        if (mDisposableExtended != null) {
+            mDisposableExtended.dispose();
+        }
     }
 
     public class WeatherDetailHolder extends RecyclerView.ViewHolder {
@@ -173,6 +187,40 @@ public class WeatherDetailFragment extends Fragment {
         }
     }
 
+    private void getWeather() {
+        Observable.defer(new Callable<ObservableSource<List<Weather>>>() {
+            @Override
+            public ObservableSource<List<Weather>> call() throws Exception {
+                return Observable.just(mWeatherStation.getSharedPreferences(getContext()));
+            }
+        })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .share()
+                .subscribe(new Observer<List<Weather>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        mDisposable = d;
+                    }
+
+                    @Override
+                    public void onNext(List<Weather> weathers) {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(TAG, "onError: ", e);                    }
+
+                    @Override
+                    public void onComplete() {
+                        mWeather = mWeatherStation.getWeather(mCityName);
+                        mWeatherView.bindWeather(mWeather);
+                        getExtendedForecast();
+                    }
+                });
+    }
+
     private void getExtendedForecast() {
         Observable.defer(new Callable<ObservableSource<Weather>>() {
             @Override
@@ -186,7 +234,7 @@ public class WeatherDetailFragment extends Fragment {
                 .subscribe(new Observer<Weather>() {
                     @Override
                     public void onSubscribe(Disposable d) {
-                        mDisposable = d;
+                        mDisposableExtended = d;
                     }
 
                     @Override
@@ -196,7 +244,7 @@ public class WeatherDetailFragment extends Fragment {
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.e(TAG, "onError: ");
+                        Log.e(TAG, "onError: ", e);
                     }
 
                     @Override
@@ -208,16 +256,19 @@ public class WeatherDetailFragment extends Fragment {
 
     private void updateUI() {
         mWeatherStation.setSharedPreferences(getContext());
-        if (mWeather.isExtendedForecastReady()) {
-            if (mAdapter == null) {
-                mAdapter = new WeatherDetailAdapter(mWeather);
-                mRecyclerView.setAdapter(mAdapter);
-            } else {
-                mAdapter.setHourlyData(mWeather);
-                mAdapter.notifyDataSetChanged();
+
+        if (mWeather != null) {
+            mWeatherView.bindWeather(mWeather);
+            if (mWeather.isExtendedForecastReady()) {
+                if (mAdapter == null) {
+                    mAdapter = new WeatherDetailAdapter(mWeather);
+                    mRecyclerView.setAdapter(mAdapter);
+                } else {
+                    mAdapter.setHourlyData(mWeather);
+                    mAdapter.notifyDataSetChanged();
+                }
             }
         }
-        mWeatherView.bindWeather(mWeather);
     }
 
 }
