@@ -7,7 +7,7 @@ import android.util.Log;
 
 import com.siddapps.android.simpleweather.util.SingleFragmentActivity;
 import com.siddapps.android.simpleweather.weatherdetail.WeatherDetailActivity;
-import com.siddapps.android.simpleweather.data.Weather;
+import com.siddapps.android.simpleweather.data.model.Weather;
 
 
 public class WeatherActivity extends SingleFragmentActivity implements WeatherFragment.Callbacks {

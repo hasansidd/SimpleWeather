@@ -7,6 +7,8 @@ import android.util.Log;
 
 import com.evernote.android.job.JobManager;
 import com.siddapps.android.simpleweather.R;
+import com.siddapps.android.simpleweather.data.model.ExtendedForecast;
+import com.siddapps.android.simpleweather.data.model.Weather;
 import com.siddapps.android.simpleweather.weatherjobs.WeatherFetchJob;
 
 import org.json.JSONObject;
@@ -48,7 +50,6 @@ public class WeatherStation {
         return mWeathers;
     }
 
-
     public Weather getWeather(String citySource) {
         for (int i = 0; i < mWeathers.size(); i++) {
             if (mWeathers.get(i).getSource().contains(citySource) || mWeathers.get(i).getName().contains(citySource)) {
@@ -82,7 +83,7 @@ public class WeatherStation {
         }
 
         Log.i(TAG, "City: " + weather.getName() + " already exists, moving to beginning of list");
-        Weather.ExtendedForecast extendedForecast = weather.getExtendedForecast();
+        ExtendedForecast extendedForecast = weather.getExtendedForecast();
         mWeathers.remove(index);
         mWeathers.add(0, weather);
         mWeathers.get(0).setExtendedForecast(extendedForecast);
@@ -126,7 +127,7 @@ public class WeatherStation {
             return weather;
         }
 
-        Weather.ExtendedForecast extendedForecast = mWeathers.get(index).getExtendedForecast();
+        ExtendedForecast extendedForecast = mWeathers.get(index).getExtendedForecast();
         mWeathers.remove(index);
         mWeathers.add(0, weather);
         mWeathers.get(0).setExtendedForecast(extendedForecast);
@@ -154,9 +155,9 @@ public class WeatherStation {
     private Weather updateWeathers() throws Exception {
         if (!mWeathers.isEmpty()) {
             long minUpdateTime = TimeUnit.MINUTES.toMillis(30);
-            if (mWeathers.get(0).getTimeFetched() < (Calendar.getInstance().getTimeInMillis() - minUpdateTime)) {
-                for (int i = 0; i < mWeathers.size(); i++) {
-                    Weather.ExtendedForecast extendedForecast = mWeathers.get(i).getExtendedForecast();
+            for (int i = 0; i < mWeathers.size(); i++) {
+                if (mWeathers.get(i).getTimeFetched() < (Calendar.getInstance().getTimeInMillis() - minUpdateTime)) {
+                    ExtendedForecast extendedForecast = mWeathers.get(i).getExtendedForecast();
                     Weather weather = mWeatherFetcher.fetchWeather(mWeathers.get(i).getSource());
                     weather.setExtendedForecast(extendedForecast);
                     mWeathers.set(i, weather);
@@ -166,7 +167,6 @@ public class WeatherStation {
         }
         return null;
     }
-
 
     public Observable updateWeathersObservable() {
         if (!mWeathers.isEmpty() && mWeathers != null) {
@@ -186,7 +186,7 @@ public class WeatherStation {
         boolean shouldCancelJobs = true;
 
         for (Weather w : mWeathers) {
-            if (w.getExtendedForecast().isNotifyReady()) {
+            if (w.isNotifyReady()) {
                 shouldCancelJobs = false;
             }
         }
@@ -202,8 +202,7 @@ public class WeatherStation {
         SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
 
         for (Weather w : mWeathers) {
-            Weather.ExtendedForecast extendedForecast = w.getExtendedForecast();
-            weathersMap.put(w.getSource(), extendedForecast.isNotifyReady());
+            weathersMap.put(w.getSource(), w.isNotifyReady());
         }
 
         JSONObject jsonObject = new JSONObject(weathersMap);
@@ -233,7 +232,7 @@ public class WeatherStation {
 
             for (String key : weathersMap.keySet()) {
                 Weather weather = addWeather(key);
-                weather.getExtendedForecast().setNotifyReady(weathersMap.get(key));
+                weather.setNotifyReady(weathersMap.get(key));
             }
 
             return mWeathers;

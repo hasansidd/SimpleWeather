@@ -19,7 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.siddapps.android.simpleweather.R;
-import com.siddapps.android.simpleweather.data.Weather;
+import com.siddapps.android.simpleweather.data.model.Weather;
 import com.siddapps.android.simpleweather.data.WeatherStation;
 import com.siddapps.android.simpleweather.settings.SettingsActivity;
 import com.siddapps.android.simpleweather.views.WeatherView;

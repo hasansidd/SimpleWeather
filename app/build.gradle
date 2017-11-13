@@ -18,13 +18,13 @@ repositories {
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "25.0.2"
+    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "com.siddapps.android.simpeweather"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 19
-        versionName "2.7"
+        versionCode 20
+        versionName "2.71"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
@@ -53,6 +53,8 @@ dependencies {
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
     compile 'com.evernote:android-job:1.2.0'
     testCompile 'junit:junit:4.12'
+    implementation "android.arch.persistence.room:runtime:1.0.0"
+    annotationProcessor "android.arch.persistence.room:compiler:1.0.0"
     compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true;
     }

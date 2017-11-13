@@ -13,7 +13,6 @@ public class WeatherDetailActivity extends SingleFragmentActivity {
     private static final String TAG = "WeatherDetailActivity";
 
     public static Intent newIntent(Context context, String cityName) {
-        Log.e(TAG, cityName);
         Intent intent = new Intent(context, WeatherDetailActivity.class);
         intent.putExtra(WeatherDetailFragment.EXTRA_CITY_NAME, cityName);
         return intent;

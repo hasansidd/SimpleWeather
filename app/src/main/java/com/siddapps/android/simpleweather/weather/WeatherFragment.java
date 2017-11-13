@@ -21,7 +21,8 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.siddapps.android.simpleweather.R;
-import com.siddapps.android.simpleweather.data.Weather;
+import com.siddapps.android.simpleweather.data.WeatherDatabase;
+import com.siddapps.android.simpleweather.data.model.Weather;
 import com.siddapps.android.simpleweather.data.WeatherStation;
 import com.siddapps.android.simpleweather.settings.SettingsActivity;
 import com.siddapps.android.simpleweather.views.WeatherView;
@@ -44,6 +45,7 @@ public class WeatherFragment extends Fragment {
     Observable<Weather> addNewWeather;
     Observable<Weather> updateWeathers;
     Observable<List<Weather>> getSharedPreferences;
+
 
     public interface Callbacks {
         void OnWeatherSelected(Weather weather);
@@ -166,7 +168,6 @@ public class WeatherFragment extends Fragment {
 
             @Override
             public void onNext(Weather weather) {
-                // mWeatherStation.setWeather(weather);
             }
 
             @Override
