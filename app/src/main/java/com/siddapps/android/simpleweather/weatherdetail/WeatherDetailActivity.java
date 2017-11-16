@@ -2,26 +2,23 @@ package com.siddapps.android.simpleweather.weatherdetail;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.os.Bundle;
-import android.util.Log;
 
 import com.siddapps.android.simpleweather.util.SingleFragmentActivity;
 
 public class WeatherDetailActivity extends SingleFragmentActivity {
     private static final String TAG = "WeatherDetailActivity";
 
-    public static Intent newIntent(Context context, String cityName) {
+    public static Intent newIntent(Context context, int id) {
         Intent intent = new Intent(context, WeatherDetailActivity.class);
-        intent.putExtra(WeatherDetailFragment.EXTRA_CITY_NAME, cityName);
+        intent.putExtra(WeatherDetailFragment.EXTRA_CITY_ID, id);
         return intent;
     }
 
     @Override
     protected Fragment createFragment() {
-        String cityName = getIntent().getStringExtra(WeatherDetailFragment.EXTRA_CITY_NAME);
-        return WeatherDetailFragment.newInstance(cityName);
+        int id = getIntent().getIntExtra(WeatherDetailFragment.EXTRA_CITY_ID,-1);
+        return WeatherDetailFragment.newInstance(id);
     }
 
 }

@@ -50,16 +50,10 @@ public class WeatherStation {
         return mWeathers;
     }
 
-    public Weather getWeather(String citySource) {
-        for (int i = 0; i < mWeathers.size(); i++) {
-            if (mWeathers.get(i).getSource().contains(citySource) || mWeathers.get(i).getName().contains(citySource)) {
-                // Log.i(TAG, "Found weather for " + mWeathers.get(i).getName());
-                return mWeathers.get(i);
-            }
-        }
-        Log.i(TAG, "Could not find weather");
-        return null;
-    }
+/*    public Weather getWeather(Context context, String citySource) {
+        WeatherDatabase db = WeatherDatabase.getInstance(context);
+        return db.weatherDao().getWeather(citySource);
+    }*/
 
     private int getWeatherIndex(Weather weather) {
         if (!mWeathers.isEmpty()) {
@@ -72,29 +66,18 @@ public class WeatherStation {
         return -1;
     }
 
-    private Weather addWeather(String source) throws Exception {
+    private Weather addWeather(String source, Context context) throws Exception {
+        WeatherDatabase db = WeatherDatabase.getInstance(context);
         Weather weather = mWeatherFetcher.fetchWeather(source);
-        int index = getWeatherIndex(weather);
-
-        if (index == -1) {
-            mWeathers.add(weather);
-            Log.i(TAG, "City: " + weather.getName() + " added to end of list");
-            return weather;
-        }
-
-        Log.i(TAG, "City: " + weather.getName() + " already exists, moving to beginning of list");
-        ExtendedForecast extendedForecast = weather.getExtendedForecast();
-        mWeathers.remove(index);
-        mWeathers.add(0, weather);
-        mWeathers.get(0).setExtendedForecast(extendedForecast);
+        db.weatherDao().addWeather(weather);
         return weather;
     }
 
-    public Observable addWeatherObservable(final String source) {
+    public Observable addWeatherObservable(final String source, final Context context) {
         return Observable.defer(new Callable<ObservableSource<Weather>>() {
             @Override
             public ObservableSource<Weather> call() throws Exception {
-                return Observable.just(addWeather(source));
+                return Observable.just(addWeather(source, context));
             }
         })
                 .subscribeOn(Schedulers.newThread())
@@ -114,24 +97,16 @@ public class WeatherStation {
     }
 
     private Weather addCurrentWeather(Context context) throws Exception {
+        WeatherDatabase db = WeatherDatabase.getInstance(context);
         Weather weather = mWeatherFetcher.fetchCurrentWeather(context);
+
         if (weather == null) {
             Log.e(TAG, "addCurrentWeather weather is null");
             return null;
         }
 
-        int index = getWeatherIndex(weather);
-        if (index == -1) {
-            Log.i(TAG, "City: " + weather.getName() + " added to beginning of list");
-            mWeathers.add(0, weather);
-            return weather;
-        }
-
-        ExtendedForecast extendedForecast = mWeathers.get(index).getExtendedForecast();
-        mWeathers.remove(index);
-        mWeathers.add(0, weather);
-        mWeathers.get(0).setExtendedForecast(extendedForecast);
-        Log.i(TAG, "City: " + weather.getName() + " already exists, moved to beginning of list");
+        Log.i(TAG, "City: " + weather.getName() + " added to beginning of list");
+        db.weatherDao().addWeather(weather);
         return weather;
     }
 
@@ -152,34 +127,22 @@ public class WeatherStation {
     //extract the Extended forecast before overwriting the weather object and then re-adding it, only
     //if it contained data before. Yeah I know great programming.
     // TODO: Rework to use setters to update weather instead of replacing object.
-    private Weather updateWeathers() throws Exception {
-        if (!mWeathers.isEmpty()) {
-            long minUpdateTime = TimeUnit.MINUTES.toMillis(30);
-            for (int i = 0; i < mWeathers.size(); i++) {
-                if (mWeathers.get(i).getTimeFetched() < (Calendar.getInstance().getTimeInMillis() - minUpdateTime)) {
-                    ExtendedForecast extendedForecast = mWeathers.get(i).getExtendedForecast();
-                    Weather weather = mWeatherFetcher.fetchWeather(mWeathers.get(i).getSource());
-                    weather.setExtendedForecast(extendedForecast);
-                    mWeathers.set(i, weather);
-                }
-            }
-            return mWeathers.get(0);
-        }
-        return null;
+    private Weather updateWeathers(Context context) throws Exception {
+        WeatherDatabase db = WeatherDatabase.getInstance(context);
+        List<Weather> weathers = db.weatherDao().getWeathers();
+        db.weatherDao().updateWeathers(weathers);
+        return weathers.get(0);
     }
 
-    public Observable updateWeathersObservable() {
-        if (!mWeathers.isEmpty() && mWeathers != null) {
-            return Observable.defer(new Callable<ObservableSource<Weather>>() {
-                @Override
-                public ObservableSource<Weather> call() throws Exception {
-                    return Observable.just(updateWeathers());
-                }
-            })
-                    .subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread());
-        }
-        return null;
+    public Observable updateWeathersObservable(final Context context) {
+        return Observable.defer(new Callable<ObservableSource<Weather>>() {
+            @Override
+            public ObservableSource<Weather> call() throws Exception {
+                return Observable.just(updateWeathers(context));
+            }
+        })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     public void shouldCancelJobs() {
@@ -231,7 +194,7 @@ public class WeatherStation {
             }
 
             for (String key : weathersMap.keySet()) {
-                Weather weather = addWeather(key);
+                Weather weather = addWeather(key, context);
                 weather.setNotifyReady(weathersMap.get(key));
             }
 
@@ -255,8 +218,9 @@ public class WeatherStation {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public void deleteWeather(Weather weather) {
-        mWeathers.remove(weather);
+    public void deleteWeather(Weather weather, Context context) {
+        WeatherDatabase db = WeatherDatabase.getInstance(context);
+        db.weatherDao().deleteWeather(weather);
     }
 
     public String getTempSetting(Context context) {

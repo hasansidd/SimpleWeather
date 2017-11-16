@@ -25,12 +25,12 @@ public interface WeatherDao {
     void addWeather(Weather weather);
 
     @Update
-    void updateWeather(Weather weather);
+    void updateWeathers(List<Weather> weathers);
 
     @Delete
     void deleteWeather(Weather weather);
 
-    @Query("SELECT * FROM hourlydata WHERE name IS :name")
+    @Query("SELECT * FROM HourlyData WHERE name IS :cityName")
     List<HourlyData> getHourlyData(String cityName);
 
 }

@@ -95,8 +95,9 @@ public class HourlyData {
         this.detailedDescription = detailedDescription;
     }
 
-    public String getTime() {
-        return formatTime(time);
+    public long getTime() {
+        //return formatTime(time);
+        return time;
     }
 
     public void setTime(long time) {

@@ -2,6 +2,7 @@ package com.siddapps.android.simpleweather.data.model;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 import android.util.Log;
 import android.view.View;
@@ -9,9 +10,8 @@ import android.view.View;
 import com.siddapps.android.simpleweather.R;
 import com.siddapps.android.simpleweather.data.WeatherFetcher;
 
-import static com.siddapps.android.simpleweather.util.TimeUtil.formatTime;
 
-@Entity(tableName = "weather")
+@Entity(tableName = "weather", indices = {@Index(value = {"name"}, unique = true)})
 public class Weather {
     private static final String TAG = "Weather";
     @PrimaryKey(autoGenerate = true)
@@ -29,6 +29,7 @@ public class Weather {
     private long time;
     private String zipCode;
     private int icon;
+    @Ignore
     private ExtendedForecast mExtendedForecast;
     private String source;
     private long timeFetched;
@@ -57,6 +58,10 @@ public class Weather {
 
     @Ignore
     public Weather() {
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getName() {
@@ -107,8 +112,16 @@ public class Weather {
         this.detailedDescription = detailedDescription;
     }
 
+    public String getLat() {
+        return lat;
+    }
+
     public void setLat(String lat) {
         this.lat = lat;
+    }
+
+    public String getLon() {
+        return lon;
     }
 
     public void setLon(String lon) {
@@ -119,24 +132,27 @@ public class Weather {
         return String.format("%s,%s", lat, lon);
     }
 
-    public String getSunrise() {
-        return formatTime(sunrise);
+    public long getSunrise() {
+        //return formatTime(sunrise);
+        return sunrise;
     }
 
     public void setSunrise(long sunrise) {
         this.sunrise = sunrise;
     }
 
-    public String getSunset() {
-        return formatTime(sunset);
+    public long getSunset() {
+        //return formatTime(sunset);
+        return sunset;
     }
 
     public void setSunset(long sunset) {
         this.sunset = sunset;
     }
 
-    public String getTime() {
-        return formatTime(time);
+    public long getTime() {
+        //return formatTime(time);
+        return time;
     }
 
     public void setTime(long time) {
@@ -226,7 +242,7 @@ public class Weather {
     }
 
     public int getNotifyAlert() {
-        if (mExtendedForecast != null) {
+        if (isNotifyReady()) {
             return View.VISIBLE;
         } else {
             return View.GONE;

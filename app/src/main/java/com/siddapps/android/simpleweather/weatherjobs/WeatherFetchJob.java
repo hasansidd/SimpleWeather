@@ -13,8 +13,9 @@ import com.evernote.android.job.Job;
 import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
 import com.siddapps.android.simpleweather.R;
+import com.siddapps.android.simpleweather.data.model.ExtendedForecast;
+import com.siddapps.android.simpleweather.data.model.HourlyData;
 import com.siddapps.android.simpleweather.data.model.Weather;
-import com.siddapps.android.simpleweather.data.model.Weather.ExtendedForecast.HourlyData;
 import com.siddapps.android.simpleweather.data.WeatherStation;
 import com.siddapps.android.simpleweather.weather.WeatherActivity;
 import com.siddapps.android.simpleweather.weatherdetail.WeatherDetailActivity;
@@ -50,7 +51,7 @@ public class WeatherFetchJob extends Job {
                 //https://stackoverflow.com/questions/23328367/up-to-parent-activity-on-android
                 TaskStackBuilder stackBuilder = TaskStackBuilder.create(getContext());
                 stackBuilder.addParentStack(WeatherDetailActivity.class);
-                stackBuilder.addNextIntent(WeatherDetailActivity.newIntent(getContext(), key));
+                //stackBuilder.addNextIntent(WeatherDetailActivity.newIntent(getContext(), key));
                 PendingIntent pi = stackBuilder.getPendingIntent(i, PendingIntent.FLAG_UPDATE_CURRENT);
 
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), "main")
@@ -91,9 +92,7 @@ public class WeatherFetchJob extends Job {
         mWeathers = WeatherStation.get().getSharedPreferences(getContext());
 
         for (Weather w : mWeathers) {
-            Weather.ExtendedForecast extendedForecast = w.getExtendedForecast();
-
-            if (extendedForecast.isNotifyReady()) {
+            if (w.isNotifyReady()) {
                 String rainTime = findRain(w);
 
                 if (rainTime != null && rainTime.length() > 0) {
@@ -112,7 +111,7 @@ public class WeatherFetchJob extends Job {
         List<HourlyData> hourlyDataList;
         String rainStartTime;
 
-        if (weather != null) {
+       /* if (weather != null) {
             weather = WeatherStation.get().getExtendedWeather(weather);
             hourlyDataList = weather.getExtendedForecast().getHourlyDataList();
 
@@ -120,13 +119,13 @@ public class WeatherFetchJob extends Job {
             if (hourlyDataList.size() >= (8 * numberOfDays)) {
                 for (int i = 0; i < (8 * numberOfDays); i++) {
                     if (hourlyDataList.get(i).getMainDescription().equals("Rain")) {
-                        rainStartTime = hourlyDataList.get(i).getTime();
+                        /rainStartTime = hourlyDataList.get(i).getTime();
                         Log.d(TAG, "Rain detected in " + weather.getName() + " at " + rainStartTime);
                         return rainStartTime;
                     }
                 }
             }
-        }
+        }*/
 
         return null;
     }
