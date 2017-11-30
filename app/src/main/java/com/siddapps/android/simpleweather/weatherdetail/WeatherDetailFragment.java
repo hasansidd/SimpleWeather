@@ -24,8 +24,8 @@ import com.siddapps.android.simpleweather.data.model.HourlyData;
 import com.siddapps.android.simpleweather.data.model.Weather;
 import com.siddapps.android.simpleweather.data.WeatherStation;
 import com.siddapps.android.simpleweather.settings.SettingsActivity;
+import com.siddapps.android.simpleweather.util.TimeUtil;
 import com.siddapps.android.simpleweather.views.WeatherView;
-import com.siddapps.android.simpleweather.weatherjobs.WeatherFetchJob;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -80,13 +80,7 @@ public class WeatherDetailFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.rain_notification:
-                if (mWeather.isNotifyReady()) {
-                    mWeather.setNotifyReady(false);
-                    mWeatherStation.shouldCancelJobs();
-                } else {
-                    mWeather.setNotifyReady(true);
-                    WeatherFetchJob.scheduleJobOnce();
-                }
+                mWeatherStation.toggleRainNotification(getContext(),mWeather);
                 getActivity().invalidateOptionsMenu();
                 updateUI();
                 return true;
@@ -117,10 +111,7 @@ public class WeatherDetailFragment extends Fragment {
         mRecyclerView = v.findViewById(R.id.weather_detail_recyclerview);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
 
-        if (mWeather!= null) {
-            getExtendedForecast();
-        }
-        updateUI();
+        getExtendedForecast();
         return v;
     }
 
@@ -151,15 +142,15 @@ public class WeatherDetailFragment extends Fragment {
         public void bind(HourlyData hourlyData) {
             mWeatherImage.setImageResource(hourlyData.getIcon());
             mTempText.setText(mWeatherStation.formatTemp(getActivity(), hourlyData.getTemp()));
-            //mTimeText.setText(hourlyData.getTime());
+            mTimeText.setText(TimeUtil.formatTime(hourlyData.getTime()));
         }
     }
 
     public class WeatherDetailAdapter extends RecyclerView.Adapter<WeatherDetailHolder> {
         private List<HourlyData> hourlyData;
 
-        public WeatherDetailAdapter(Weather weather) {
-            hourlyData = weather.getExtendedForecast().getHourlyDataList();
+        public WeatherDetailAdapter(List<HourlyData> hourlyData) {
+            this.hourlyData = hourlyData;
         }
 
         @Override
@@ -178,62 +169,29 @@ public class WeatherDetailFragment extends Fragment {
             return hourlyData.size();
         }
 
-        public void setHourlyData(Weather weather) {
-            hourlyData = weather.getExtendedForecast().getHourlyDataList();
+        public void setHourlyData(List<HourlyData> hourlyData) {
+            this.hourlyData = hourlyData;
         }
     }
 
-    private void getWeather() {
-        Observable.defer(new Callable<ObservableSource<List<Weather>>>() {
-            @Override
-            public ObservableSource<List<Weather>> call() throws Exception {
-                return Observable.just(mWeatherStation.getSharedPreferences(getContext()));
-            }
-        })
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .share()
-                .subscribe(new Observer<List<Weather>>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                        mDisposable = d;
-                    }
-
-                    @Override
-                    public void onNext(List<Weather> weathers) {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e(TAG, "onError: ", e);                    }
-
-                    @Override
-                    public void onComplete() {
-                        mWeatherView.bindWeather(mWeather);
-                        getExtendedForecast();
-                    }
-                });
-    }
-
     private void getExtendedForecast() {
-        Observable.defer(new Callable<ObservableSource<Weather>>() {
+        Observable.defer(new Callable<ObservableSource<List<HourlyData>>>() {
             @Override
-            public ObservableSource<Weather> call() throws Exception {
-                return Observable.just(mWeatherStation.getExtendedWeather(mWeather));
+            public ObservableSource<List<HourlyData>> call() throws Exception {
+                return Observable.just(mWeatherStation.getExtendedWeather(getContext(), mWeather));
             }
         })
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .share()
-                .subscribe(new Observer<Weather>() {
+                .subscribe(new Observer<List<HourlyData>>() {
                     @Override
                     public void onSubscribe(Disposable d) {
                         mDisposableExtended = d;
                     }
 
                     @Override
-                    public void onNext(Weather weather) {
+                    public void onNext(List<HourlyData> hourlyDataList) {
 
                     }
 
@@ -253,15 +211,17 @@ public class WeatherDetailFragment extends Fragment {
         if (mWeather != null) {
             mWeatherView.bindWeather(mWeather);
 
-            if (mWeather.getExtendedForecast() != null) {
+            List<HourlyData> hourlyData = db.weatherDao().getHourlyData(mWeather.getName());
+            if (hourlyData.size()>0) {
                 if (mAdapter == null) {
-                    mAdapter = new WeatherDetailAdapter(mWeather);
+                    mAdapter = new WeatherDetailAdapter(hourlyData);
                     mRecyclerView.setAdapter(mAdapter);
                 } else {
-                    mAdapter.setHourlyData(mWeather);
+                    mAdapter.setHourlyData(hourlyData);
                     mAdapter.notifyDataSetChanged();
                 }
             }
+
         }
     }
 

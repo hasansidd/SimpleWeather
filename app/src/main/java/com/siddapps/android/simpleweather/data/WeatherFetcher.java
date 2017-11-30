@@ -4,7 +4,6 @@ import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 
-import com.siddapps.android.simpleweather.data.model.ExtendedForecast;
 import com.siddapps.android.simpleweather.data.model.HourlyData;
 import com.siddapps.android.simpleweather.data.model.Weather;
 import com.siddapps.android.simpleweather.util.LocationUtil;
@@ -16,7 +15,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 public class WeatherFetcher {
     private final String TAG = this.getClass().getSimpleName();
@@ -28,7 +29,7 @@ public class WeatherFetcher {
     private static final String METHOD_CURRENT = "weather";
 
     private String[] fetchWeatherByType(String source, String methodType) throws Exception {
-        String urlString = source.replaceAll("\\s", "");
+        String urlString = source.replaceAll("\\s", "+");
         URL url = new URL("http://api.openweathermap.org/data/2.5/" + methodType + "?q=" + urlString + "&APPID=" + API_KEY); //by city name
         String sourceType = SOURCE_CITY;
 
@@ -44,7 +45,6 @@ public class WeatherFetcher {
         }
 
         String json = fetchJson(url);
-
         return new String[] {json, sourceType};
     }
 
@@ -95,7 +95,7 @@ public class WeatherFetcher {
         weather.setSunrise(sysInfoObject.getLong("sunrise"));
         weather.setSunset(sysInfoObject.getLong("sunset"));
 
-        weather.setSource(weatherInfo[1]);
+        weather.setSourceType(weatherInfo[1]);
 
         if (weatherInfo[1].equals(SOURCE_ZIP)) {
             weather.setZipCode(source);
@@ -107,15 +107,20 @@ public class WeatherFetcher {
         return weather;
     }
 
-    public Weather fetchExtendedForecast(Weather weather) throws Exception {
-        ExtendedForecast extendedForecast = weather.getExtendedForecast();
+    private ArrayList<HourlyData> fetchHourlyData(Weather weather) throws Exception {
         String json = fetchWeatherByType(weather.getSource(), METHOD_EXTENDED)[0];
 
         JSONObject jsonObject = new JSONObject(json);
         JSONArray fullInfoArray = new JSONArray(jsonObject.getString("list"));
+        JSONObject nameObject = new JSONObject(jsonObject.getString("city"));
+        String name = nameObject.getString("name");
+
+        ArrayList<HourlyData> hourlyDataList = new ArrayList<>();
 
         for (int i = 0; i < fullInfoArray.length(); i++) {
             HourlyData hourlyData = new HourlyData();
+            hourlyData.setName(name);
+
             JSONObject hourlyInfoObject = fullInfoArray.getJSONObject(i);
             hourlyData.setTime(hourlyInfoObject.getLong("dt"));
 
@@ -130,12 +135,37 @@ public class WeatherFetcher {
             hourlyData.setDetailedDescription(weatherInfoObject.getString("description"));
             hourlyData.setNight(weatherInfoObject.getString("icon"));
 
+            hourlyDataList.add(hourlyData);
             //printExtendedForecastWeather(hourlyData);
-            extendedForecast.addHourlyData(hourlyData);
+            //extendedForecast.addHourlyData(hourlyData);
+
+        }
+        return hourlyDataList;
+    }
+
+    public ArrayList<HourlyData> fetchExtendedForecasts(Context context, List<Weather> weathers) throws Exception {
+        ArrayList<HourlyData> totalHourlyDataList = new ArrayList<>();
+
+        for (Weather w : weathers) {
+            List<HourlyData> hourlyDataList = fetchHourlyData(w);
+            totalHourlyDataList.addAll(hourlyDataList);
         }
 
-        weather.setExtendedForecast(extendedForecast);
-        return weather;
+        WeatherDatabase db = WeatherDatabase.getInstance(context);
+        db.weatherDao().addHourlyData(totalHourlyDataList);
+
+        for (HourlyData data : totalHourlyDataList) {
+            Log.e(TAG, data.getName());
+        }
+
+        return totalHourlyDataList;
+    }
+
+    public ArrayList<HourlyData> fetchExtendedForecast(Context context, Weather weather) throws Exception {
+        WeatherDatabase db = WeatherDatabase.getInstance(context);
+        ArrayList<HourlyData> hourlyDataList = fetchHourlyData(weather);
+        db.weatherDao().addHourlyData(hourlyDataList);
+        return hourlyDataList;
     }
 
     public Weather fetchCurrentWeather(Context context) throws Exception {

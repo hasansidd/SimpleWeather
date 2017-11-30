@@ -93,10 +93,7 @@ public class WeatherFragment extends Fragment {
 
     private void updateUI() {
         Log.i(TAG, "Updating UI");
-        //List<Weather> weathers = mWeatherStation.getWeathers();
-        //mWeatherStation.setSharedPreferences(getContext());
-
-        List<Weather> weathers = db.weatherDao().getWeathers();
+        List<Weather> weathers = mWeatherStation.getWeathers(getContext());
 
         if (mAdapter == null) {
             mAdapter = new WeatherAdapter(weathers);
@@ -129,35 +126,6 @@ public class WeatherFragment extends Fragment {
         addCurrentWeather = mWeatherStation.addCurrentWeatherObservable(getActivity());
         if (addCurrentWeather != null) {
             addCurrentWeather.subscribe(updateUIObserver);
-        }
-    }
-
-    private void getSavedWeather() {
-        getSharedPreferences = mWeatherStation.getSharedPreferencesObservable(getActivity());
-        if (getSharedPreferences != null) {
-            getSharedPreferences.subscribe(new Observer<List<Weather>>() {
-                @Override
-                public void onSubscribe(Disposable d) {
-
-                }
-
-                @Override
-                public void onNext(List<Weather> weathers) {
-
-                }
-
-                @Override
-                public void onError(Throwable e) {
-                    Log.e(TAG, "onError: ", e);
-                    addCurrentWeather();
-                }
-
-                @Override
-                public void onComplete() {
-                    updateUI();
-                    addCurrentWeather();
-                }
-            });
         }
     }
 
@@ -284,7 +252,7 @@ public class WeatherFragment extends Fragment {
 
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                List<Weather> weathers = db.weatherDao().getWeathers();
+                List<Weather> weathers = mWeatherStation.getWeathers(getContext());
                 mWeatherStation.deleteWeather(weathers.get(viewHolder.getAdapterPosition()),getContext());
                 updateUI();
             }
