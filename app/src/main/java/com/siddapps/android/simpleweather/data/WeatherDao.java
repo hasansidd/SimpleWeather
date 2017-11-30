@@ -21,8 +21,17 @@ public interface WeatherDao {
     @Query("SELECT * FROM weather WHERE id IS :id")
     Weather getWeather(int id);
 
+    @Query("SELECT * FROM weather WHERE notifyReady IS 1")
+    List<Weather> getNotifyReadyWeathers();
+
+    @Query("SELECT id FROM weather WHERE name IS :name")
+    int getIdFromCityName(String name);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void addWeather(Weather weather);
+
+    @Update
+    void updateWeathers(List<Weather> weathers);
 
     @Update
     void updateWeather(Weather weather);
@@ -30,7 +39,10 @@ public interface WeatherDao {
     @Delete
     void deleteWeather(Weather weather);
 
-    @Query("SELECT * FROM hourlydata WHERE name IS :name")
-    List<HourlyData> getHourlyData(String cityName);
+    @Query("SELECT * FROM HourlyData WHERE name IS :name")
+    List<HourlyData> getHourlyData(String name);
+
+    @Insert
+    void addHourlyData(List<HourlyData> hourlyDataList);
 
 }

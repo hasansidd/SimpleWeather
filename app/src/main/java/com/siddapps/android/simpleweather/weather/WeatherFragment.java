@@ -1,6 +1,7 @@
 package com.siddapps.android.simpleweather.weather;
 
 import android.app.AlertDialog;
+import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -45,6 +46,7 @@ public class WeatherFragment extends Fragment {
     Observable<Weather> addNewWeather;
     Observable<Weather> updateWeathers;
     Observable<List<Weather>> getSharedPreferences;
+    WeatherDatabase db;
 
 
     public interface Callbacks {
@@ -68,6 +70,8 @@ public class WeatherFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        db= WeatherDatabase.getInstance(getActivity());
+
     }
 
     @Override
@@ -89,8 +93,7 @@ public class WeatherFragment extends Fragment {
 
     private void updateUI() {
         Log.i(TAG, "Updating UI");
-        List<Weather> weathers = mWeatherStation.getWeathers();
-        mWeatherStation.setSharedPreferences(getContext());
+        List<Weather> weathers = mWeatherStation.getWeathers(getContext());
 
         if (mAdapter == null) {
             mAdapter = new WeatherAdapter(weathers);
@@ -104,18 +107,18 @@ public class WeatherFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        updateWeathers();
+        updateWeathers(getActivity());
     }
 
-    private void updateWeathers() {
-        updateWeathers = mWeatherStation.updateWeathersObservable();
+    private void updateWeathers(Context context) {
+        updateWeathers = mWeatherStation.updateWeathersObservable(context);
         if (updateWeathers != null) {
             updateWeathers.subscribe(updateUIObserver);
         }
     }
 
     private void addNewWeather(final String source) {
-        addNewWeather = mWeatherStation.addWeatherObservable(source);
+        addNewWeather = mWeatherStation.addWeatherObservable(source, getActivity());
         addNewWeather.subscribe(updateUIObserver);
     }
 
@@ -123,35 +126,6 @@ public class WeatherFragment extends Fragment {
         addCurrentWeather = mWeatherStation.addCurrentWeatherObservable(getActivity());
         if (addCurrentWeather != null) {
             addCurrentWeather.subscribe(updateUIObserver);
-        }
-    }
-
-    private void getSavedWeather() {
-        getSharedPreferences = mWeatherStation.getSharedPreferencesObservable(getActivity());
-        if (getSharedPreferences != null) {
-            getSharedPreferences.subscribe(new Observer<List<Weather>>() {
-                @Override
-                public void onSubscribe(Disposable d) {
-
-                }
-
-                @Override
-                public void onNext(List<Weather> weathers) {
-
-                }
-
-                @Override
-                public void onError(Throwable e) {
-                    Log.e(TAG, "onError: ", e);
-                    addCurrentWeather();
-                }
-
-                @Override
-                public void onComplete() {
-                    updateUI();
-                    addCurrentWeather();
-                }
-            });
         }
     }
 
@@ -181,10 +155,12 @@ public class WeatherFragment extends Fragment {
             }
         };
 
-        getSavedWeather();
+        //getSavedWeather();
 
         mRecyclerView = v.findViewById(R.id.weather_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        addCurrentWeather();
+        updateUI();
 
         setupItemTouchHelper();
 
@@ -276,8 +252,8 @@ public class WeatherFragment extends Fragment {
 
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                List<Weather> weathers = mWeatherStation.getWeathers();
-                mWeatherStation.deleteWeather(weathers.get(viewHolder.getAdapterPosition()));
+                List<Weather> weathers = mWeatherStation.getWeathers(getContext());
+                mWeatherStation.deleteWeather(weathers.get(viewHolder.getAdapterPosition()),getContext());
                 updateUI();
             }
         };

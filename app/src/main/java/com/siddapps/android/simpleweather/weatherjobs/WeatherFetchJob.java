@@ -13,9 +13,10 @@ import com.evernote.android.job.Job;
 import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
 import com.siddapps.android.simpleweather.R;
+import com.siddapps.android.simpleweather.data.model.HourlyData;
 import com.siddapps.android.simpleweather.data.model.Weather;
-import com.siddapps.android.simpleweather.data.model.Weather.ExtendedForecast.HourlyData;
 import com.siddapps.android.simpleweather.data.WeatherStation;
+import com.siddapps.android.simpleweather.util.TimeUtil;
 import com.siddapps.android.simpleweather.weather.WeatherActivity;
 import com.siddapps.android.simpleweather.weatherdetail.WeatherDetailActivity;
 
@@ -46,11 +47,13 @@ public class WeatherFetchJob extends Job {
             for (int i = 0; i < rainMap.keySet().size(); i++) {
                 String key = (String) rainMap.keySet().toArray()[i];
                 String formattedText = (getContext().getString(R.string.weather_alert_content_individual, rainMap.get(key)));
+                int id = WeatherStation.get().getIdFromName(getContext(), key);
+
 
                 //https://stackoverflow.com/questions/23328367/up-to-parent-activity-on-android
                 TaskStackBuilder stackBuilder = TaskStackBuilder.create(getContext());
                 stackBuilder.addParentStack(WeatherDetailActivity.class);
-                stackBuilder.addNextIntent(WeatherDetailActivity.newIntent(getContext(), key));
+                stackBuilder.addNextIntent(WeatherDetailActivity.newIntent(getContext(), id));
                 PendingIntent pi = stackBuilder.getPendingIntent(i, PendingIntent.FLAG_UPDATE_CURRENT);
 
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), "main")
@@ -88,21 +91,17 @@ public class WeatherFetchJob extends Job {
     //TODO: find multiple instances of rain. Group together long instances of rain (multiple hours).
     private HashMap<String, String> findRainMap() throws Exception {
         HashMap<String, String> rainMap = new HashMap<>();
-        mWeathers = WeatherStation.get().getSharedPreferences(getContext());
+        mWeathers = WeatherStation.get().getNotifyReadyWeathers(getContext());
 
         for (Weather w : mWeathers) {
-            Weather.ExtendedForecast extendedForecast = w.getExtendedForecast();
+            String rainTime = findRain(w);
 
-            if (extendedForecast.isNotifyReady()) {
-                String rainTime = findRain(w);
-
-                if (rainTime != null && rainTime.length() > 0) {
-                    rainMap.put(w.getName(), rainTime);
-                } else {
-                    Log.d(TAG, "No rain detected for " + w.getName());
-                }
-
+            if (rainTime != null && rainTime.length() > 0) {
+                rainMap.put(w.getName(), rainTime);
+            } else {
+                Log.d(TAG, "No rain detected for " + w.getName());
             }
+
         }
         return rainMap;
     }
@@ -112,19 +111,14 @@ public class WeatherFetchJob extends Job {
         List<HourlyData> hourlyDataList;
         String rainStartTime;
 
-        if (weather != null) {
-            weather = WeatherStation.get().getExtendedWeather(weather);
-            hourlyDataList = weather.getExtendedForecast().getHourlyDataList();
+        hourlyDataList = WeatherStation.get().getExtendedWeather(getContext(), weather);
 
-            //find rain in extended forecast
-            if (hourlyDataList.size() >= (8 * numberOfDays)) {
-                for (int i = 0; i < (8 * numberOfDays); i++) {
-                    if (hourlyDataList.get(i).getMainDescription().equals("Rain")) {
-                        rainStartTime = hourlyDataList.get(i).getTime();
-                        Log.d(TAG, "Rain detected in " + weather.getName() + " at " + rainStartTime);
-                        return rainStartTime;
-                    }
-                }
+        //find rain in extended forecast
+        for (int i = 0; i < (8 * numberOfDays); i++) {
+            if (hourlyDataList.get(i).getMainDescription().equals("Rain")) {
+                rainStartTime = TimeUtil.formatTime(hourlyDataList.get(i).getTime());
+                Log.d(TAG, "Rain detected in " + weather.getName() + " at " + rainStartTime);
+                return rainStartTime;
             }
         }
 

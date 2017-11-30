@@ -7,19 +7,17 @@ import android.util.Log;
 
 import com.evernote.android.job.JobManager;
 import com.siddapps.android.simpleweather.R;
-import com.siddapps.android.simpleweather.data.model.ExtendedForecast;
+import com.siddapps.android.simpleweather.data.model.HourlyData;
 import com.siddapps.android.simpleweather.data.model.Weather;
 import com.siddapps.android.simpleweather.weatherjobs.WeatherFetchJob;
 
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
@@ -29,7 +27,6 @@ import io.reactivex.schedulers.Schedulers;
 public class WeatherStation {
     private static final String TAG = "WeatherStation";
     private static final String SHARED_PREF_MAP = "sharedPrefList";
-    private static String SHARED_TEMPERATURE_SETTING = "temperatureSetting";
     private List<Weather> mWeathers;
     private static WeatherStation sWeatherStation;
     WeatherFetcher mWeatherFetcher;
@@ -46,92 +43,64 @@ public class WeatherStation {
         mWeathers = new ArrayList<>();
     }
 
-    public List<Weather> getWeathers() {
-        return mWeathers;
+    public int getIdFromName(Context context, String name) {
+        WeatherDatabase db = WeatherDatabase.getInstance(context);
+        int Id = db.weatherDao().getIdFromCityName(name);
+        return Id;
     }
 
-    public Weather getWeather(String citySource) {
-        for (int i = 0; i < mWeathers.size(); i++) {
-            if (mWeathers.get(i).getSource().contains(citySource) || mWeathers.get(i).getName().contains(citySource)) {
-                // Log.i(TAG, "Found weather for " + mWeathers.get(i).getName());
-                return mWeathers.get(i);
-            }
-        }
-        Log.i(TAG, "Could not find weather");
-        return null;
+    public List<Weather> getWeathers(Context context) {
+        WeatherDatabase db = WeatherDatabase.getInstance(context);
+        List<Weather> weathers = db.weatherDao().getWeathers();
+        return weathers;
     }
 
-    private int getWeatherIndex(Weather weather) {
-        if (!mWeathers.isEmpty()) {
-            for (int i = 0; i < mWeathers.size(); i++) {
-                if (mWeathers.get(i).getName().equals(weather.getName()) || mWeathers.get(i).getLatLon().equals(weather.getLatLon())) {
-                    return i;
-                }
-            }
-        }
-        return -1;
+    public List<Weather> getNotifyReadyWeathers(Context context) {
+        WeatherDatabase db = WeatherDatabase.getInstance(context);
+        List<Weather> weathers = db.weatherDao().getNotifyReadyWeathers();
+        return weathers;
     }
 
-    private Weather addWeather(String source) throws Exception {
+
+    private Weather addWeather(String source, Context context) throws Exception {
+        WeatherDatabase db = WeatherDatabase.getInstance(context);
         Weather weather = mWeatherFetcher.fetchWeather(source);
-        int index = getWeatherIndex(weather);
-
-        if (index == -1) {
-            mWeathers.add(weather);
-            Log.i(TAG, "City: " + weather.getName() + " added to end of list");
-            return weather;
-        }
-
-        Log.i(TAG, "City: " + weather.getName() + " already exists, moving to beginning of list");
-        ExtendedForecast extendedForecast = weather.getExtendedForecast();
-        mWeathers.remove(index);
-        mWeathers.add(0, weather);
-        mWeathers.get(0).setExtendedForecast(extendedForecast);
+        db.weatherDao().addWeather(weather);
         return weather;
     }
 
-    public Observable addWeatherObservable(final String source) {
+    public Observable addWeatherObservable(final String source, final Context context) {
         return Observable.defer(new Callable<ObservableSource<Weather>>() {
             @Override
             public ObservableSource<Weather> call() throws Exception {
-                return Observable.just(addWeather(source));
+                return Observable.just(addWeather(source, context));
             }
         })
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Weather getExtendedWeather(Weather weather) throws Exception {
-        int index = getWeatherIndex(weather);
-        if (index == -1) {
-            Log.i(TAG, "Could not get extended forecast for: " + weather.getName());
-            return null;
-        }
+    public List<HourlyData> getExtendedWeather(Context context, Weather weather) throws Exception {
+        List<HourlyData> hourlyDataList = mWeatherFetcher.fetchExtendedForecast(context, weather);
+        return hourlyDataList;
+    }
 
-        Log.i(TAG, "Getting extended forecast for: " + weather.getName());
-        mWeathers.set(index, mWeatherFetcher.fetchExtendedForecast(weather));
-        return weather;
+    public List<HourlyData> getExtendedWeathers(Context context, List<Weather> weathers) throws Exception {
+        List<HourlyData> hourlyDataList = mWeatherFetcher.fetchExtendedForecasts(context, weathers);
+        return hourlyDataList;
     }
 
     private Weather addCurrentWeather(Context context) throws Exception {
+        WeatherDatabase db = WeatherDatabase.getInstance(context);
         Weather weather = mWeatherFetcher.fetchCurrentWeather(context);
+
         if (weather == null) {
             Log.e(TAG, "addCurrentWeather weather is null");
             return null;
         }
 
-        int index = getWeatherIndex(weather);
-        if (index == -1) {
-            Log.i(TAG, "City: " + weather.getName() + " added to beginning of list");
-            mWeathers.add(0, weather);
-            return weather;
-        }
-
-        ExtendedForecast extendedForecast = mWeathers.get(index).getExtendedForecast();
-        mWeathers.remove(index);
-        mWeathers.add(0, weather);
-        mWeathers.get(0).setExtendedForecast(extendedForecast);
-        Log.i(TAG, "City: " + weather.getName() + " already exists, moved to beginning of list");
+        Log.i(TAG, "City: " + weather.getName() + " added to beginning of list");
+        db.weatherDao().addWeather(weather);
         return weather;
     }
 
@@ -146,43 +115,42 @@ public class WeatherStation {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    //This method needs to be reworked. When going back from detailed view, this method is run.
-    //When it is ran, the weather object containing the ExtendedForecast is overwritten
-    //with the new weather object. This erases the Extended Forecast. Currently the work around is to
-    //extract the Extended forecast before overwriting the weather object and then re-adding it, only
-    //if it contained data before. Yeah I know great programming.
-    // TODO: Rework to use setters to update weather instead of replacing object.
-    private Weather updateWeathers() throws Exception {
-        if (!mWeathers.isEmpty()) {
-            long minUpdateTime = TimeUnit.MINUTES.toMillis(30);
-            for (int i = 0; i < mWeathers.size(); i++) {
-                if (mWeathers.get(i).getTimeFetched() < (Calendar.getInstance().getTimeInMillis() - minUpdateTime)) {
-                    ExtendedForecast extendedForecast = mWeathers.get(i).getExtendedForecast();
-                    Weather weather = mWeatherFetcher.fetchWeather(mWeathers.get(i).getSource());
-                    weather.setExtendedForecast(extendedForecast);
-                    mWeathers.set(i, weather);
-                }
+    private void updateWeather(Context context, Weather weather) {
+        WeatherDatabase db = WeatherDatabase.getInstance(context);
+        db.weatherDao().updateWeather(weather);
+    }
+
+    private Weather updateWeathers(Context context) throws Exception {
+        WeatherDatabase db = WeatherDatabase.getInstance(context);
+        List<Weather> weathers = getWeathers(context);
+        db.weatherDao().updateWeathers(weathers);
+        return weathers.get(0);
+    }
+
+    public Observable updateWeathersObservable(final Context context) {
+        return Observable.defer(new Callable<ObservableSource<Weather>>() {
+            @Override
+            public ObservableSource<Weather> call() throws Exception {
+                return Observable.just(updateWeathers(context));
             }
-            return mWeathers.get(0);
-        }
-        return null;
+        })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable updateWeathersObservable() {
-        if (!mWeathers.isEmpty() && mWeathers != null) {
-            return Observable.defer(new Callable<ObservableSource<Weather>>() {
-                @Override
-                public ObservableSource<Weather> call() throws Exception {
-                    return Observable.just(updateWeathers());
-                }
-            })
-                    .subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread());
+    public void toggleRainNotification(Context context, Weather weather) {
+        if (weather.isNotifyReady()) {
+            weather.setNotifyReady(false);
+            shouldCancelJobs();
+        } else {
+            weather.setNotifyReady(true);
+            WeatherFetchJob.scheduleJobOnce();
         }
-        return null;
+
+        updateWeather(context, weather);
     }
 
-    public void shouldCancelJobs() {
+    private void shouldCancelJobs() {
         boolean shouldCancelJobs = true;
 
         for (Weather w : mWeathers) {
@@ -197,66 +165,9 @@ public class WeatherStation {
         }
     }
 
-    public void setSharedPreferences(Context context) {
-        LinkedHashMap<String, Boolean> weathersMap = new LinkedHashMap<>();
-        SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
-
-        for (Weather w : mWeathers) {
-            weathersMap.put(w.getSource(), w.isNotifyReady());
-        }
-
-        JSONObject jsonObject = new JSONObject(weathersMap);
-        String jsonString = jsonObject.toString();
-
-        sharedPreferences.edit().putString(SHARED_PREF_MAP, jsonString).apply();
-    }
-
-    public List<Weather> getSharedPreferences(Context context) throws Exception {
-        if (mWeathers.size() > 0) {
-            return mWeathers;
-        }
-
-        LinkedHashMap<String, Boolean> weathersMap = new LinkedHashMap<>();
-        SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
-
-        if (sharedPreferences.contains(SHARED_PREF_MAP)) {
-            String jsonString = sharedPreferences.getString(SHARED_PREF_MAP, (new JSONObject()).toString());
-            JSONObject jsonObject = new JSONObject(jsonString);
-
-            Iterator<String> keysItr = jsonObject.keys();
-            while (keysItr.hasNext()) {
-                String key = keysItr.next();
-                Boolean value = (Boolean) jsonObject.get(key);
-                weathersMap.put(key, value);
-            }
-
-            for (String key : weathersMap.keySet()) {
-                Weather weather = addWeather(key);
-                weather.setNotifyReady(weathersMap.get(key));
-            }
-
-            return mWeathers;
-        }
-        return null;
-    }
-
-    public Observable getSharedPreferencesObservable(final Context context) {
-        if (mWeathers.size() > 0) {
-            return null;
-        }
-
-        return Observable.defer(new Callable<ObservableSource<List<Weather>>>() {
-            @Override
-            public ObservableSource<List<Weather>> call() throws Exception {
-                return Observable.just(getSharedPreferences(context));
-            }
-        })
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread());
-    }
-
-    public void deleteWeather(Weather weather) {
-        mWeathers.remove(weather);
+    public void deleteWeather(Weather weather, Context context) {
+        WeatherDatabase db = WeatherDatabase.getInstance(context);
+        db.weatherDao().deleteWeather(weather);
     }
 
     public String getTempSetting(Context context) {

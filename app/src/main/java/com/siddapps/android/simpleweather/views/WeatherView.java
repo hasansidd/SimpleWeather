@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.siddapps.android.simpleweather.R;
 import com.siddapps.android.simpleweather.data.model.Weather;
 import com.siddapps.android.simpleweather.data.WeatherStation;
+import com.siddapps.android.simpleweather.util.TimeUtil;
 
 public class WeatherView extends LinearLayout {
     private TextView mCityNameText;
@@ -72,7 +73,7 @@ public class WeatherView extends LinearLayout {
         mLowTemp.setText(mWeatherStation.formatTemp(getContext(), weather.getTemp_min()));
         mCurrentDescriptionText.setText(weather.getDetailedDescription());
         mWeatherBackgroundImage.setImageResource(weather.getIcon());
-        mTimeText.setText(weather.getTime());
+        mTimeText.setText(TimeUtil.formatTime(weather.getTime()));
         //noinspection ResourceType
         mWeatherAlertImage.setVisibility(weather.getNotifyAlert());
     }
