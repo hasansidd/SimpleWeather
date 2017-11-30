@@ -15,7 +15,7 @@ import java.util.List;
 @Dao
 public interface WeatherDao {
 
-    @Query("SELECT * FROM weather")
+    @Query("SELECT * FROM weather ORDER BY current DESC")
     List<Weather> getWeathers();
 
     @Query("SELECT * FROM weather WHERE id IS :id")

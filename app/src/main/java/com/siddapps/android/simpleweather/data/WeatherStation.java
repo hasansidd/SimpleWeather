@@ -92,7 +92,12 @@ public class WeatherStation {
 
     private Weather addCurrentWeather(Context context) throws Exception {
         WeatherDatabase db = WeatherDatabase.getInstance(context);
+        List<Weather> weathers = getWeathers(context);
+        prepareCurrent(weathers);
+        db.weatherDao().updateWeathers(weathers);
+
         Weather weather = mWeatherFetcher.fetchCurrentWeather(context);
+        weather.setCurrent(true);
 
         if (weather == null) {
             Log.e(TAG, "addCurrentWeather weather is null");
@@ -102,6 +107,13 @@ public class WeatherStation {
         Log.i(TAG, "City: " + weather.getName() + " added to beginning of list");
         db.weatherDao().addWeather(weather);
         return weather;
+    }
+
+    private List<Weather> prepareCurrent(List<Weather> weathers) {
+        for (Weather w : weathers) {
+            w.setCurrent(false);
+        }
+        return weathers;
     }
 
     public Observable addCurrentWeatherObservable(final Context context) {

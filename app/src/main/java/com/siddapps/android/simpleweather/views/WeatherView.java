@@ -5,6 +5,7 @@ import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -76,5 +77,7 @@ public class WeatherView extends LinearLayout {
         mTimeText.setText(TimeUtil.formatTime(weather.getTime()));
         //noinspection ResourceType
         mWeatherAlertImage.setVisibility(weather.getNotifyAlert());
+
+        Log.e("VIEW", weather.getName() + " : " + weather.isCurrent());
     }
 }
