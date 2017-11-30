@@ -18,6 +18,7 @@ Uses:
 --------------
 - [OpenWeatherMap](http://openweathermap.org/api)
 
+- [Room DB](https://developer.android.com/topic/libraries/architecture/room.html)
 - [RxJava2](https://github.com/ReactiveX/RxJava)
 - [RxAndroid](https://github.com/ReactiveX/RxAndroid)
 - [Android-Job](https://github.com/evernote/android-job)
