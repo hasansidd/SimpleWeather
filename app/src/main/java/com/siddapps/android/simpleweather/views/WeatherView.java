@@ -77,7 +77,5 @@ public class WeatherView extends LinearLayout {
         mTimeText.setText(TimeUtil.formatTime(weather.getTime()));
         //noinspection ResourceType
         mWeatherAlertImage.setVisibility(weather.getNotifyAlert());
-
-        Log.e("VIEW", weather.getName() + " : " + weather.isCurrent());
     }
 }

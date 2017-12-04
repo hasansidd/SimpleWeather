@@ -27,6 +27,9 @@ public interface WeatherDao {
     @Query("SELECT id FROM weather WHERE name IS :name")
     int getIdFromCityName(String name);
 
+    @Query("SELECT notifyReady FROM weather WHERE id IS :id")
+    boolean isNotifyReadyFromId(int id);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void addWeather(Weather weather);
 

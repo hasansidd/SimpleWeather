@@ -108,6 +108,7 @@ public class WeatherFetcher {
     }
 
     private ArrayList<HourlyData> fetchHourlyData(Weather weather) throws Exception {
+        Log.e(TAG, weather.getName());
         String json = fetchWeatherByType(weather.getSource(), METHOD_EXTENDED)[0];
 
         JSONObject jsonObject = new JSONObject(json);
