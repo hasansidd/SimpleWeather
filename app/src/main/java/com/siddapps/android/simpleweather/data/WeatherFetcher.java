@@ -108,6 +108,7 @@ public class WeatherFetcher {
     }
 
     private ArrayList<HourlyData> fetchHourlyData(Weather weather) throws Exception {
+        Log.e(TAG, weather.getName());
         String json = fetchWeatherByType(weather.getSource(), METHOD_EXTENDED)[0];
 
         JSONObject jsonObject = new JSONObject(json);
@@ -136,6 +137,11 @@ public class WeatherFetcher {
             hourlyData.setNight(weatherInfoObject.getString("icon"));
 
             hourlyDataList.add(hourlyData);
+
+            long timeFetched = Calendar.getInstance().getTimeInMillis();
+            for (HourlyData data : hourlyDataList) {
+                data.setTimeFetched(timeFetched);
+            }
             //printExtendedForecastWeather(hourlyData);
             //extendedForecast.addHourlyData(hourlyData);
 
@@ -154,16 +160,14 @@ public class WeatherFetcher {
         WeatherDatabase db = WeatherDatabase.getInstance(context);
         db.weatherDao().addHourlyData(totalHourlyDataList);
 
-        for (HourlyData data : totalHourlyDataList) {
-            Log.e(TAG, data.getName());
-        }
-
         return totalHourlyDataList;
     }
 
     public ArrayList<HourlyData> fetchExtendedForecast(Context context, Weather weather) throws Exception {
         WeatherDatabase db = WeatherDatabase.getInstance(context);
+        Log.e("fetchExtendedForecast", weather.getName());
         ArrayList<HourlyData> hourlyDataList = fetchHourlyData(weather);
+        db.weatherDao().deleteAllHourlyDataByCity(weather.getName());
         db.weatherDao().addHourlyData(hourlyDataList);
         return hourlyDataList;
     }

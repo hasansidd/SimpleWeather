@@ -29,11 +29,10 @@ public class Weather {
     private long time;
     private String zipCode;
     private int icon;
-    @Ignore
-    private ExtendedForecast mExtendedForecast;
     private String sourceType;
     private long timeFetched;
     private boolean notifyReady;
+    private boolean current;
 
     public Weather(int id, String name, String temp, String temp_max, String temp_min, String mainDescription, String detailedDescription,
                    String lat, String lon, long sunrise, long sunset, long time, String zipCode, int icon, String sourceType, long timeFetched, boolean notifyReady) {
@@ -209,14 +208,6 @@ public class Weather {
         this.icon = icon;
     }
 
-    public ExtendedForecast getExtendedForecast() {
-        return mExtendedForecast;
-    }
-
-    public void setExtendedForecast(ExtendedForecast extendedForecast) {
-        mExtendedForecast = extendedForecast;
-    }
-
     public String getSourceType() {
         return sourceType;
     }
@@ -259,5 +250,13 @@ public class Weather {
 
     public void setNotifyReady(boolean notifyReady) {
         this.notifyReady = notifyReady;
+    }
+
+    public boolean isCurrent() {
+        return current;
+    }
+
+    public void setCurrent(boolean current) {
+        this.current = current;
     }
 }

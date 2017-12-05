@@ -15,7 +15,7 @@ import java.util.List;
 @Dao
 public interface WeatherDao {
 
-    @Query("SELECT * FROM weather")
+    @Query("SELECT * FROM weather ORDER BY current DESC")
     List<Weather> getWeathers();
 
     @Query("SELECT * FROM weather WHERE id IS :id")
@@ -26,6 +26,9 @@ public interface WeatherDao {
 
     @Query("SELECT id FROM weather WHERE name IS :name")
     int getIdFromCityName(String name);
+
+    @Query("SELECT notifyReady FROM weather WHERE id IS :id")
+    boolean isNotifyReadyFromId(int id);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void addWeather(Weather weather);
@@ -39,10 +42,12 @@ public interface WeatherDao {
     @Delete
     void deleteWeather(Weather weather);
 
-    @Query("SELECT * FROM HourlyData WHERE name IS :name")
+    @Query("SELECT * FROM HourlyData WHERE name IS :name ORDER BY timeFetched DESC")
     List<HourlyData> getHourlyData(String name);
 
     @Insert
     void addHourlyData(List<HourlyData> hourlyDataList);
 
+    @Query("DELETE FROM hourlydata WHERE name is :name")
+    void deleteAllHourlyDataByCity(String name);
 }

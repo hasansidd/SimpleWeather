@@ -21,6 +21,7 @@ public class HourlyData {
     private long time;
     private int icon;
     private String night;
+    private long timeFetched;
 
     @Ignore
     public HourlyData() {
@@ -155,13 +156,11 @@ public class HourlyData {
         this.night = night;
     }
 
+    public long getTimeFetched() {
+        return timeFetched;
+    }
 
-
-
-
-
-
-
-
-
+    public void setTimeFetched(long timeFetched) {
+        this.timeFetched = timeFetched;
+    }
 }
