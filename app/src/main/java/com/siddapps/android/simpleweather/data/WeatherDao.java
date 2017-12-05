@@ -42,10 +42,12 @@ public interface WeatherDao {
     @Delete
     void deleteWeather(Weather weather);
 
-    @Query("SELECT * FROM HourlyData WHERE name IS :name")
+    @Query("SELECT * FROM HourlyData WHERE name IS :name ORDER BY timeFetched DESC")
     List<HourlyData> getHourlyData(String name);
 
     @Insert
     void addHourlyData(List<HourlyData> hourlyDataList);
 
+    @Query("DELETE FROM hourlydata WHERE name is :name")
+    void deleteAllHourlyDataByCity(String name);
 }
