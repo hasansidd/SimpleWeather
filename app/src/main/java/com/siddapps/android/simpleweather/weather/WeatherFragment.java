@@ -22,7 +22,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.siddapps.android.simpleweather.R;
-import com.siddapps.android.simpleweather.data.WeatherDatabase;
 import com.siddapps.android.simpleweather.data.model.Weather;
 import com.siddapps.android.simpleweather.data.WeatherStation;
 import com.siddapps.android.simpleweather.settings.SettingsActivity;
@@ -42,12 +41,11 @@ public class WeatherFragment extends Fragment {
     private Callbacks mCallbacks;
     private FloatingActionButton mAddCityFAB;
     private Observer<Weather> updateUIObserver;
+    private Observer<Weather> addCurrentObserver;
     Observable<Weather> addCurrentWeather;
     Observable<Weather> addNewWeather;
     Observable<Weather> updateWeathers;
-    Observable<List<Weather>> getSharedPreferences;
-    WeatherDatabase db;
-
+    public int indextester = 0;
 
     public interface Callbacks {
         void OnWeatherSelected(Weather weather);
@@ -70,8 +68,6 @@ public class WeatherFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        db= WeatherDatabase.getInstance(getActivity());
-
     }
 
     @Override
@@ -95,6 +91,12 @@ public class WeatherFragment extends Fragment {
         Log.i(TAG, "Updating UI");
         List<Weather> weathers = mWeatherStation.getWeathers(getContext());
 
+        Log.e("on update run ", String.valueOf(indextester));
+        indextester++;
+        for (int i = 0; i < weathers.size(); i++) {
+            Log.e("On update " + i, weathers.get(i).getName() + " : " + weathers.get(i).isCurrent());
+        }
+
         if (mAdapter == null) {
             mAdapter = new WeatherAdapter(weathers);
             mRecyclerView.setAdapter(mAdapter);
@@ -107,7 +109,7 @@ public class WeatherFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        updateWeathers(getActivity());
+        updateWeathers(getContext());
     }
 
     private void updateWeathers(Context context) {
@@ -125,7 +127,7 @@ public class WeatherFragment extends Fragment {
     private void addCurrentWeather() {
         addCurrentWeather = mWeatherStation.addCurrentWeatherObservable(getActivity());
         if (addCurrentWeather != null) {
-            addCurrentWeather.subscribe(updateUIObserver);
+            addCurrentWeather.subscribe(addCurrentObserver);
         }
     }
 
@@ -155,12 +157,31 @@ public class WeatherFragment extends Fragment {
             }
         };
 
-        //getSavedWeather();
+        addCurrentObserver = new Observer<Weather>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+            }
+
+            @Override
+            public void onNext(Weather weather) {
+                Log.e("CURRENT", weather.getName() + " is " + weather.isCurrent());
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.e(TAG, "onError: ", e);
+            }
+
+            @Override
+            public void onComplete() {
+                updateWeathers(getContext());
+            }
+        };
 
         mRecyclerView = v.findViewById(R.id.weather_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         addCurrentWeather();
-        updateUI();
+       // updateUI();
 
         setupItemTouchHelper();
 
@@ -206,6 +227,7 @@ public class WeatherFragment extends Fragment {
         public void bind(Weather weather) {
             mWeather = weather;
             mWeatherView.bindWeather(mWeather);
+           // Log.e(TAG+" bind", weather.getName() + " : " + weather.isCurrent());
         }
 
         @Override

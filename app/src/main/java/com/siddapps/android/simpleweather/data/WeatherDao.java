@@ -18,8 +18,8 @@ public interface WeatherDao {
     @Query("SELECT * FROM weather ORDER BY current DESC")
     List<Weather> getWeathers();
 
-    @Query("SELECT * FROM weather WHERE id IS :id")
-    Weather getWeather(int id);
+    @Query("SELECT * FROM weather WHERE name IS :name")
+    Weather getWeather(String name);
 
     @Query("SELECT * FROM weather WHERE notifyReady IS 1")
     List<Weather> getNotifyReadyWeathers();
@@ -27,8 +27,8 @@ public interface WeatherDao {
     @Query("SELECT id FROM weather WHERE name IS :name")
     int getIdFromCityName(String name);
 
-    @Query("SELECT notifyReady FROM weather WHERE id IS :id")
-    boolean isNotifyReadyFromId(int id);
+    @Query("SELECT notifyReady FROM weather WHERE name IS :name")
+    boolean isNotifyReadyFromName(String name);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void addWeather(Weather weather);

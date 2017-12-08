@@ -24,6 +24,8 @@ import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.siddapps.android.simpleweather.util.TimeUtil.formatTime;
+
 public class WeatherStation {
     private static final String TAG = "WeatherStation";
     private static final String SHARED_PREF_MAP = "sharedPrefList";
@@ -41,12 +43,6 @@ public class WeatherStation {
     private WeatherStation() {
         mWeatherFetcher = new WeatherFetcher();
         mWeathers = new ArrayList<>();
-    }
-
-    public int getIdFromName(Context context, String name) {
-        WeatherDatabase db = WeatherDatabase.getInstance(context);
-        int Id = db.weatherDao().getIdFromCityName(name);
-        return Id;
     }
 
     public List<Weather> getWeathers(Context context) {
@@ -95,26 +91,26 @@ public class WeatherStation {
         prepareCurrent(context);
 
         Weather weather = mWeatherFetcher.fetchCurrentWeather(context);
-        int id = getIdFromName(context, weather.getName());
-        boolean isNotifyReady = db.weatherDao().isNotifyReadyFromId(id);
-
-        weather.setCurrent(true);
-        weather.setNotifyReady(isNotifyReady);
 
         if (weather == null) {
-            Log.e(TAG, "addCurrentWeather weather is null");
+            Log.i(TAG, "addCurrentWeather weather is null");
             return null;
         }
 
-        Log.i(TAG, "City: " + weather.getName() + " added to beginning of list");
+        boolean isNotifyReady = db.weatherDao().isNotifyReadyFromName(weather.getName());
+
+        weather.setCurrent(true);
+        weather.setNotifyReady(isNotifyReady);
+        Log.e(TAG, weather.getName() + " set as " + weather.isCurrent());
+
         db.weatherDao().addWeather(weather);
+        Log.e(TAG, "Done adding");
         return weather;
     }
 
     private void prepareCurrent(Context context) {
         WeatherDatabase db = WeatherDatabase.getInstance(context);
         List<Weather> weathers = db.weatherDao().getWeathers();
-
         for (Weather w : weathers) {
             w.setCurrent(false);
         }
@@ -140,8 +136,18 @@ public class WeatherStation {
 
     private Weather updateWeathers(Context context) throws Exception {
         WeatherDatabase db = WeatherDatabase.getInstance(context);
-        List<Weather> weathers = getWeathers(context);
-        db.weatherDao().updateWeathers(weathers);
+        List<Weather> weathers = db.weatherDao().getWeathers();
+
+        List<Weather> newWeathers = new ArrayList<>();
+        for (int i = 0; i<weathers.size(); i++) {
+            Weather weather = mWeatherFetcher.fetchWeather(weathers.get(i).getSource());
+            weather.setCurrent(weathers.get(i).isCurrent());
+            newWeathers.add(weather);
+            Log.e("new", newWeathers.get(i).getName() + " : " + newWeathers.get(i).isCurrent());
+            Log.e("old", weathers.get(i).getName() + " : " + weathers.get(i).isCurrent());
+        }
+
+        db.weatherDao().updateWeathers(newWeathers);
         return weathers.get(0);
     }
 

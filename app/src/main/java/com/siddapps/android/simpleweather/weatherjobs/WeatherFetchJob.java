@@ -47,13 +47,11 @@ public class WeatherFetchJob extends Job {
             for (int i = 0; i < rainMap.keySet().size(); i++) {
                 String key = (String) rainMap.keySet().toArray()[i];
                 String formattedText = (getContext().getString(R.string.weather_alert_content_individual, rainMap.get(key)));
-                int id = WeatherStation.get().getIdFromName(getContext(), key);
-
 
                 //https://stackoverflow.com/questions/23328367/up-to-parent-activity-on-android
                 TaskStackBuilder stackBuilder = TaskStackBuilder.create(getContext());
                 stackBuilder.addParentStack(WeatherDetailActivity.class);
-                stackBuilder.addNextIntent(WeatherDetailActivity.newIntent(getContext(), id));
+                stackBuilder.addNextIntent(WeatherDetailActivity.newIntent(getContext(), key));
                 PendingIntent pi = stackBuilder.getPendingIntent(i, PendingIntent.FLAG_UPDATE_CURRENT);
 
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), "main")
