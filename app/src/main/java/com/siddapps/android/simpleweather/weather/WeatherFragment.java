@@ -91,12 +91,6 @@ public class WeatherFragment extends Fragment {
         Log.i(TAG, "Updating UI");
         List<Weather> weathers = mWeatherStation.getWeathers(getContext());
 
-        Log.e("on update run ", String.valueOf(indextester));
-        indextester++;
-        for (int i = 0; i < weathers.size(); i++) {
-            Log.e("On update " + i, weathers.get(i).getName() + " : " + weathers.get(i).isCurrent());
-        }
-
         if (mAdapter == null) {
             mAdapter = new WeatherAdapter(weathers);
             mRecyclerView.setAdapter(mAdapter);
@@ -109,7 +103,8 @@ public class WeatherFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        updateWeathers(getContext());
+        //updateWeathers(getContext());
+        addCurrentWeather();
     }
 
     private void updateWeathers(Context context) {
@@ -164,7 +159,6 @@ public class WeatherFragment extends Fragment {
 
             @Override
             public void onNext(Weather weather) {
-                Log.e("CURRENT", weather.getName() + " is " + weather.isCurrent());
             }
 
             @Override
@@ -227,7 +221,6 @@ public class WeatherFragment extends Fragment {
         public void bind(Weather weather) {
             mWeather = weather;
             mWeatherView.bindWeather(mWeather);
-           // Log.e(TAG+" bind", weather.getName() + " : " + weather.isCurrent());
         }
 
         @Override

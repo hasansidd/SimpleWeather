@@ -4,16 +4,19 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.util.TimeUtils;
 
 import com.evernote.android.job.JobManager;
 import com.siddapps.android.simpleweather.R;
 import com.siddapps.android.simpleweather.data.model.HourlyData;
 import com.siddapps.android.simpleweather.data.model.Weather;
+import com.siddapps.android.simpleweather.util.TimeUtil;
 import com.siddapps.android.simpleweather.weatherjobs.WeatherFetchJob;
 
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -98,13 +101,9 @@ public class WeatherStation {
         }
 
         boolean isNotifyReady = db.weatherDao().isNotifyReadyFromName(weather.getName());
-
         weather.setCurrent(true);
         weather.setNotifyReady(isNotifyReady);
-        Log.e(TAG, weather.getName() + " set as " + weather.isCurrent());
-
         db.weatherDao().addWeather(weather);
-        Log.e(TAG, "Done adding");
         return weather;
     }
 
@@ -142,9 +141,8 @@ public class WeatherStation {
         for (int i = 0; i<weathers.size(); i++) {
             Weather weather = mWeatherFetcher.fetchWeather(weathers.get(i).getSource());
             weather.setCurrent(weathers.get(i).isCurrent());
+            weather.setNotifyReady(weathers.get(i).isNotifyReady());
             newWeathers.add(weather);
-            Log.e("new", newWeathers.get(i).getName() + " : " + newWeathers.get(i).isCurrent());
-            Log.e("old", weathers.get(i).getName() + " : " + weathers.get(i).isCurrent());
         }
 
         db.weatherDao().updateWeathers(newWeathers);

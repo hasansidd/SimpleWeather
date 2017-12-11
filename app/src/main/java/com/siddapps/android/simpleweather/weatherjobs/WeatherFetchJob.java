@@ -20,7 +20,7 @@ import com.siddapps.android.simpleweather.util.TimeUtil;
 import com.siddapps.android.simpleweather.weather.WeatherActivity;
 import com.siddapps.android.simpleweather.weatherdetail.WeatherDetailActivity;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -36,26 +36,25 @@ public class WeatherFetchJob extends Job {
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getContext());
         Log.e(TAG, "running");
 
-        HashMap<String, String> rainMap = new HashMap<>();
+        List<WeatherNotification> weatherNotificationList = new ArrayList<>();
         try {
-            rainMap = findRainMap();
+            weatherNotificationList = findBadWeatherMap();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        if (rainMap != null && rainMap.size() > 0) {
-            for (int i = 0; i < rainMap.keySet().size(); i++) {
-                String key = (String) rainMap.keySet().toArray()[i];
-                String formattedText = (getContext().getString(R.string.weather_alert_content_individual, rainMap.get(key)));
+        if (weatherNotificationList != null && weatherNotificationList.size() > 0) {
+            for (int i = 0; i < weatherNotificationList.size(); i++) {
+                String formattedText = (getContext().getString(R.string.weather_alert_content_individual, weatherNotificationList.get(i).getWeatherType(), weatherNotificationList.get(i).getTime()));
 
                 //https://stackoverflow.com/questions/23328367/up-to-parent-activity-on-android
                 TaskStackBuilder stackBuilder = TaskStackBuilder.create(getContext());
                 stackBuilder.addParentStack(WeatherDetailActivity.class);
-                stackBuilder.addNextIntent(WeatherDetailActivity.newIntent(getContext(), key));
+                stackBuilder.addNextIntent(WeatherDetailActivity.newIntent(getContext(), weatherNotificationList.get(i).getCityName()));
                 PendingIntent pi = stackBuilder.getPendingIntent(i, PendingIntent.FLAG_UPDATE_CURRENT);
 
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), "main")
-                        .setContentTitle(key)
+                        .setContentTitle(weatherNotificationList.get(i).getCityName())
                         .setContentText(formattedText)
                         .setAutoCancel(true)
                         .setContentIntent(pi)
@@ -68,7 +67,7 @@ public class WeatherFetchJob extends Job {
                 notificationManager.notify(i, builder.build());
             }
 
-            getNotificationSummary(rainMap);
+            getNotificationSummary(weatherNotificationList);
 
             //https://github.com/evernote/android-job/issues/298
             //If the job is ran from scheduleJobOnce(), this will set it to run periodically
@@ -76,9 +75,9 @@ public class WeatherFetchJob extends Job {
                 scheduleJobPeriodic();
             }
 
-            Log.e(TAG, "notification sent");
+            Log.d(TAG, "notification sent");
         } else {
-            Log.e(TAG, "No rain detected");
+            Log.d(TAG, "No rain detected");
         }
 
         return Result.SUCCESS;
@@ -87,36 +86,48 @@ public class WeatherFetchJob extends Job {
     //Currently finds the first time it rains in the extended forecast. Also ExtendedForecast contains
     //information on whether or not to check for rain. Consider changing to something better and less stupid.
     //TODO: find multiple instances of rain. Group together long instances of rain (multiple hours).
-    private HashMap<String, String> findRainMap() throws Exception {
-        HashMap<String, String> rainMap = new HashMap<>();
+    private List<WeatherNotification> findBadWeatherMap() throws Exception {
+        List<WeatherNotification> weatherNotificationList = new ArrayList<>();
         mWeathers = WeatherStation.get().getNotifyReadyWeathers(getContext());
 
         for (Weather w : mWeathers) {
-            String rainTime = findRain(w);
+            WeatherNotification weatherNotification = findBadWeather(w);
 
-            if (rainTime != null && rainTime.length() > 0) {
-                rainMap.put(w.getName(), rainTime);
+            if (weatherNotification != null) {
+                weatherNotificationList.add(weatherNotification);
             } else {
-                Log.d(TAG, "No rain detected for " + w.getName());
+                Log.d(TAG, "No bad weather detected for " + w.getName());
             }
 
         }
-        return rainMap;
+        return weatherNotificationList;
     }
 
-    private String findRain(Weather weather) throws Exception {
+    private WeatherNotification findBadWeather(Weather weather) throws Exception {
         int numberOfDays = getAlertRange();
         List<HourlyData> hourlyDataList;
-        String rainStartTime;
-
         hourlyDataList = WeatherStation.get().getExtendedWeather(getContext(), weather);
 
-        //find rain in extended forecast
+        //find bad weather in extended forecast
         for (int i = 0; i < (8 * numberOfDays); i++) {
             if (hourlyDataList.get(i).getMainDescription().equals("Rain")) {
-                rainStartTime = TimeUtil.formatTime(hourlyDataList.get(i).getTime());
-                Log.d(TAG, "Rain detected in " + weather.getName() + " at " + rainStartTime);
-                return rainStartTime;
+                Log.d(TAG, "Rain detected in " + weather.getName() + " at " + TimeUtil.formatTime(hourlyDataList.get(i).getTime()));
+
+                WeatherNotification weatherNotification = new WeatherNotification(
+                        weather.getName(),
+                        TimeUtil.formatTime(hourlyDataList.get(i).getTime()),
+                        "Rain");
+
+                return weatherNotification;
+            } else if (hourlyDataList.get(i).getMainDescription().equals("Snow")) {
+                Log.d(TAG, "Snow detected in " + weather.getName() + " at " + TimeUtil.formatTime(hourlyDataList.get(i).getTime()));
+
+                WeatherNotification weatherNotification = new WeatherNotification(
+                        weather.getName(),
+                        TimeUtil.formatTime(hourlyDataList.get(i).getTime()),
+                        "Snow");
+
+                return weatherNotification;
             }
         }
 
@@ -130,19 +141,19 @@ public class WeatherFetchJob extends Job {
         return numberOfDays;
     }
 
-    private void getNotificationSummary(HashMap<String, String> rainMap) {
+    private void getNotificationSummary(List<WeatherNotification> weatherNotificationList) {
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getContext());
 
         String formattedTitle;
-        if (rainMap.size() == 1) {
+        if (weatherNotificationList.size() == 1) {
             formattedTitle = getContext().getString(R.string.weather_alert_title_single);
         } else {
-            formattedTitle = (getContext().getString(R.string.weather_alert_title, rainMap.size()));
+            formattedTitle = (getContext().getString(R.string.weather_alert_title, weatherNotificationList.size()));
         }
 
         String formattedText = "";
-        for (String key : rainMap.keySet()) {
-            formattedText += getContext().getString(R.string.weather_alert_content_summnary, key, rainMap.get(key));
+        for (WeatherNotification w : weatherNotificationList) {
+            formattedText += getContext().getString(R.string.weather_alert_content_summnary, w.getWeatherType(), w.getCityName(),w.getTime());
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), "main")

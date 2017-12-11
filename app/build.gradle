@@ -8,11 +8,13 @@ buildscript {
     }
 }
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 apply plugin: 'io.fabric'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
     maven { url "https://maven.google.com" }
+    mavenCentral()
 }
 
 
@@ -23,8 +25,8 @@ android {
         applicationId "com.siddapps.android.simpeweather"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 24
-        versionName "3.2"
+        versionCode 25
+        versionName "3.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
 
@@ -61,4 +63,5 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true;
     }
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 }

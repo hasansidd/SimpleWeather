@@ -2,8 +2,8 @@
     <string name="app_name">TiempoSimple</string>
     <string name="weather_alert_title_single">Alerta meteorológica en 1 ciudad</string>
     <string name="weather_alert_title">Alerta meteorológica en %1$d ciudades</string>
-    <string name="weather_alert_content_individual">lluvia on %1$s</string>
-    <string name="weather_alert_content_summnary">lluvia en %1$s on %2$s\n</string>
+    <string name="weather_alert_content_individual">%1$s on %2$s</string>
+    <string name="weather_alert_content_summnary">%1$s en %2$s on %3$s\n</string>
     <string name="units_c">Unidades (°C)</string>
     <string name="units_f">Unidades (°F)</string>
     <string name="add_new_city">Añadir nueva ciudad</string>
@@ -18,4 +18,5 @@
     <string name="pref_alert_range_dialog_title">Días:</string>
     <string name="pref_alert_range_summary">Selecciona con cuántos días de anticipación estarás alerta de la lluvia</string>
     <string name="pref_alert_range_title">Alerta meteorológica</string>
+    <string name="weather_detected">Snow detected in</string>
 </resources>
