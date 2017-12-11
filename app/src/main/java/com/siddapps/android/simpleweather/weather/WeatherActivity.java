@@ -26,7 +26,7 @@ public class WeatherActivity extends SingleFragmentActivity implements WeatherFr
     @Override
     public void OnWeatherSelected(Weather weather) {
         Log.i(TAG, "onWeatherSelected()");
-        Intent intent = WeatherDetailActivity.newIntent(this,weather.getId());
+        Intent intent = WeatherDetailActivity.newIntent(this,weather.getName());
         startActivity(intent);
     }
 }

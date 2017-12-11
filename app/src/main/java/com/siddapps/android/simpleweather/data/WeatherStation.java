@@ -4,16 +4,19 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.util.TimeUtils;
 
 import com.evernote.android.job.JobManager;
 import com.siddapps.android.simpleweather.R;
 import com.siddapps.android.simpleweather.data.model.HourlyData;
 import com.siddapps.android.simpleweather.data.model.Weather;
+import com.siddapps.android.simpleweather.util.TimeUtil;
 import com.siddapps.android.simpleweather.weatherjobs.WeatherFetchJob;
 
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,6 +26,8 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+
+import static com.siddapps.android.simpleweather.util.TimeUtil.formatTime;
 
 public class WeatherStation {
     private static final String TAG = "WeatherStation";
@@ -41,12 +46,6 @@ public class WeatherStation {
     private WeatherStation() {
         mWeatherFetcher = new WeatherFetcher();
         mWeathers = new ArrayList<>();
-    }
-
-    public int getIdFromName(Context context, String name) {
-        WeatherDatabase db = WeatherDatabase.getInstance(context);
-        int Id = db.weatherDao().getIdFromCityName(name);
-        return Id;
     }
 
     public List<Weather> getWeathers(Context context) {
@@ -95,18 +94,15 @@ public class WeatherStation {
         prepareCurrent(context);
 
         Weather weather = mWeatherFetcher.fetchCurrentWeather(context);
-        int id = getIdFromName(context, weather.getName());
-        boolean isNotifyReady = db.weatherDao().isNotifyReadyFromId(id);
-
-        weather.setCurrent(true);
-        weather.setNotifyReady(isNotifyReady);
 
         if (weather == null) {
-            Log.e(TAG, "addCurrentWeather weather is null");
+            Log.i(TAG, "addCurrentWeather weather is null");
             return null;
         }
 
-        Log.i(TAG, "City: " + weather.getName() + " added to beginning of list");
+        boolean isNotifyReady = db.weatherDao().isNotifyReadyFromName(weather.getName());
+        weather.setCurrent(true);
+        weather.setNotifyReady(isNotifyReady);
         db.weatherDao().addWeather(weather);
         return weather;
     }
@@ -114,7 +110,6 @@ public class WeatherStation {
     private void prepareCurrent(Context context) {
         WeatherDatabase db = WeatherDatabase.getInstance(context);
         List<Weather> weathers = db.weatherDao().getWeathers();
-
         for (Weather w : weathers) {
             w.setCurrent(false);
         }
@@ -140,8 +135,17 @@ public class WeatherStation {
 
     private Weather updateWeathers(Context context) throws Exception {
         WeatherDatabase db = WeatherDatabase.getInstance(context);
-        List<Weather> weathers = getWeathers(context);
-        db.weatherDao().updateWeathers(weathers);
+        List<Weather> weathers = db.weatherDao().getWeathers();
+
+        List<Weather> newWeathers = new ArrayList<>();
+        for (int i = 0; i<weathers.size(); i++) {
+            Weather weather = mWeatherFetcher.fetchWeather(weathers.get(i).getSource());
+            weather.setCurrent(weathers.get(i).isCurrent());
+            weather.setNotifyReady(weathers.get(i).isNotifyReady());
+            newWeathers.add(weather);
+        }
+
+        db.weatherDao().updateWeathers(newWeathers);
         return weathers.get(0);
     }
 

@@ -9,7 +9,7 @@ import android.util.Log;
 import com.siddapps.android.simpleweather.data.model.HourlyData;
 import com.siddapps.android.simpleweather.data.model.Weather;
 
-@Database(entities = {Weather.class, HourlyData.class}, version = 8)
+@Database(entities = {Weather.class, HourlyData.class}, version = 10)
 public abstract class WeatherDatabase extends RoomDatabase {
 
     private static final String TAG = WeatherDatabase.class.getSimpleName();

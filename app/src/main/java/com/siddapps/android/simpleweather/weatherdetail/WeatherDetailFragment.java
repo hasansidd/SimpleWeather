@@ -39,7 +39,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public class WeatherDetailFragment extends Fragment {
     private static final String TAG = "WeatherDetailFragment";
-    public static final String EXTRA_CITY_ID = "cityname";
+    public static final String EXTRA_CITY_NAME = "cityname";
     private Weather mWeather;
     private RecyclerView mRecyclerView;
     private WeatherDetailAdapter mAdapter;
@@ -47,13 +47,13 @@ public class WeatherDetailFragment extends Fragment {
     private Disposable mDisposable;
     private Disposable mDisposableExtended;
     private WeatherView mWeatherView;
-    private int id;
+    private String cityName;
     private WeatherDatabase db;
 
-    public static WeatherDetailFragment newInstance(int id) {
+    public static WeatherDetailFragment newInstance(String cityName) {
         WeatherDetailFragment fragment = new WeatherDetailFragment();
         Bundle args = new Bundle();
-        args.putInt(EXTRA_CITY_ID, id);
+        args.putString(EXTRA_CITY_NAME, cityName);
         fragment.setArguments(args);
         return fragment;
     }
@@ -97,8 +97,8 @@ public class WeatherDetailFragment extends Fragment {
         setHasOptionsMenu(true);
         mWeatherStation = WeatherStation.get();
         db = WeatherDatabase.getInstance(getContext());
-        id = getArguments().getInt(EXTRA_CITY_ID);
-        mWeather = db.weatherDao().getWeather(id);
+        cityName = getArguments().getString(EXTRA_CITY_NAME);
+        mWeather = db.weatherDao().getWeather(cityName);
         super.onCreate(savedInstanceState);
     }
 

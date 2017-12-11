@@ -4,6 +4,7 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 
@@ -14,8 +15,9 @@ import com.siddapps.android.simpleweather.data.WeatherFetcher;
 @Entity(tableName = "weather", indices = {@Index(value = {"name"}, unique = true)})
 public class Weather {
     private static final String TAG = "Weather";
-    @PrimaryKey(autoGenerate = true)
     public int id;
+    @PrimaryKey
+    @NonNull
     private String name;
     private String temp;
     private String temp_min;
