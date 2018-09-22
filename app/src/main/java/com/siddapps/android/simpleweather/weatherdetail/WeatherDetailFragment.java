@@ -26,6 +26,7 @@ import com.siddapps.android.simpleweather.data.WeatherStation;
 import com.siddapps.android.simpleweather.settings.SettingsActivity;
 import com.siddapps.android.simpleweather.util.TimeUtil;
 import com.siddapps.android.simpleweather.views.WeatherView;
+import com.siddapps.android.simpleweather.privacypolicy.PrivacyPolicyActivity;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -87,6 +88,8 @@ public class WeatherDetailFragment extends Fragment {
             case R.id.settings:
                 startActivity(new Intent(getActivity(), SettingsActivity.class));
                 return true;
+            case R.id.privacy_policy:
+                startActivity(new Intent(getActivity(), PrivacyPolicyActivity.class));
             default:
                 return super.onOptionsItemSelected(item);
         }

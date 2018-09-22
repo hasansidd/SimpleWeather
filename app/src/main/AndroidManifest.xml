@@ -31,7 +31,11 @@
             android:parentActivityName="com.siddapps.android.simpleweather.weather.WeatherActivity"/>
 
         <activity
-            android:name="com.siddapps.android.simpleweather.settings.SettingsActivity"/>
+            android:name="com.siddapps.android.simpleweather.settings.SettingsActivity"
+            android:parentActivityName="com.siddapps.android.simpleweather.weather.WeatherActivity"/>
+
+        <activity android:name=".privacypolicy.PrivacyPolicyActivity"
+            android:parentActivityName="com.siddapps.android.simpleweather.weather.WeatherActivity"/>
 
         <meta-data
             android:name="com.crashlytics.ApiKey"

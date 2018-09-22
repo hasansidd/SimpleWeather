@@ -12,4 +12,9 @@
         android:title="@string/settings"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/privacy_policy"
+        android:title="@string/privacy_policy"
+        app:showAsAction="never"/>
+
 </menu>

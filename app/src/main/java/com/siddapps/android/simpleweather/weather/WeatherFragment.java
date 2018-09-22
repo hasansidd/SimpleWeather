@@ -1,7 +1,6 @@
 package com.siddapps.android.simpleweather.weather;
 
 import android.app.AlertDialog;
-import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,6 +25,7 @@ import com.siddapps.android.simpleweather.data.model.Weather;
 import com.siddapps.android.simpleweather.data.WeatherStation;
 import com.siddapps.android.simpleweather.settings.SettingsActivity;
 import com.siddapps.android.simpleweather.views.WeatherView;
+import com.siddapps.android.simpleweather.privacypolicy.PrivacyPolicyActivity;
 
 import java.util.List;
 
@@ -82,6 +82,8 @@ public class WeatherFragment extends Fragment {
             case R.id.settings:
                 startActivity(new Intent(getActivity(), SettingsActivity.class));
                 return true;
+            case R.id.privacy_policy:
+                startActivity(new Intent(getActivity(), PrivacyPolicyActivity.class));
             default:
                 return false;
         }
