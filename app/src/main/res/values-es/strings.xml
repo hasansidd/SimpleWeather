@@ -19,4 +19,5 @@
     <string name="pref_alert_range_summary">Selecciona con cuántos días de anticipación estarás alerta de la lluvia</string>
     <string name="pref_alert_range_title">Alerta meteorológica</string>
     <string name="weather_detected">Snow detected in</string>
+    <string name="privacy_policy">política de privacidad</string>
 </resources>
